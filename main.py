@@ -53,7 +53,7 @@ async def m(ctx, *args):
                 elif source == 'MangaClash':
                     embed = \
                         getMangaClash(manhwa[3], manhwa[5], manhwa[6], int(manhwa[7]), int(manhwa[8]), int(manhwa[9]),
-                                      int(manhwa[10]), int(manhwa[11]), int(manhwa[12]))[0]
+                                      int(manhwa[10]), int(manhwa[11]), int(manhwa[12]),str(id_guild))[0]
                     await ctx.send(embed=embed)
                 else:
                     await ctx.send("We don't support this source")
@@ -89,6 +89,15 @@ async def m(ctx, *args):
                                           f'!m library sub <title> and !m library unsub <title> \n'
                                           f'  - you can write the title with the spaces '
                                           f'  - if you dont know the title, find it in !m list \n',
+                              color=discord.Color.from_rgb(246, 214, 4))
+        await ctx.send(embed=embed)
+    elif args[0] == "sources":
+        embed = discord.Embed(title=f"DokjaBot - Sources",
+                              description=f'When asked for source, write the code of source'
+                                          f'The sources we support are \n'
+                                          f'----Name----------Code----\n'
+                                          f'Reaper Scans: Reaper_Scans \n'
+                                          f'MangaClash: MangaClash ',
                               color=discord.Color.from_rgb(246, 214, 4))
         await ctx.send(embed=embed)
     elif args[0] == "library":
@@ -410,6 +419,14 @@ async def chapterreleasecheck():
                             await channel.send(embed=embed)
                             await channel.send(f'>>> Ping of The {title} {getReaper[3]}: {getReaper[2]}',
                                                delete_after=8)
+                    if source == "MangaClash":
+                        getMangaClash = getMangaClashReleased(title, url_basic, url_chapter, int(r), int(g), int(b), id_guild)
+                        if getMangaClash[0]:
+                            embed = getMangaClash[1]
+                            channel = bot.get_channel(int(id_channel))
+                            await channel.send(embed=embed)
+                            await channel.send(f'>>> Ping of The {title} {getMangaClash[3]}: {getMangaClash[2]}',
+                                               delete_after=8)
         end = datetime.now().strftime('%H:%M:%S')
         print(f'Refreshing releases status: Finished {end}')
     except Exception as e:
@@ -523,25 +540,27 @@ def getReaperScansReleased(Title, urlbasic, urlchapter, r1, g, b, id_channel, id
     content = []
     subscription = []
     subscription_other = []
+
     with open('server_release_ping', 'r', errors='ignore') as f:
         for line in f:
-            line_ = line.split("-")
-            if line_[0] == id_guild:
-                if line_[1] == Title:
+            splited = line.split("-")
+            if splited[0] == id_guild:
+                if splited[1] == Title:
                     # Now I just need to get the list of player
-                    test = line_[2].replace("[", '')
-                    test = str(test.replace("]", ''))
-                    test = list(test.split(','))
-                    if len(test) > 1:
-                        for t in test:
-                            if t != '':
-                                subscription.append(t)
-                    else:
-                        subscription_other.append(test)
+                    users = splited[2].replace("[", "")
+                    users = users.replace("]", "")
+                    users = users.replace("'", '')
+                    users = users.replace("\\n", '')
+                    users = users.replace("\n", '')
+                    users = users.replace(" ", '')
+                    users = users.replace("  ", '')
+                    users = users.split(",")
+                    subscription = users
                 else:
                     subscription_other.append(line)
             else:
                 subscription_other.append(line)
+
 
     web = req.get(url=urlbasic)
     chapter_number = float(0)
@@ -660,7 +679,7 @@ def getReaperScansReleased(Title, urlbasic, urlchapter, r1, g, b, id_channel, id
 
 # Manga Clash
 
-def getMangaClash(Title, urlbasic, urlchapter, r1, g, b, rHour, rMin, rDay):
+def getMangaClash(Title, urlbasic, urlchapter, r1, g, b, rHour, rMin, rDay, id_guild):
     '''
         Thumbnail:  Y
         CHAPTER_NUMBER: Y
@@ -705,7 +724,17 @@ def getMangaClash(Title, urlbasic, urlchapter, r1, g, b, rHour, rMin, rDay):
     next_chapter = chapter_number + 1
 
     last_chapters = {}
+    with open('server_latest', 'r', errors='ignore') as r_sl:
+        if r_sl is not None:
+            for line in r_sl:
+                if line is not None:
+                    line_ = line.split('-')
+                    if line[0] != ' \n':
+                        if line_[0] == id_guild:
+                            last_chapters.setdefault(line_[1], f'{line_[2]}')
+
     # Check if the last_chapters has the  current chapter number, if does it has not been released yet
+
     if last_chapters[Title] == chapter_number:
         released = False
     else:
@@ -722,7 +751,7 @@ def getMangaClash(Title, urlbasic, urlchapter, r1, g, b, rHour, rMin, rDay):
     return embed, chapter_number
 
 
-def getMangaClashReleased(Title, urlbasic, urlchapter, r1, g, b):
+def getMangaClashReleased(Title, urlbasic, urlchapter, r1, g, b, id_guild):
     '''
         Thumbnail:  Y
         CHAPTER_NUMBER: Y
@@ -731,6 +760,31 @@ def getMangaClashReleased(Title, urlbasic, urlchapter, r1, g, b):
     '''
 
     # Now get the time of release and if it already was released today or not
+    subscription = []
+    subscription_other = []
+
+    with open('server_release_ping', 'r', errors='ignore') as f:
+        for line in f:
+            splited = line.split("-")
+            if splited[0] == id_guild:
+                if splited[1] == Title:
+                    # Now I just need to get the list of player
+                    users = splited[2].replace("[", "")
+                    users = users.replace("]", "")
+                    users = users.replace("'", '')
+                    users = users.replace("\\n", '')
+                    users = users.replace("\n", '')
+                    users = users.replace(" ", '')
+                    users = users.replace("  ", '')
+                    users = users.split(",")
+                    subscription = users
+                else:
+                    subscription_other.append(line)
+            else:
+                subscription_other.append(line)
+
+
+
 
     web = req.get(url=f"{urlbasic}")
     menu_soup = bs(web.content, features="html.parser")
@@ -754,29 +808,90 @@ def getMangaClashReleased(Title, urlbasic, urlchapter, r1, g, b):
     thumbnail_text = str(thumbnail_text.find("img")).split('"')[5]
     url_thumbnail = thumbnail_text
     last_chapters = {}
+
+    last_chapters = {}
+    content_new = []
+    content_servers = []
+    content_new_ = f'{id_guild}-{Title}-{chapter_number}'
+    content_new.append(content_new_)
+    # Now get the time of release and if it already was released today or not
+    with open('server_latest', 'r', errors='ignore') as r_sl:
+        if r_sl is not None:
+            for line in r_sl:
+                if line is not None:
+                    line_ = line.split('-')
+                    if line[0] != ' \n':
+                        if line_[0] == id_guild:
+                            content_element = f'{line_[0]}-{(line_[1])}-{(line_[2])}'
+                            content.append(content_element)
+                            last_chapters.setdefault(line_[1], f'{line_[2]}')
+                        else:
+                            if str(line) != ' \n':
+                                content_element = f'{line_[0]}-{(line_[1])}-{(line_[2])}'
+                                content_servers.append(content_element)
+                # Title Source  url  url_chapter r g b rHour rMinute rDay
+    new = False
     if last_chapters.keys().__contains__(Title):
-        chapter_last_number = float(last_chapters.get(Title))
-        # It has last chapter, so chose the last chapter
+        chapter_last_number = last_chapters[Title]
+        message_release = f"The Chapters {chapter_number} was released!"
     else:
-        chapter_last_number = chapter_number - 1
-        # It doesnt have chapter, so set it as empty
-    if chapter_number - chapter_last_number <= 1.0 and not 0.0:
-        m_chapter_number = chapter_number
-    elif chapter_number - chapter_last_number > 1.0:
-        chapters_released = list(range(int(chapter_last_number) + 1, int(chapter_number)))
-        m_chapter_number = ""
-        for numbers in chapters_released:
-            numbers = int(numbers)
-            m_chapter_number += f'{str(numbers)}'
+        new = True
+        message_release = f"The {Title} was added to existing bookmarks!"
+        chapter_last_number = float(chapter_number)-1
+
+    released = False
+    if float(chapter_number) > float(chapter_last_number):
+        released = True
         # Now I have the list of all released chapters
 
+    if new:
+        with open('server_release_ping', 'w') as write:
+            subscription.append(f'{id_guild}-{Title}-[]')
+            for subs in subscription:
+                write.write(f'{subs} \n')
+            for subs in subscription_other:
+                write.write(subs)
     # Its more than 1 chapter
+    if released:
+        with open('server_latest', 'w', errors='ignore') as wf:
+            # Check if there are some that have to be updated
+            for line in content:
+                for line_new in content_new:
+                    id_g_new = line_new.split("-")[0]
+                    id_g = line.split("-")[0]
+                    if id_g_new == id_g:
+                        # found the same server
+                        # Now I need to check for the Title
+                        title_new = line_new.split("-")[1]
+                        title_ = line.split("-")[1]
+                        if title_ == title_new:
+                            # Its the same manga! so delete the old one
+                            content.remove(line)
 
-    embed = discord.Embed(title=f"{Title}", url=f"{urlbasic}",
-                          description=f"The Chapter {m_chapter_number} was released! " + f"\n Link to latest chapter: {urlchapter}",
-                          color=discord.Color.from_rgb(r1, g, b))
-    embed.set_image(url=f"{url_thumbnail}")
-    return embed, chapter_number, chapter_last_number
+            # Write it down
+            for c in content_new:
+                wf.write(c + " \n")
+            for c in content:
+                if not c.__contains__('\n'):
+                    wf.write(c + " \n")
+                else:
+                    wf.write(c)
+            for c in content_servers:
+                if not c.__contains__('\n'):
+                    wf.write(c + " \n")
+                else:
+                    wf.write(c)
+    if new is False:
+        embed = discord.Embed(title=f"{Title}", url=f"{urlbasic}",
+                              description=f"{message_release} \n Link to the chapter: {urlchapter}",
+                              color=discord.Color.from_rgb(r1, g, b))
+        embed.set_image(url=f"{url_thumbnail}")
+    else:
+        embed = discord.Embed(title=f"{Title}", url=f"{urlbasic}",
+                              description=f"{message_release} \n Link to the chapter: {urlchapter}",
+                              color=discord.Color.from_rgb(r1, g, b))
+        embed.set_image(url=f"{url_thumbnail}")
+    return released, embed, subscription, chapter_number
     # New chapter was RELEASED!!!!
 
 

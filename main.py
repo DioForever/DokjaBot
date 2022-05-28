@@ -249,6 +249,65 @@ async def m(ctx, *args):
                             w_srp.write(subs)
             if not found:
                 await ctx.send('>>> Coulnd´t find the desired manhwa/manga \nTry check the title again')
+        elif args[1] == "unsub":
+            subscription_searched = []
+            subscription_other = []
+            found = False
+            contain = False
+            # I need to get the title
+            title = ''
+            count = 0
+            max = len(args) - 1
+            for arg in args:
+                if count >= 2 and count != max:
+                    title += f'{arg} '
+                elif count == max:
+                    title += arg
+                count += 1
+            # Now I can read the file and edit it accordingly
+
+            with open('server_release_ping','r') as read:
+                for line in read:
+                    if line != ('' or ' '):
+                        splited = line.split('-')
+                        if splited[0] == str(id_guild):
+                            # Its the correct server
+                            if title == splited[1]:
+                                # Its the correct title
+                                found = True
+                                # Its the same title so now just get the users already in lsit and add the new one
+                                # , but check if he isnt there already
+                                users = splited[2].replace("[", "")
+                                users = users.replace("]", "")
+                                users = users.replace("'", '')
+                                users = users.replace("\\n", '')
+                                users = users.replace("\n", '')
+                                users = users.replace(" ", '')
+                                users = users.replace("  ", '')
+                                users = users.split(",")
+
+                                if users.__contains__(str(ctx.author.mention)):
+                                    # It does contain user
+                                    contain = True
+                                    users.remove(str(ctx.author.mention))
+                                    subscription_searched.append(f'{id_guild}-{title}-{users}')
+                            else:
+                                subscription_other.append(line)
+                        else:
+                            subscription_other.append(line)
+                    with open('server_release_ping','w') as write:
+                        for subs in subscription_searched:
+                            write.write(f'{subs} \n')
+                        for subs in subscription_other:
+                            write.write(subs)
+            if found and contain:
+                await ctx.send(f'>>> You have unsubscribed the {title}')
+            elif found and not contain:
+                await ctx.send(f'>>> You haven´t been subscribed to the {title}')
+            else:
+                await ctx.send(f'>>> The {title} was not found \n Check if you wrote title correctly')
+
+
 
     else:
         await  ctx.send('>>> Unknown command!')

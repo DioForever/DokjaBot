@@ -70,6 +70,27 @@ async def m(ctx, *args):
     elif args[0] == "test":
         '''embed = getMangaClashReleased("The Beginning After The End","https://mangaclash.com/manga/the-beginning-after-the-end/","https://mangaclash.com/manga/the-beginning-after-the-end/chapter-", 0,0,0)[0]
         await ctx.send(embed = embed)'''
+    elif args[0] == "help":
+        embed = discord.Embed(title=f"DokjaBot - Help Menu",
+                              description=f'The list of commands for DokjaBot \n'
+                                          f'!m list - writes down every manga/manhwa in the library \n'
+                                          f'!m library add <command> <Title> <Source> <menu_url> <chapter_url> <r> <g> <b> <Hours> <Minutes> <Weekay> \n'
+                                          f'  -  command has to be one word \n'
+                                          f'  -  Title can have spaces, but you have to write _ between the words, \n'
+                                          f'     the character _ will be deleted later on by itself \n'
+                                          f'  - source, you can see all the sources possible by writing !m sources \n'
+                                          f'  - menu_url is url of a website where you can see all or latest chapters \n'
+                                          f'  - chapter_url is url of a website wheer you read the manga/manhwa without the \n'
+                                          f'    number and what comes after that \n'
+                                          f'  - rgb write rgb, but put spaces between \n'
+                                          f'  - time, remember that its in UTC, Coordinated Universal Time, put hours then minutes and \n'
+                                          f'    weekday, but write 0-6 not the weekday in words \n'
+                                          f'example: !m library add after_fall  The_World_After_the_Fall  Reaper_Scans  https://reaperscans.com/series/the-world-after-the-fall/  https://reaperscans.com/series/the-world-after-the-fall/chapter-  0 0 0 18 0 6\n'
+                                          f'!m library sub <title> and !m library unsub <title> \n'
+                                          f'  - you can write the title with the spaces '
+                                          f'  - if you dont know the title, find it in !m list \n',
+                              color=discord.Color.from_rgb(246, 214, 4))
+        await ctx.send(embed=embed)
     elif args[0] == "library":
         if args[1] == "add":
             #  0     1      2               3                       4                       5                                                           6                                               7  8  9  10  11 12  = 13

@@ -8,7 +8,7 @@ from discord.ext import commands
 
 bot = commands.Bot(command_prefix="!")
 
-content = []
+
 # await bot.wait_until_ready()
 print("DokjaBot activated")
 
@@ -762,7 +762,7 @@ def getMangaClashReleased(Title, urlbasic, urlchapter, r1, g, b, id_guild):
     # Now get the time of release and if it already was released today or not
     subscription = []
     subscription_other = []
-
+    content = []
     with open('server_release_ping', 'r', errors='ignore') as f:
         for line in f:
             splited = line.split("-")

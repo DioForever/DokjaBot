@@ -427,7 +427,13 @@ async def chapterreleasecheck():
                             if announced.keys().__contains__(f'{id_guild}-{title}'):
                                 if float(announced.get(f'{id_guild}-{title}')) < getReaperRelease[3]:
                                     channel = bot.get_channel(int(id_channel))
-                                    await channel.send(embed=getReaperRelease[1])
+                                    embed = getReaperRelease[1]
+                                    try:
+                                        await channel.send(embed=embed)
+                                    except:
+                                        embed.set_image(
+                                            'https://cdn.discordapp.com/attachments/977231331199164466/979778575890780180/unknown.png')
+                                        await channel.send(embed=embed)
                                     await channel.send(f'>>> Ping of The {title} {getReaperRelease[3]}: {getReaperRelease[2]}',
                                                        delete_after=8)
                                     announced[f'{id_guild}-{title}'] = float(getReaperRelease[3])
@@ -436,7 +442,12 @@ async def chapterreleasecheck():
                                     print('------------------------------------')
                             else:
                                 channel = bot.get_channel(int(id_channel))
-                                await channel.send(embed=getReaperRelease[1])
+                                embed = getReaperRelease[1]
+                                try:
+                                    await channel.send(embed=embed)
+                                except:
+                                    embed.set_image('https://cdn.discordapp.com/attachments/977231331199164466/979778575890780180/unknown.png')
+                                    await channel.send(embed=embed)
                                 await channel.send(f'>>> Ping of The {title} {getReaperRelease[3]}: {getReaperRelease[2]}',
                                                    delete_after=8)
                                 announced.setdefault(f'{id_guild}-{title}',float(getReaperRelease[3]))
@@ -449,7 +460,13 @@ async def chapterreleasecheck():
                             if announced.keys().__contains__(f'{id_guild}-{title}'):
                                 if float(announced.get(f'{id_guild}-{title}')) < getMangaClashRelease[3]:
                                     channel = bot.get_channel(int(id_channel))
-                                    await channel.send(embed=getMangaClashRelease[1])
+                                    embed = getMangaClashRelease[1]
+                                    try:
+                                        await channel.send(embed=embed)
+                                    except:
+                                        embed.set_image(
+                                            'https://cdn.discordapp.com/attachments/977231331199164466/979778575890780180/unknown.png')
+                                        await channel.send(embed=embed)
                                     await channel.send(f'>>> Ping of The {title} {getMangaClashRelease[3]}: {getMangaClashRelease[2]}',
                                                        delete_after=8)
                                     announced[f'{id_guild}-{title}'] = float(getMangaClashRelease[3])
@@ -458,7 +475,12 @@ async def chapterreleasecheck():
                                     print('------------------------------------')
                             else:
                                 channel = bot.get_channel(int(id_channel))
-                                await channel.send(embed=getReaperRelease[1])
+                                embed=getMangaClashRelease[1]
+                                try:
+                                    await channel.send(embed=embed)
+                                except:
+                                    embed.set_image('https://cdn.discordapp.com/attachments/977231331199164466/979778575890780180/unknown.png')
+                                    await channel.send(embed=embed)
                                 await channel.send(f'>>> Ping of The {title} {getMangaClashRelease[3]}: {getMangaClashRelease[2]}',
                                                    delete_after=8)
                                 announced.setdefault(f'{id_guild}-{title}',float(getMangaClashRelease[3]))
@@ -466,7 +488,7 @@ async def chapterreleasecheck():
                                 print(f'{title} {getMangaClashRelease[3]}: {getMangaClashRelease[2]}')
                                 print('------------------------------------')
                     except Exception as e:
-                        print(f'Error: {e}')
+                        print(f'Error of {title}: {e}')
         print(announced)
         end = datetime.now().strftime('%H:%M:%S')
         print(f'Refreshing releases status: Finished {end}')

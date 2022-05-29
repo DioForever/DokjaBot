@@ -420,32 +420,53 @@ async def chapterreleasecheck():
                     g = line[8]
                     b = line[9]
                     # Now I need to check the source and according to that I need to send the embed
-                    if source == "Reaper_Scans":
-                        getReaperRelease = getReaperScansReleased(title, url_basic, url_chapter, int(r), int(g), int(b), id_channel,
-                                               id_guild)
-                        if announced.keys().__contains__(f'{id_guild}-{title}'):
-                            if float(announced.get(f'{id_guild}-{title}')) < getReaperRelease[3]:
+                    try:
+                        if source == "Reaper_Scans":
+                            getReaperRelease = getReaperScansReleased(title, url_basic, url_chapter, int(r), int(g), int(b), id_channel,
+                                                   id_guild)
+                            if announced.keys().__contains__(f'{id_guild}-{title}'):
+                                if float(announced.get(f'{id_guild}-{title}')) < getReaperRelease[3]:
+                                    channel = bot.get_channel(int(id_channel))
+                                    await channel.send(embed=getReaperRelease[1])
+                                    await channel.send(f'>>> Ping of The {title} {getReaperRelease[3]}: {getReaperRelease[2]}',
+                                                       delete_after=8)
+                                    announced[f'{id_guild}-{title}'] = float(getReaperRelease[3])
+                                    print('------------------------------------')
+                                    print(f'{title} {getReaperRelease[3]}: {getReaperRelease[2]}')
+                                    print('------------------------------------')
+                            else:
                                 channel = bot.get_channel(int(id_channel))
                                 await channel.send(embed=getReaperRelease[1])
                                 await channel.send(f'>>> Ping of The {title} {getReaperRelease[3]}: {getReaperRelease[2]}',
                                                    delete_after=8)
-                                announced[f'{id_guild}-{title}'] = float(getReaperRelease[3])
+                                announced.setdefault(f'{id_guild}-{title}',float(getReaperRelease[3]))
                                 print('------------------------------------')
                                 print(f'{title} {getReaperRelease[3]}: {getReaperRelease[2]}')
                                 print('------------------------------------')
-                    if source == "MangaClash":
-                        getMangaClashRelease = getMangaClashReleased(title, url_basic, url_chapter, int(r), int(g), int(b), id_channel,
-                                              id_guild)
-                        if announced.keys().__contains__(f'{id_guild}-{title}'):
-                            if float(announced.get(f'{id_guild}-{title}')) < getMangaClashRelease[3]:
+                        if source == "MangaClash":
+                            getMangaClashRelease = getMangaClashReleased(title, url_basic, url_chapter, int(r), int(g), int(b), id_channel,
+                                                  id_guild)
+                            if announced.keys().__contains__(f'{id_guild}-{title}'):
+                                if float(announced.get(f'{id_guild}-{title}')) < getMangaClashRelease[3]:
+                                    channel = bot.get_channel(int(id_channel))
+                                    await channel.send(embed=getMangaClashRelease[1])
+                                    await channel.send(f'>>> Ping of The {title} {getMangaClashRelease[3]}: {getMangaClashRelease[2]}',
+                                                       delete_after=8)
+                                    announced[f'{id_guild}-{title}'] = float(getMangaClashRelease[3])
+                                    print('------------------------------------')
+                                    print(f'{title} {getMangaClashRelease[3]}: {getMangaClashRelease[2]}')
+                                    print('------------------------------------')
+                            else:
                                 channel = bot.get_channel(int(id_channel))
-                                await channel.send(embed=getMangaClashRelease[1])
+                                await channel.send(embed=getReaperRelease[1])
                                 await channel.send(f'>>> Ping of The {title} {getMangaClashRelease[3]}: {getMangaClashRelease[2]}',
                                                    delete_after=8)
-                                announced[f'{id_guild}-{title}'] = float(getMangaClashRelease[3])
+                                announced.setdefault(f'{id_guild}-{title}',float(getMangaClashRelease[3]))
                                 print('------------------------------------')
                                 print(f'{title} {getMangaClashRelease[3]}: {getMangaClashRelease[2]}')
                                 print('------------------------------------')
+                    except Exception as e:
+                        print(f'Error: {e}')
         print(announced)
         end = datetime.now().strftime('%H:%M:%S')
         print(f'Refreshing releases status: Finished {end}')

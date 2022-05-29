@@ -435,8 +435,7 @@ async def chapterreleasecheck():
                                     try:
                                         await channel.send(embed=embed)
                                     except:
-                                        embed.set_image(
-                                            'https://cdn.discordapp.com/attachments/977231331199164466/979778575890780180/unknown.png')
+                                        embed.set_image(url='')
                                         await channel.send(embed=embed)
                                     await channel.send(f'>>> Ping of The {title} {getReaperRelease[3]}: {getReaperRelease[2]}',
                                                        delete_after=8)
@@ -453,7 +452,7 @@ async def chapterreleasecheck():
                                 try:
                                     await channel.send(embed=embed)
                                 except:
-                                    embed.set_image('https://cdn.discordapp.com/attachments/977231331199164466/979778575890780180/unknown.png')
+                                    embed.set_image(url='')
                                     await channel.send(embed=embed)
                                 await channel.send(f'>>> Ping of The {title} {getReaperRelease[3]}: {getReaperRelease[2]}',
                                                    delete_after=120)
@@ -474,8 +473,7 @@ async def chapterreleasecheck():
                                     try:
                                         await channel.send(embed=embed)
                                     except:
-                                        embed.set_image(
-                                            'https://cdn.discordapp.com/attachments/977231331199164466/979778575890780180/unknown.png')
+                                        embed.set_image(url='')
                                         await channel.send(embed=embed)
                                     await channel.send(f'>>> Ping of The {title} {getMangaClashRelease[3]}: {getMangaClashRelease[2]}',
                                                        delete_after=8)
@@ -492,7 +490,7 @@ async def chapterreleasecheck():
                                 try:
                                     await channel.send(embed=embed)
                                 except:
-                                    embed.set_image('https://cdn.discordapp.com/attachments/977231331199164466/979778575890780180/unknown.png')
+                                    embed.set_image(url='')
                                     await channel.send(embed=embed)
                                 await channel.send(f'>>> Ping of The {title} {getMangaClashRelease[3]}: {getMangaClashRelease[2]}',
                                                    delete_after=120)

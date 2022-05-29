@@ -11,6 +11,7 @@ bot = commands.Bot(command_prefix="!")
 # await bot.wait_until_ready()
 print("DokjaBot activated")
 
+
 announced = {}
 
 with open('server_latest', 'r') as r_an:
@@ -387,8 +388,10 @@ async def m_subscribe_all(ctx):
 @tasks.loop(seconds=60)
 async def chapterreleasecheck():
     await bot.wait_until_ready()
+    channel_print = bot.get_channel(980509693329932338)
     start = datetime.now().strftime('%H:%M:%S')
     print(f'Refreshing releases status: Starting {start}')
+    await channel_print.send(f'Refreshing releases status: Starting {start}')
     try:
 
         # I need to get the chapters latest from the server.latest
@@ -406,6 +409,7 @@ async def chapterreleasecheck():
 
         # Now I need the channel_listed and check every one of them
         print(announced)
+        await channel_print.send(announced)
         with open('channel_listed', 'r', errors='ignore') as r_cl:
             if r_cl is not None:
                 for line in r_cl:
@@ -438,8 +442,11 @@ async def chapterreleasecheck():
                                                        delete_after=8)
                                     announced[f'{id_guild}-{title}'] = float(getReaperRelease[3])
                                     print('------------------------------------')
+                                    await channel_print.send('------------------------------------')
                                     print(f'{title} {getReaperRelease[3]}: {getReaperRelease[2]}')
+                                    await channel_print.send(f'{title} {getReaperRelease[3]}: {getReaperRelease[2]}')
                                     print('------------------------------------')
+                                    await channel_print.send('------------------------------------')
                             else:
                                 channel = bot.get_channel(int(id_channel))
                                 embed = getReaperRelease[1]
@@ -449,11 +456,14 @@ async def chapterreleasecheck():
                                     embed.set_image('https://cdn.discordapp.com/attachments/977231331199164466/979778575890780180/unknown.png')
                                     await channel.send(embed=embed)
                                 await channel.send(f'>>> Ping of The {title} {getReaperRelease[3]}: {getReaperRelease[2]}',
-                                                   delete_after=8)
+                                                   delete_after=120)
                                 announced.setdefault(f'{id_guild}-{title}',float(getReaperRelease[3]))
                                 print('------------------------------------')
+                                await channel_print.send('------------------------------------')
                                 print(f'{title} {getReaperRelease[3]}: {getReaperRelease[2]}')
+                                await channel_print.send(f'{title} {getReaperRelease[3]}: {getReaperRelease[2]}')
                                 print('------------------------------------')
+                                await channel_print.send('------------------------------------')
                         if source == "MangaClash":
                             getMangaClashRelease = getMangaClashReleased(title, url_basic, url_chapter, int(r), int(g), int(b), id_channel,
                                                   id_guild)
@@ -471,8 +481,11 @@ async def chapterreleasecheck():
                                                        delete_after=8)
                                     announced[f'{id_guild}-{title}'] = float(getMangaClashRelease[3])
                                     print('------------------------------------')
+                                    await channel_print.send('------------------------------------')
                                     print(f'{title} {getMangaClashRelease[3]}: {getMangaClashRelease[2]}')
+                                    await channel_print.send(f'{title} {getMangaClashRelease[3]}: {getMangaClashRelease[2]}')
                                     print('------------------------------------')
+                                    await channel_print.send('------------------------------------')
                             else:
                                 channel = bot.get_channel(int(id_channel))
                                 embed=getMangaClashRelease[1]
@@ -482,20 +495,28 @@ async def chapterreleasecheck():
                                     embed.set_image('https://cdn.discordapp.com/attachments/977231331199164466/979778575890780180/unknown.png')
                                     await channel.send(embed=embed)
                                 await channel.send(f'>>> Ping of The {title} {getMangaClashRelease[3]}: {getMangaClashRelease[2]}',
-                                                   delete_after=8)
+                                                   delete_after=120)
                                 announced.setdefault(f'{id_guild}-{title}',float(getMangaClashRelease[3]))
                                 print('------------------------------------')
+                                await channel_print.send('------------------------------------')
                                 print(f'{title} {getMangaClashRelease[3]}: {getMangaClashRelease[2]}')
+                                await channel_print.send(f'{title} {getMangaClashRelease[3]}: {getMangaClashRelease[2]}')
                                 print('------------------------------------')
+                                await channel_print.send('------------------------------------')
                     except Exception as e:
                         print(f'Error of {title}: {e}')
+                        await channel_print.send(f'Error of {title}: {e}')
         print(announced)
+        await channel_print.send(announced)
         end = datetime.now().strftime('%H:%M:%S')
         print(f'Refreshing releases status: Finished {end}')
+        await channel_print.send(f'Refreshing releases status: Finished {end}')
     except Exception as e:
         end = datetime.now().strftime('%H:%M:%S')
         print(f'Couldnt refresh the releases {end}')
+        await channel_print.send(f'Couldnt refresh the releases {end}')
         print(f'Error: {e}')
+        await channel_print.send(f'Error: {e}')
 
 
 def getTime(rHour, rMinute, rDay):
@@ -503,7 +524,6 @@ def getTime(rHour, rMinute, rDay):
     temp = datetime.today().weekday()
 
     day = datetime.today().weekday()
-    print(day)
     # Released on Friday at 18:00 / 6PM
     release = 18
     hour = int(datetime.today().strftime("%H")) * 60 * 60

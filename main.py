@@ -8,9 +8,17 @@ from discord.ext import commands
 
 bot = commands.Bot(command_prefix="!")
 
-
 # await bot.wait_until_ready()
 print("DokjaBot activated")
+
+announced = {}
+
+with open('server_latest', 'r') as r_an:
+    for line in r_an:
+        if line != ('' or ' '):
+            split = line.split('-')
+            announced.setdefault(f'{split[0]}-{split[1]}', float(split[2]))
+print(announced)
 
 
 @tasks.loop(seconds=60)
@@ -53,7 +61,7 @@ async def m(ctx, *args):
                 elif source == 'MangaClash':
                     embed = \
                         getMangaClash(manhwa[3], manhwa[5], manhwa[6], int(manhwa[7]), int(manhwa[8]), int(manhwa[9]),
-                                      int(manhwa[10]), int(manhwa[11]), int(manhwa[12]),str(id_guild))[0]
+                                      int(manhwa[10]), int(manhwa[11]), int(manhwa[12]), str(id_guild))[0]
                     await ctx.send(embed=embed)
                 else:
                     await ctx.send("We don't support this source")
@@ -296,7 +304,7 @@ async def m(ctx, *args):
                 count += 1
             # Now I can read the file and edit it accordingly
 
-            with open('server_release_ping','r') as read:
+            with open('server_release_ping', 'r') as read:
                 for line in read:
                     if line != ('' or ' '):
                         splited = line.split('-')
@@ -325,11 +333,12 @@ async def m(ctx, *args):
                                 subscription_other.append(line)
                         else:
                             subscription_other.append(line)
-                    with open('server_release_ping','w') as write:
+                    with open('server_release_ping', 'w') as write:
                         for subs in subscription_searched:
                             write.write(f'{subs} \n')
                         for subs in subscription_other:
                             write.write(subs)
+                new = True
             if found and contain:
                 await ctx.send(f'>>> You have unsubscribed the {title}')
             elif found and not contain:
@@ -396,6 +405,7 @@ async def chapterreleasecheck():
                                 chapters_released.setdefault(id_channel, name_number)
 
         # Now I need the channel_listed and check every one of them
+        print(announced)
         with open('channel_listed', 'r', errors='ignore') as r_cl:
             if r_cl is not None:
                 for line in r_cl:
@@ -411,22 +421,26 @@ async def chapterreleasecheck():
                     b = line[9]
                     # Now I need to check the source and according to that I need to send the embed
                     if source == "Reaper_Scans":
-                        getReaper = getReaperScansReleased(title, url_basic, url_chapter, int(r), int(g), int(b),
-                                                           id_channel, id_guild)
-                        if getReaper[0]:
-                            embed = getReaper[1]
-                            channel = bot.get_channel(int(id_channel))
-                            await channel.send(embed=embed)
-                            await channel.send(f'>>> Ping of The {title} {getReaper[3]}: {getReaper[2]}',
-                                               delete_after=8)
+                        getReaperRelease = getReaperScansReleased(title, url_basic, url_chapter, int(r), int(g), int(b), id_channel,
+                                               id_guild)
+                        if announced.keys().__contains__(f'{id_guild}-{title}'):
+                            if float(announced.get(f'{id_guild}-{title}')) < getReaperRelease[3]:
+                                channel = bot.get_channel(int(id_channel))
+                                await channel.send(embed=getReaperRelease[1])
+                                await channel.send(f'>>> Ping of The {title} {getReaperRelease[3]}: {getReaperRelease[2]}',
+                                                   delete_after=8)
+                                announced[f'{id_guild}-{title}'] = float(getReaperRelease[3])
                     if source == "MangaClash":
-                        getMangaClash = getMangaClashReleased(title, url_basic, url_chapter, int(r), int(g), int(b), id_guild)
-                        if getMangaClash[0]:
-                            embed = getMangaClash[1]
-                            channel = bot.get_channel(int(id_channel))
-                            await channel.send(embed=embed)
-                            await channel.send(f'>>> Ping of The {title} {getMangaClash[3]}: {getMangaClash[2]}',
-                                               delete_after=8)
+                        getMangaClashRelease = getMangaClashReleased(title, url_basic, url_chapter, int(r), int(g), int(b), id_channel,
+                                              id_guild)
+                        if announced.keys().__contains__(f'{id_guild}-{title}'):
+                            if float(announced.get(f'{id_guild}-{title}')) < getMangaClashRelease[3]:
+                                channel = bot.get_channel(int(id_channel))
+                                await channel.send(embed=getMangaClashRelease[1])
+                                await channel.send(f'>>> Ping of The {title} {getMangaClashRelease[3]}: {getMangaClashRelease[2]}',
+                                                   delete_after=8)
+                                announced[f'{id_guild}-{title}'] = float(getMangaClashRelease[3])
+        print(announced)
         end = datetime.now().strftime('%H:%M:%S')
         print(f'Refreshing releases status: Finished {end}')
     except Exception as e:
@@ -561,7 +575,6 @@ def getReaperScansReleased(Title, urlbasic, urlchapter, r1, g, b, id_channel, id
             else:
                 subscription_other.append(line)
 
-
     web = req.get(url=urlbasic)
     chapter_number = float(0)
     soup = bs(web.content, features="html.parser")
@@ -633,9 +646,9 @@ def getReaperScansReleased(Title, urlbasic, urlchapter, r1, g, b, id_channel, id
                               description=f"{message_release} \n Link to the chapter: {urlchapter}",
                               color=discord.Color.from_rgb(r1, g, b))
         embed.set_image(url=f"{url_thumbnail}")
+
     released = False
-    if float(chapter_number) > float(last_chapter):
-        released = True
+
     if new:
         with open('server_release_ping', 'w') as write:
             subscription.append(f'{id_guild}-{Title}-[]')
@@ -751,7 +764,7 @@ def getMangaClash(Title, urlbasic, urlchapter, r1, g, b, rHour, rMin, rDay, id_g
     return embed, chapter_number
 
 
-def getMangaClashReleased(Title, urlbasic, urlchapter, r1, g, b, id_guild):
+def getMangaClashReleased(Title, urlbasic, urlchapter, r1, g, b, id_channel, id_guild):
     '''
         Thumbnail:  Y
         CHAPTER_NUMBER: Y
@@ -782,9 +795,6 @@ def getMangaClashReleased(Title, urlbasic, urlchapter, r1, g, b, id_guild):
                     subscription_other.append(line)
             else:
                 subscription_other.append(line)
-
-
-
 
     web = req.get(url=f"{urlbasic}")
     menu_soup = bs(web.content, features="html.parser")
@@ -837,7 +847,7 @@ def getMangaClashReleased(Title, urlbasic, urlchapter, r1, g, b, id_guild):
     else:
         new = True
         message_release = f"The {Title} was added to existing bookmarks!"
-        chapter_last_number = float(chapter_number)-1
+        chapter_last_number = float(chapter_number) - 1
 
     released = False
     if float(chapter_number) > float(chapter_last_number):
@@ -867,7 +877,7 @@ def getMangaClashReleased(Title, urlbasic, urlchapter, r1, g, b, id_guild):
                         if title_ == title_new:
                             # Its the same manga! so delete the old one
                             content.remove(line)
-
+            released = True
             # Write it down
             for c in content_new:
                 wf.write(c + " \n")
@@ -891,8 +901,13 @@ def getMangaClashReleased(Title, urlbasic, urlchapter, r1, g, b, id_guild):
                               description=f"{message_release} \n Link to the chapter: {urlchapter}",
                               color=discord.Color.from_rgb(r1, g, b))
         embed.set_image(url=f"{url_thumbnail}")
+
+
     return released, embed, subscription, chapter_number
     # New chapter was RELEASED!!!!
+
+
+
 
 
 # 1st Kiss

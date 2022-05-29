@@ -430,6 +430,9 @@ async def chapterreleasecheck():
                                 await channel.send(f'>>> Ping of The {title} {getReaperRelease[3]}: {getReaperRelease[2]}',
                                                    delete_after=8)
                                 announced[f'{id_guild}-{title}'] = float(getReaperRelease[3])
+                                print('------------------------------------')
+                                print(f'{title} {getReaperRelease[3]}: {getReaperRelease[2]}')
+                                print('------------------------------------')
                     if source == "MangaClash":
                         getMangaClashRelease = getMangaClashReleased(title, url_basic, url_chapter, int(r), int(g), int(b), id_channel,
                                               id_guild)
@@ -440,6 +443,9 @@ async def chapterreleasecheck():
                                 await channel.send(f'>>> Ping of The {title} {getMangaClashRelease[3]}: {getMangaClashRelease[2]}',
                                                    delete_after=8)
                                 announced[f'{id_guild}-{title}'] = float(getMangaClashRelease[3])
+                                print('------------------------------------')
+                                print(f'{title} {getMangaClashRelease[3]}: {getMangaClashRelease[2]}')
+                                print('------------------------------------')
         print(announced)
         end = datetime.now().strftime('%H:%M:%S')
         print(f'Refreshing releases status: Finished {end}')

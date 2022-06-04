@@ -352,6 +352,15 @@ async def m(ctx, *args):
     else:
         await  ctx.send('>>> Unknown command!')
 
+'''@bot.command()
+async def test(ctx):
+    web = req.get(url='https://247manga.com/manhwa/legend-of-the-northern-blade/')
+    soup = bs(web.content, features="html.parser")
+    print(soup)
+    chapter_text = (soup.find("li", class_="wp-manga-chapter"))
+    print(chapter_text)
+'''
+
 
 @bot.command()
 async def supl(ctx):
@@ -371,21 +380,7 @@ async def supl(ctx):
                 messageToSend = f"1.B {predmet} {ucitel} {skupina} {typ} {hodina}. hodina"
                 await ctx.send(messageToSend)
 
-
-@bot.command()
-async def m_subscribe_all(ctx):
-    subscription_all = []
-    with open('server_release_ping', 'r', errors='ignore') as f:
-        for line in f:
-            subscription_all.append(line)
-    # Now check if user is in the list
-    await bot.wait_until_ready()
-    channel = bot.get_channel(977231331199164466)
-    await channel.send('Pinging {}'.format(ctx.author.mention))
-    await channel.send('<@401845652541145089>')
-
-
-@tasks.loop(seconds=60)
+@tasks.loop(seconds=6000)
 async def chapterreleasecheck():
     await bot.wait_until_ready()
     channel_print = bot.get_channel(980509693329932338)
@@ -443,7 +438,7 @@ async def chapterreleasecheck():
                                     print('------------------------------------')
                                     await channel_print.send('------------------------------------')
                                     print(f'{title} {getReaperRelease[3]}: {getReaperRelease[2]}')
-                                    await channel_print.send(f'{title} {getReaperRelease[3]}: {getReaperRelease[2]}')
+                                    await channel_print.send(str(f'{title} {getReaperRelease[3]}: {getReaperRelease[2]}').replace('@',''))
                                     print('------------------------------------')
                                     await channel_print.send('------------------------------------')
                             else:
@@ -460,7 +455,7 @@ async def chapterreleasecheck():
                                 print('------------------------------------')
                                 await channel_print.send('------------------------------------')
                                 print(f'{title} {getReaperRelease[3]}: {getReaperRelease[2]}')
-                                await channel_print.send(f'{title} {getReaperRelease[3]}: {getReaperRelease[2]}')
+                                await channel_print.send(str(f'{title} {getReaperRelease[3]}: {getReaperRelease[2]}').replace('@',''))
                                 print('------------------------------------')
                                 await channel_print.send('------------------------------------')
                         if source == "MangaClash":
@@ -481,7 +476,7 @@ async def chapterreleasecheck():
                                     print('------------------------------------')
                                     await channel_print.send('------------------------------------')
                                     print(f'{title} {getMangaClashRelease[3]}: {getMangaClashRelease[2]}')
-                                    await channel_print.send(f'{title} {getMangaClashRelease[3]}: {getMangaClashRelease[2]}')
+                                    await channel_print.send(str(f'{title} {getMangaClashRelease[3]}: {getMangaClashRelease[2]}').replace('@',''))
                                     print('------------------------------------')
                                     await channel_print.send('------------------------------------')
                             else:
@@ -498,7 +493,7 @@ async def chapterreleasecheck():
                                 print('------------------------------------')
                                 await channel_print.send('------------------------------------')
                                 print(f'{title} {getMangaClashRelease[3]}: {getMangaClashRelease[2]}')
-                                await channel_print.send(f'{title} {getMangaClashRelease[3]}: {getMangaClashRelease[2]}')
+                                await channel_print.send(str(f'{title} {getMangaClashRelease[3]}: {getMangaClashRelease[2]}').replace('@',''))
                                 print('------------------------------------')
                                 await channel_print.send('------------------------------------')
                     except Exception as e:
@@ -979,11 +974,16 @@ def getMangaClashReleased(Title, urlbasic, urlchapter, r1, g, b, id_channel, id_
 
 # 1st Kiss
 
-def get1stKiss(Title, urlbasic, urlchapter, r1, g, b, rHour, rMin, rDay):
-    print("")
+def getAquaManga(Title, urlbasic, urlchapter, r1, g, b, rHour, rMin, rDay):
+    web = req.get(url=urlbasic)
+    soup = bs(web.content, features="html.parser")
+    chapter_text = (soup.find("li", class_="wp-manga-chapter"))
+    print(chapter_text)
 
 
-def get1stKissReleased(Title, urlbasic, urlchapter, r1, g, b):
+
+
+def getAquaMangaReleased(Title, urlbasic, urlchapter, r1, g, b):
     print("")
 
 

@@ -55,7 +55,7 @@ async def m(ctx, *args):
             if manhwa[2] == args[0]:
                 # Now we found the manhwa we wanted
                 source = manhwa[4].replace(" ", "")
-                if source == 'Reaper_Scans':
+                if source == 'ReaperScans':
                     embed = \
                         getReaperScans(manhwa[3], manhwa[5], manhwa[6], int(manhwa[7]), int(manhwa[8]), int(manhwa[9]),
                                        int(manhwa[10]), int(manhwa[11]), int(manhwa[12]))[0]
@@ -80,6 +80,7 @@ async def m(ctx, *args):
     elif args[0] == "test":
         '''embed = getMangaClashReleased("The Beginning After The End","https://mangaclash.com/manga/the-beginning-after-the-end/","https://mangaclash.com/manga/the-beginning-after-the-end/chapter-", 0,0,0)[0]
         await ctx.send(embed = embed)'''
+        getLuminousScansReleased("FFF Class Trashero", '', '', 1, 1, 1, 1, 1)
     elif args[0] == "help":
         embed = discord.Embed(title=f"DokjaBot - Help Menu",
                               description=f'The list of commands for DokjaBot \n'
@@ -95,7 +96,7 @@ async def m(ctx, *args):
                                           f'  - rgb write rgb, but put spaces between \n'
                                           f'  - time, remember that its in UTC, Coordinated Universal Time, put hours then minutes and \n'
                                           f'    weekday, but write 0-6 not the weekday in words \n'
-                                          f'example: !m library add after_fall  The_World_After_the_Fall  Reaper_Scans  https://reaperscans.com/series/the-world-after-the-fall/  https://reaperscans.com/series/the-world-after-the-fall/chapter-  0 0 0 18 0 6\n'
+                                          f'example: !m library add after_fall  The_World_After_the_Fall  ReaperScans  https://reaperscans.com/series/the-world-after-the-fall/  https://reaperscans.com/series/the-world-after-the-fall/chapter-  0 0 0 18 0 6\n'
                                           f'!m library sub <title> and !m library unsub <title> \n'
                                           f'  - you can write the title with the spaces '
                                           f'  - if you dont know the title, find it in !m list \n',
@@ -106,14 +107,15 @@ async def m(ctx, *args):
                               description=f'When asked for source, write the code of source'
                                           f'The sources we support are \n'
                                           f'----Name----------Code----\n'
-                                          f'Reaper Scans: Reaper_Scans \n'
-                                          f'MangaClash: MangaClash ',
+                                          f'Reaper Scans: ReaperScans \n'
+                                          f'MangaClash: MangaClash \n'
+                                          f'Luminous Scans: LuminousScans',
                               color=discord.Color.from_rgb(246, 214, 4))
         await ctx.send(embed=embed)
     elif args[0] == "library":
         if args[1] == "add":
             #  0     1      2               3                       4                       5                                                           6                                               7  8  9  10  11 12  = 13
-            # listen add after_fall The_World_After_the_Fall  Reaper_Scans  https://reaperscans.com/series/the-world-after-the-fall/  https://reaperscans.com/series/the-world-after-the-fall/chapter-  0  0  0  18  0  6
+            # listen add after_fall The_World_After_the_Fall  ReaperScans  https://reaperscans.com/series/the-world-after-the-fall/  https://reaperscans.com/series/the-world-after-the-fall/chapter-  0  0  0  18  0  6
             if len(args) == 13:
                 id_guild = ctx.message.guild.id
                 id_channel = ctx.message.channel.id
@@ -448,7 +450,7 @@ async def chapterreleasecheck():
                     b = line[9]
                     # Now I need to check the source and according to that I need to send the embed
                     try:
-                        if source == "Reaper_Scans":
+                        if source == "ReaperScans":
                             getReaperRelease = getReaperScansReleased(title, url_basic, url_chapter, int(r), int(g),
                                                                       int(b), id_channel,
                                                                       id_guild)
@@ -463,7 +465,7 @@ async def chapterreleasecheck():
                                         await channel.send(embed=embed)
                                     await channel.send(
                                         f'>>> Ping of The {title} {getReaperRelease[3]}: {getReaperRelease[2]}',
-                                        delete_after=8)
+                                        delete_after=300)
                                     announced[f'{id_guild}-{title}'] = float(getReaperRelease[3])
                                     print('------------------------------------')
                                     await channel_print.send('------------------------------------')
@@ -482,7 +484,7 @@ async def chapterreleasecheck():
                                     await channel.send(embed=embed)
                                 await channel.send(
                                     f'>>> Ping of The {title} {getReaperRelease[3]}: {getReaperRelease[2]}',
-                                    delete_after=120)
+                                    delete_after=300)
                                 announced.setdefault(f'{id_guild}-{title}', float(getReaperRelease[3]))
                                 print('------------------------------------')
                                 await channel_print.send('------------------------------------')
@@ -491,7 +493,7 @@ async def chapterreleasecheck():
                                     str(f'{title} {getReaperRelease[3]}: {getReaperRelease[2]}').replace('@', ''))
                                 print('------------------------------------')
                                 await channel_print.send('------------------------------------')
-                        if source == "MangaClash":
+                        elif source == "MangaClash":
                             getMangaClashRelease = getMangaClashReleased(title, url_basic, url_chapter, int(r), int(g),
                                                                          int(b), id_channel,
                                                                          id_guild)
@@ -506,7 +508,7 @@ async def chapterreleasecheck():
                                         await channel.send(embed=embed)
                                     await channel.send(
                                         f'>>> Ping of The {title} {getMangaClashRelease[3]}: {getMangaClashRelease[2]}',
-                                        delete_after=8)
+                                        delete_after=300)
                                     announced[f'{id_guild}-{title}'] = float(getMangaClashRelease[3])
                                     print('------------------------------------')
                                     await channel_print.send('------------------------------------')
@@ -526,13 +528,58 @@ async def chapterreleasecheck():
                                     await channel.send(embed=embed)
                                 await channel.send(
                                     f'>>> Ping of The {title} {getMangaClashRelease[3]}: {getMangaClashRelease[2]}',
-                                    delete_after=120)
+                                    delete_after=300)
                                 announced.setdefault(f'{id_guild}-{title}', float(getMangaClashRelease[3]))
                                 print('------------------------------------')
                                 await channel_print.send('------------------------------------')
                                 print(f'{title} {getMangaClashRelease[3]}: {getMangaClashRelease[2]}')
                                 await channel_print.send(
                                     str(f'{title} {getMangaClashRelease[3]}: {getMangaClashRelease[2]}').replace('@',
+                                                                                                                 ''))
+                                print('------------------------------------')
+                                await channel_print.send('------------------------------------')
+                        elif source == "LuminousScans":
+                            getLuminousRelease = getLuminousScansReleased(title, url_basic, url_chapter, int(r), int(g),
+                                                                         int(b), id_channel,
+                                                                         id_guild)
+                            if announced.keys().__contains__(f'{id_guild}-{title}'):
+                                if float(announced.get(f'{id_guild}-{title}')) < getLuminousRelease[3]:
+                                    channel = bot.get_channel(int(id_channel))
+                                    embed = getLuminousRelease[1]
+                                    try:
+                                        await channel.send(embed=embed)
+                                    except:
+                                        embed.set_image(url='')
+                                        await channel.send(embed=embed)
+                                    await channel.send(
+                                        f'>>> Ping of The {title} {getLuminousRelease[3]}: {getLuminousRelease[2]}',
+                                        delete_after=300)
+                                    announced[f'{id_guild}-{title}'] = float(getLuminousRelease[3])
+                                    print('------------------------------------')
+                                    await channel_print.send('------------------------------------')
+                                    print(f'{title} {getLuminousRelease[3]}: {getLuminousRelease[2]}')
+                                    await channel_print.send(
+                                        str(f'{title} {getLuminousRelease[3]}: {getLuminousRelease[2]}').replace(
+                                            '@', ''))
+                                    print('------------------------------------')
+                                    await channel_print.send('------------------------------------')
+                            else:
+                                channel = bot.get_channel(int(id_channel))
+                                embed = getLuminousRelease[1]
+                                try:
+                                    await channel.send(embed=embed)
+                                except:
+                                    embed.set_image(url='')
+                                    await channel.send(embed=embed)
+                                await channel.send(
+                                    f'>>> Ping of The {title} {getLuminousRelease[3]}: {getLuminousRelease[2]}',
+                                    delete_after=300)
+                                announced.setdefault(f'{id_guild}-{title}', float(getLuminousRelease[3]))
+                                print('------------------------------------')
+                                await channel_print.send('------------------------------------')
+                                print(f'{title} {getLuminousRelease[3]}: {getLuminousRelease[2]}')
+                                await channel_print.send(
+                                    str(f'{title} {getLuminousRelease[3]}: {getLuminousRelease[2]}').replace('@',
                                                                                                                  ''))
                                 print('------------------------------------')
                                 await channel_print.send('------------------------------------')
@@ -919,7 +966,6 @@ def getMangaClashReleased(Title, urlbasic, urlchapter, r1, g, b, id_channel, id_
     thumbnail_text = (menu_soup.find("div", class_="summary_image"))
     thumbnail_text = str(thumbnail_text.find("img")).split('"')[5]
     url_thumbnail = thumbnail_text
-    last_chapters = {}
 
     last_chapters = {}
     content_new = []
@@ -1008,8 +1054,6 @@ def getMangaClashReleased(Title, urlbasic, urlchapter, r1, g, b, id_channel, id_
     # New chapter was RELEASED!!!!
 
 
-# 1st Kiss
-
 def getAquaManga(Title, urlbasic, urlchapter, r1, g, b, rHour, rMin, rDay):
     web = req.get(url=urlbasic)
     soup = bs(web.content, features="html.parser")
@@ -1023,9 +1067,132 @@ def getAquaMangaReleased(Title, urlbasic, urlchapter, r1, g, b):
 
 # Aqua Manga
 
-def getAquaManga(Title, urlbasic, urlchapter, r1, g, b, rHour, rMin, rDay):
-    print("")
+def getLuminousScansReleased(Title, urlbasic, urlchapter, r1, g, b, id_channel, id_guild):
+    # We get the soup of the website
+    #urlbasic = 'https://luminousscans.com/series/1653732347-fff-class-trash-hero/'
+    web = req.get(url=urlbasic)
+    soup = bs(web.content, features="html.parser")
+    content = web.content
+    # Now we split it at the epcurlast class and split it again so we get the Chapter {number}
+    chapter_text = str(content).split('epcurlast')
+    chapter_text = chapter_text[1].split('<')[0].replace('">', '')
 
+    chapter_num = float(chapter_text.split()[1])
+
+    #
+    # Url chapter
+    urlchapter = urlchapter + f'{chapter_num}/'
+
+    # I will get the picture from the website as well
+    thumb_url = str(soup.find('div', class_='thumb')).split()[15].split('"')[1]
+
+    # get subscriptions
+    subscription = []
+    subscription_other = []
+    content = []
+    with open('server_release_ping', 'r', errors='ignore') as f:
+        for line in f:
+            splited = line.split("-")
+            if splited[0] == id_guild:
+                if splited[1] == Title:
+                    # Now I just need to get the list of player
+                    users = splited[2].replace("[", "")
+                    users = users.replace("]", "")
+                    users = users.replace("'", '')
+                    users = users.replace("\\n", '')
+                    users = users.replace("\n", '')
+                    users = users.replace(" ", '')
+                    users = users.replace("  ", '')
+                    users = users.split(",")
+                    subscription = users
+                else:
+                    subscription_other.append(line)
+            else:
+                subscription_other.append(line)
+
+    # get content
+    last_chapters = {}
+    content_new = []
+    content_servers = []
+    content_new_ = f'{id_guild}-{Title}-{chapter_num}'
+    content_new.append(content_new_)
+    # Now get the time of release and if it already was released today or not
+    with open('server_latest', 'r', errors='ignore') as r_sl:
+        if r_sl is not None:
+            for line in r_sl:
+                if line is not None:
+                    line_ = line.split('-')
+                    if line[0] != ' \n':
+                        if line_[0] == id_guild:
+                            content_element = f'{line_[0]}-{(line_[1])}-{(line_[2])}'
+                            content.append(content_element)
+                            last_chapters.setdefault(line_[1], f'{line_[2]}')
+                        else:
+                            if str(line) != ' \n':
+                                content_element = f'{line_[0]}-{(line_[1])}-{(line_[2])}'
+                                content_servers.append(content_element)
+    new = False
+    released = False
+    # Check if there is new episode
+    if last_chapters.keys().__contains__(Title):
+        if float(last_chapters.get(Title)) < float(chapter_num):
+            released = True
+    else:
+        new = True
+        released = True
+
+    # Now I write the files if something new was released
+    if new:
+        with open('server_release_ping', 'w') as write:
+            subscription.append(f'{id_guild}-{Title}-[]')
+            for subs in subscription:
+                write.write(f'{subs} \n')
+            for subs in subscription_other:
+                write.write(subs)
+    # Its more than 1 chapter
+    if released:
+        with open('server_latest', 'w', errors='ignore') as wf:
+            # Check if there are some that have to be updated
+            for line in content:
+                for line_new in content_new:
+                    id_g_new = line_new.split("-")[0]
+                    id_g = line.split("-")[0]
+                    if id_g_new == id_g:
+                        # found the same server
+                        # Now I need to check for the Title
+                        title_new = line_new.split("-")[1]
+                        title_ = line.split("-")[1]
+                        if title_ == title_new:
+                            # Its the same manga! so delete the old one
+                            content.remove(line)
+            released = True
+            # Write it down
+            for c in content_new:
+                wf.write(c + " \n")
+            for c in content:
+                if not c.__contains__('\n'):
+                    wf.write(c + " \n")
+                else:
+                    wf.write(c)
+            for c in content_servers:
+                if not c.__contains__('\n'):
+                    wf.write(c + " \n")
+                else:
+                    wf.write(c)
+    if new is False:
+        message_release = f'The Chapter {chapter_num} was released'
+        embed = discord.Embed(title=f"{Title}", url=f"{urlbasic}",
+                              description=f"{message_release} \n Link to the chapter: {urlchapter}",
+                              color=discord.Color.from_rgb(r1, g, b))
+        embed.set_image(url=f"{thumb_url}")
+    else:
+        message_release = f'The {Title} has been added to library'
+        embed = discord.Embed(title=f"{Title}", url=f"{urlbasic}",
+                              description=f"{message_release} \n Link to the chapter: {urlchapter}",
+                              color=discord.Color.from_rgb(r1, g, b))
+        embed.set_image(url=f"{thumb_url}")
+
+    return released, embed, subscription, chapter_num
 
 def getAguaMangaReleased(Title, urlbasic, urlchapter, r1, g, b):
     print("")

@@ -1,6 +1,7 @@
 import json
 from datetime import datetime
 from discord.ext import tasks
+from discord.ext import commands
 import discord
 import requests as req
 from bs4 import BeautifulSoup as bs
@@ -36,7 +37,10 @@ async def rich_presence():
 async def m(ctx, *args):
     cmds = []
     manhwas = []
-    id_guild = ctx.message.guild.id
+    try:
+        id_guild = ctx.message.guild.id
+    except:
+        id_guild = 0
     with open('channel_listed', 'r', errors='ignore') as r:
         for line in r:
             if line is not None:
@@ -365,7 +369,32 @@ async def m(ctx, *args):
                 await ctx.send(f'>>> You haven´t been subscribed to the {title}')
             else:
                 await ctx.send(f'>>> The {title} was not found \n Check if you wrote title correctly')
+    elif args[0] == "dm":
+        dm_ping = []
+        dm_other = []
+        with open('dm_ping','r') as r_dm:
+            for line in r_dm:
+                split_dm = line.split('-')
+                if split_dm[0] == str(id_guild):
+                    dm_list = split_dm[1].replace("['",'').replace("']",'').replace("'",'').replace(' ','').split(',')
+                    for s in dm_list:
+                        s.replace(' ','')
+                        if s != '[]':
+                            dm_ping.append(s)
+                else:
+                    dm_other.append(line)
+        if dm_ping.__contains__(ctx.author.mention):
+            dm_ping.remove(ctx.author.mention)
+            await ctx.send('>>> You have disabled DirectMessages for this server!')
+        else:
+            dm_ping.append(ctx.author.mention)
+            await ctx.send('>>> You have enabled DirectMessages for this server!')
 
+        # Now I will save it to the file
+        with open('dm_ping','w') as w_dm:
+            w_dm.write(f'{id_guild}-{dm_ping}')
+            for p in dm_other:
+                w_dm.write(p)
 
 
     else:
@@ -499,6 +528,7 @@ async def chapterreleasecheck():
                                     str(f'{title} {getReaperRelease[3]}: {getReaperRelease[2]}').replace('@', ''))
                                 print('------------------------------------')
                                 await channel_print.send('------------------------------------')
+
                         elif source == "MangaClash":
                             getMangaClashRelease = getMangaClashReleased(title, url_basic, url_chapter, int(r), int(g),
                                                                          int(b), id_channel,
@@ -595,6 +625,29 @@ async def chapterreleasecheck():
                                                                               id_guild)
                             if announced.keys().__contains__(f'{id_guild}-{title}'):
                                 if float(announced.get(f'{id_guild}-{title}')) < getMangaKakalotRelease[3]:
+                                    # I will check the dm_ping file and see if they want dm
+                                    dm_subs = []
+                                    dm_other = []
+                                    subscription_p = getMangaKakalotRelease[2].copy()
+                                    subscription = getMangaKakalotRelease[2].copy()
+                                    with open('dm_ping', 'r') as r_dm:
+                                        for line_dm in r_dm:
+                                            split_dm = line_dm.split('-')
+                                            guild_dm = split_dm[0]
+                                            subs_dm = split_dm[1].split(',')
+                                            if str(guild_dm) == str(id_guild):
+                                                for s in subs_dm:
+                                                    n = s.replace("['",'').replace("']",'')
+                                                    dm_subs.append(n)
+                                                    print(n)
+                                                    subscription_p.remove(n)
+                                                    print(subscription)
+                                                    print(subscription_p)
+                                            else:
+                                                dm_other.append(line_dm)
+
+                                    #-------
+
                                     channel = bot.get_channel(int(id_channel))
                                     embed = getMangaKakalotRelease[1]
                                     try:
@@ -603,7 +656,7 @@ async def chapterreleasecheck():
                                         embed.set_image(url='')
                                         await channel.send(embed=embed)
                                     await channel.send(
-                                        f'>>> Ping of The {title} {getMangaKakalotRelease[3]}: {getMangaKakalotRelease[2]}',
+                                        f'>>> Ping of The {title} {getMangaKakalotRelease[3]}: {subscription_p}',
                                         delete_after=300)
                                     announced[f'{id_guild}-{title}'] = float(getMangaKakalotRelease[3])
                                     print('------------------------------------')
@@ -614,6 +667,30 @@ async def chapterreleasecheck():
                                             '@', ''))
                                     print('------------------------------------')
                                     await channel_print.send('------------------------------------')
+
+                                    # DM to the user
+                                    chapter_num = getMangaKakalotRelease[3]
+                                    server = bot.get_guild(int(id_guild))
+                                    embed_user = discord.Embed(title=f"{title}", url=f"{url_basic}",
+                                                          description=f"The Chapter {chapter_num} was released! \n"
+                                                                      f" Link to the chapter: {url_chapter}{int(chapter_num)} \n"
+                                                                      f" Server: {server}",
+                                                          color=discord.Color.from_rgb(int(r), int(g), int(b)))
+
+                                    # Now I have the dm sub ids
+                                    subscription = getMangaKakalotRelease[2]
+                                    print(f'{dm_subs} - dm_subs')
+                                    print(f'{subscription} - subscription')
+
+                                    for sub in subscription:
+                                        print(f'{sub} - sub')
+                                        if dm_subs.__contains__(sub):
+                                            id = int(sub.replace('<@','').replace('>',''))
+                                            print(id)
+                                            user = await bot.fetch_user(id)
+                                            await user.send(embed= embed_user)
+                                    # --------------
+
                             else:
                                 channel = bot.get_channel(int(id_channel))
                                 embed = getMangaKakalotRelease[1]

@@ -204,15 +204,16 @@ async def m(ctx, *args):
             # !m library remove archmage_streamer
             content_cl = []
             content_sl = []
+            content_rsl = []
             cmds = []
             found = False
             title = ''
             # I need to delete it from channel_listed
             with open('channel_listed', 'r', errors='ignore') as r_cl:
-                for line in r_cl:
-                    if line != ' \n' and line != '':
+                for line_cl in r_cl:
+                    if line_cl != ' \n' and line_cl != '':
                         # Make sure theer will be no empty lines
-                        line_ = line.split("  ")
+                        line_ = line_cl.split("  ")
                         if str(line_[0]) == str(id_guild):
                             # it is the cmd from the server
                             cmd = f'{line_[2]}'
@@ -221,36 +222,58 @@ async def m(ctx, *args):
                                 found = True
                                 title = line_[3]
                             else:
-                                content_cl.append(line)
+                                content_cl.append(line_cl)
                         else:
-                            content_cl.append(line)
-            # I need to delete it from server_latest
+                            content_cl.append(line_cl)
             if found is True:
+                # I need to delete it from server_latest
                 with open('server_latest', 'r', errors='ignore') as r_sl:
-                    for line in r_sl:
-                        if line != ' \n' and line != '':
+                    for line_sl in r_sl:
+                        if line_sl != ' \n' or line_sl != '':
                             # Make sure theer will be no empty lines
-                            line_ = line.split("-")
+                            line_ = line_sl.split("-")
                             if str(line_[0]) == str(id_guild):
                                 # it is the cmd from the server
                                 title_ = f'{line_[1]}'
-                                if not (str(title) == str(title_)):
-                                    content_sl.append(line)
+                                if str(title) != str(title_):
+                                    content_sl.append(line_sl)
                             else:
-                                content_sl.append(line)
-            # Now I need to rewrite the channel_listed
-            with open('channel_listed', 'w', errors='ignore') as w_cl:
-                for c in content_cl:
-                    if not c.__contains__("\n"):
-                        c += ' \n'
-                    w_cl.write(c)
-            with open('server_latest', 'w', errors='ignore') as w_cl:
-                for c in content_sl:
-                    if not c.__contains__("\n"):
-                        c += ' \n'
-                    w_cl.write(c)
+                                content_sl.append(line_sl)
+                # I need to delete it from server_release_ping
+                with open('server_release_ping', 'r', errors='ignore') as r_srp:
+                    for line_srp in r_srp:
+                        if line_srp != ' \n' and line_srp != '':
+                            line_split = line_srp.split('-')
+                            if id_guild == int(line_split[0]):
+                                # Its the same server
+                                title_ = f'{line_split[1]}'
+                                if str(title) != str(title_):
+                                    content_rsl.append(line_srp)
+                            else:
+                                content_rsl.append(line_srp)
+                # Now I just rewrite it to server_release_ping
+                with open('server_release_ping', 'w', errors='ignore') as w_srp:
+                    for lin in content_rsl:
+                        if not lin.__contains__("\n"):
+                            lin += ' \n'
+                        w_srp.write(lin)
 
-            if found is True:
+                # Now I need to rewrite the channel_listed
+                with open('channel_listed', 'w', errors='ignore') as w_cl:
+                    for c in content_cl:
+                        if not c.__contains__("\n"):
+                            c += ' \n'
+                        w_cl.write(c)
+
+                # Now I need to rewrite server_latest
+                with open('server_latest', 'w', errors='ignore') as w_sl:
+                    for item in content_sl:
+                        if not item.__contains__("\n"):
+                            item += ' \n'
+                        w_sl.write(item)
+
+                # Now I need to remove it from the announced
+                del announced[f'{id_guild}-{title}']
                 await ctx.send(f'>>> The command: {cmd} with Title: {title} has been removed!')
             else:
                 await ctx.send(f'>>> The command: {args[2]} was **not** found!')
@@ -372,13 +395,14 @@ async def m(ctx, *args):
     elif args[0] == "dm":
         dm_ping = []
         dm_other = []
-        with open('dm_ping','r') as r_dm:
+        with open('dm_ping', 'r') as r_dm:
             for line in r_dm:
                 split_dm = line.split('-')
                 if split_dm[0] == str(id_guild):
-                    dm_list = split_dm[1].replace("['",'').replace("']",'').replace("'",'').replace(' ','').split(',')
+                    dm_list = split_dm[1].replace("['", '').replace("']", '').replace("'", '').replace(' ', '').split(
+                        ',')
                     for s in dm_list:
-                        s.replace(' ','')
+                        s.replace(' ', '')
                         if s != '[]':
                             dm_ping.append(s)
                 else:
@@ -391,33 +415,12 @@ async def m(ctx, *args):
             await ctx.send('>>> You have enabled DirectMessages for this server!')
 
         # Now I will save it to the file
-        with open('dm_ping','w') as w_dm:
+        with open('dm_ping', 'w') as w_dm:
             w_dm.write(f'{id_guild}-{dm_ping}')
             for p in dm_other:
                 w_dm.write(p)
-
-
     else:
-        await  ctx.send('>>> Unknown command!')
-
-
-@bot.command()
-async def supl(ctx):
-    datet = datetime.today().strftime("%Y%m%d")
-    odpoved = req.get("https://skripta.ssps.cz/substitutions.php/?date=" + datet)
-    print("https://skripta.ssps.cz/substitutions.php/?date=" + datet)
-    data = json.loads(odpoved.content)
-
-    for i in data["ChangesForClasses"]:
-        if (i["Class"]["Abbrev"] == "1.B"):
-            for j in i["CancelledLessons"]:
-                predmet = j["Subject"]
-                ucitel = j["ChgType2"]
-                skupina = j["Group"]
-                typ = j["ChgType1"]
-                hodina = j["Hour"]
-                messageToSend = f"1.B {predmet} {ucitel} {skupina} {typ} {hodina}. hodina"
-                await ctx.send(messageToSend)
+        await ctx.send('>>> Unknown command!')
 
 
 First = True
@@ -584,13 +587,13 @@ async def chapterreleasecheck():
                                             subs_dm = split_dm[1].split(',')
                                             if str(guild_dm) == str(id_guild):
                                                 for s in subs_dm:
-                                                    n = s.replace("['",'').replace("']",'')
+                                                    n = s.replace("['", '').replace("']", '')
                                                     '''dm_subs.append(n)'''
                                                     subscription_p.remove(n)
                                             else:
                                                 dm_other.append(line_dm)
 
-                                    #-------
+                                    # -------
                                     channel = bot.get_channel(int(id_channel))
                                     embed = getMangaClashRelease[1]
                                     try:
@@ -667,13 +670,13 @@ async def chapterreleasecheck():
                                             subs_dm = split_dm[1].split(',')
                                             if str(guild_dm) == str(id_guild):
                                                 for s in subs_dm:
-                                                    n = s.replace("['",'').replace("']",'')
+                                                    n = s.replace("['", '').replace("']", '')
                                                     dm_subs.append(n)
                                                     subscription_p.remove(n)
                                             else:
                                                 dm_other.append(line_dm)
 
-                                    #-------
+                                    # -------
                                     channel = bot.get_channel(int(id_channel))
                                     embed = getLuminousRelease[1]
                                     try:
@@ -698,21 +701,20 @@ async def chapterreleasecheck():
                                     chapter_num = getLuminousRelease[3]
                                     server = bot.get_guild(int(id_guild))
                                     embed_user = discord.Embed(title=f"{title}", url=f"{url_basic}",
-                                                          description=f"The Chapter {chapter_num} was released! \n"
-                                                                      f" Link to the chapter: {url_chapter}{int(chapter_num)} \n"
-                                                                      f" Server: {server}",
-                                                          color=discord.Color.from_rgb(int(r), int(g), int(b)))
+                                                               description=f"The Chapter {chapter_num} was released! \n"
+                                                                           f" Link to the chapter: {url_chapter}{int(chapter_num)} \n"
+                                                                           f" Server: {server}",
+                                                               color=discord.Color.from_rgb(int(r), int(g), int(b)))
 
                                     # Now I have the dm sub ids
                                     subscription = getLuminousRelease[2]
 
-
                                     for sub in subscription:
 
                                         if dm_subs.__contains__(sub):
-                                            id = int(sub.replace('<@','').replace('>',''))
+                                            id = int(sub.replace('<@', '').replace('>', ''))
                                             user = await bot.fetch_user(id)
-                                            await user.send(embed= embed_user)
+                                            await user.send(embed=embed_user)
                                     # --------------
                             else:
                                 channel = bot.get_channel(int(id_channel))
@@ -735,9 +737,9 @@ async def chapterreleasecheck():
                                 await channel_print.send('------------------------------------')
                         elif source == "MangaKakalot":
                             getMangaKakalotRelease = getMangaKakalotReleased(title, url_basic, url_chapter, int(r),
-                                                                              int(g),
-                                                                              int(b), id_channel,
-                                                                              id_guild)
+                                                                             int(g),
+                                                                             int(b), id_channel,
+                                                                             id_guild)
                             if announced.keys().__contains__(f'{id_guild}-{title}'):
                                 if float(announced.get(f'{id_guild}-{title}')) < getMangaKakalotRelease[3]:
                                     # I will check the dm_ping file and see if they want dm
@@ -752,13 +754,13 @@ async def chapterreleasecheck():
                                             subs_dm = split_dm[1].split(',')
                                             if str(guild_dm) == str(id_guild):
                                                 for s in subs_dm:
-                                                    n = s.replace("['",'').replace("']",'')
+                                                    n = s.replace("['", '').replace("']", '')
                                                     dm_subs.append(n)
                                                     subscription_p.remove(n)
                                             else:
                                                 dm_other.append(line_dm)
 
-                                    #-------
+                                    # -------
 
                                     channel = bot.get_channel(int(id_channel))
                                     embed = getMangaKakalotRelease[1]
@@ -784,19 +786,19 @@ async def chapterreleasecheck():
                                     chapter_num = getMangaKakalotRelease[3]
                                     server = bot.get_guild(int(id_guild))
                                     embed_user = discord.Embed(title=f"{title}", url=f"{url_basic}",
-                                                          description=f"The Chapter {chapter_num} was released! \n"
-                                                                      f" Link to the chapter: {url_chapter}{int(chapter_num)} \n"
-                                                                      f" Server: {server}",
-                                                          color=discord.Color.from_rgb(int(r), int(g), int(b)))
+                                                               description=f"The Chapter {chapter_num} was released! \n"
+                                                                           f" Link to the chapter: {url_chapter}{int(chapter_num)} \n"
+                                                                           f" Server: {server}",
+                                                               color=discord.Color.from_rgb(int(r), int(g), int(b)))
 
                                     # Now I have the dm sub ids
                                     subscription = getMangaKakalotRelease[2]
 
                                     for sub in subscription:
                                         if dm_subs.__contains__(sub):
-                                            id = int(sub.replace('<@','').replace('>',''))
+                                            id = int(sub.replace('<@', '').replace('>', ''))
                                             user = await bot.fetch_user(id)
-                                            await user.send(embed= embed_user)
+                                            await user.send(embed=embed_user)
                                     # --------------
 
                             else:
@@ -1380,7 +1382,9 @@ def getMangaKakalotReleased(Title, urlbasic, urlchapter, r1, g, b, id_channel, i
     urlbasic = 'https://readmanganato.com/manga-ki987365'
     web = req.get(url=urlbasic)
     soup = bs(web.content, features="html.parser")
-    chapter_num = float(str(soup.find("a", class_='chapter-name text-nowrap')).split('"')[8].replace('>Chapter ', '').replace('</a>', ''))
+    chapter_num = float(
+        str(soup.find("a", class_='chapter-name text-nowrap')).split('"')[8].replace('>Chapter ', '').replace('</a>',
+                                                                                                              ''))
     # Now I need to get thumbnail
     thumb_url = str(soup.find('span', class_='info-image')).split('"')[9]
 

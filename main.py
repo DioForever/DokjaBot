@@ -831,7 +831,7 @@ async def chapterreleasecheck():
         await channel_print.send(f'Refreshing releases status: Finished {end}')
     except Exception as e:
         end = datetime.now().strftime('%H:%M:%S')
-        print(f'Couldnt refresh the releases {end}')
+        print(f'Couldn´t refresh the releases {end}')
         await channel_print.send(f'Couldnt refresh the releases {end}')
         print(f'Error: {e}')
         await channel_print.send(f'Error: {str(e)}')
@@ -1274,14 +1274,7 @@ def doReleased(id_guild, Title, chapter_num, urlbasic, urlchapter, r1, g, b, thu
             if splited[0] == id_guild:
                 if splited[1] == Title:
                     # Now I just need to get the list of player
-                    users = splited[2].replace("[", "")
-                    users = users.replace("]", "")
-                    users = users.replace("'", '')
-                    users = users.replace("\\n", '')
-                    users = users.replace("\n", '')
-                    users = users.replace(" ", '')
-                    users = users.replace("  ", '')
-                    users = users.split(",")
+                    users = splited[2].replace("[", "").replace("]", "").replace("'", '').replace("\\n", '').replace("\n", '').replace(" ", '').replace("  ", '').split(",")
                     subscription = users
                 else:
                     subscription_other.append(line)
@@ -1384,14 +1377,7 @@ def doCheck(id_guild, Title, chapter_num, rHour, rMin, rDay, urlbasic, urlchapte
             if splited[0] == id_guild:
                 if splited[1] == Title:
                     # Now I just need to get the list of player
-                    users = splited[2].replace("[", "")
-                    users = users.replace("]", "")
-                    users = users.replace("'", '')
-                    users = users.replace("\\n", '')
-                    users = users.replace("\n", '')
-                    users = users.replace(" ", '')
-                    users = users.replace("  ", '')
-                    users = users.split(",")
+                    users = splited[2].replace("[", "").replace("]", "").replace("'", '').replace("\\n", '').replace("\n", '').replace(" ", '').replace("  ", '').split(",")
                     subscription = users
                 else:
                     subscription_other.append(line)

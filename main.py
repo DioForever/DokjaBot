@@ -8,6 +8,7 @@ from bs4 import BeautifulSoup as bs
 from discord.ext import commands
 import os
 import sys
+import release
 
 bot = commands.Bot(command_prefix="!")
 
@@ -502,13 +503,19 @@ async def chapterreleasecheck():
                                         with open('dm_ping', 'r') as r_dm:
                                             for line_dm in r_dm:
                                                 split_dm = line_dm.split('-')
+                                                # Now I have it splited as [0] guild id and [1] all the users that want dm ping
                                                 guild_dm = split_dm[0]
                                                 subs_dm = split_dm[1].split(',')
+                                                # Now I have list of users
                                                 if str(guild_dm) == str(id_guild):
                                                     for s in subs_dm:
                                                         n = s.replace("['", '').replace("']", '')
+                                                        print(s)
+                                                        print(n)
+                                                        print(subscription_p)
                                                         dm_subs.append(n)
-                                                        subscription_p.remove(n)
+                                                        if subscription_p.__contains__(n):
+                                                            subscription_p.remove(n)
                                                 else:
                                                     dm_other.append(line_dm)
 
@@ -932,66 +939,72 @@ def getMangaClash(Title, urlbasic, urlchapter, r1, g, b, rHour, rMin, rDay, id_g
     '''
 
     # Now get the time of release and if it already was released today or not
+    try:
+        web = req.get(url=f"{urlbasic}")
+        menu_soup = bs(web.content, features="html.parser")
+        chapter_text = (menu_soup.find("li", class_="wp-manga-chapter"))
+        chapter_text = str(chapter_text.find("a"))
+        chapter_text = chapter_text.split(">")[1]
+        chapter_number = float(chapter_text.replace("</a", "").split(" ")[1])
+        # now we have chapter_number
 
-    web = req.get(url=f"{urlbasic}")
-    menu_soup = bs(web.content, features="html.parser")
-    chapter_text = (menu_soup.find("li", class_="wp-manga-chapter"))
-    chapter_text = str(chapter_text.find("a"))
-    chapter_text = chapter_text.split(">")[1]
-    chapter_number = float(chapter_text.replace("</a", "").split(" ")[1])
-    # now we have chapter_number
+        # Mow I need the second chapter release date
 
-    # Mow I need the second chapter release date
+        chapter_second = str(menu_soup.find_all("li", class_="wp-manga-chapter")[1])
+        chapter_second = chapter_second.split('>')[5]
+        chapter_second = chapter_second.split('<')[0]
+        date_text = chapter_second
 
-    chapter_second = str(menu_soup.find_all("li", class_="wp-manga-chapter")[1])
-    chapter_second = chapter_second.split('>')[5]
-    chapter_second = chapter_second.split('<')[0]
-    date_text = chapter_second
+        # Returns the time until release
+        until_release = getTime(rHour, rMin, rDay)
 
-    # Returns the time until release
-    until_release = getTime(rHour, rMin, rDay)
+        # Now I will add the number of chapter to the url of chapter
+        if chapter_number == int(chapter_number):
+            urlchapter = str(urlchapter) + f'{int(chapter_number)}/'
+            # It is a full number
+        else:
+            m_chapter_number = str(chapter_number).replace(".", '-')
+            urlchapter = str(urlchapter) + f'{m_chapter_number}/'
+        # Now I have the URL for the chapter
 
-    # Now I will add the number of chapter to the url of chapter
-    if chapter_number == int(chapter_number):
-        urlchapter = str(urlchapter) + f'{int(chapter_number)}/'
-        # It is a full number
-    else:
-        m_chapter_number = str(chapter_number).replace(".", '-')
-        urlchapter = str(urlchapter) + f'{m_chapter_number}/'
-    # Now I have the URL for the chapter
+        # now I need the chapter_thumbnail
+        thumbnail_text = (menu_soup.find("div", class_="summary_image"))
+        thumbnail_text = str(thumbnail_text.find("img")).split('"')[5]
+        url_thumbnail = thumbnail_text
 
-    # now I need the chapter_thumbnail
-    thumbnail_text = (menu_soup.find("div", class_="summary_image"))
-    thumbnail_text = str(thumbnail_text.find("img")).split('"')[5]
-    url_thumbnail = thumbnail_text
+        next_chapter = chapter_number + 1
 
-    next_chapter = chapter_number + 1
+        last_chapters = {}
+        with open('server_latest', 'r', errors='ignore') as r_sl:
+            if r_sl is not None:
+                for line in r_sl:
+                    if line is not None:
+                        line_ = line.split('-')
+                        if line[0] != ' \n':
+                            if line_[0] == id_guild:
+                                last_chapters.setdefault(line_[1], f'{line_[2]}')
 
-    last_chapters = {}
-    with open('server_latest', 'r', errors='ignore') as r_sl:
-        if r_sl is not None:
-            for line in r_sl:
-                if line is not None:
-                    line_ = line.split('-')
-                    if line[0] != ' \n':
-                        if line_[0] == id_guild:
-                            last_chapters.setdefault(line_[1], f'{line_[2]}')
+        # Check if the last_chapters has the  current chapter number, if does it has not been released yet
 
-    # Check if the last_chapters has the  current chapter number, if does it has not been released yet
+        if last_chapters[Title] == chapter_number:
+            released = False
+        else:
+            released = True
 
-    if last_chapters[Title] == chapter_number:
-        released = False
-    else:
-        released = True
+        if until_release[1] is True and released is True:
+            message_release = f'The Chapter {int(next_chapter)} is being translated \n or is on break or has random releases'
+        else:
+            message_release = f'The Chapter {next_chapter} will be released in {until_release[0]}'
+        embed = discord.Embed(title=f"{Title}", url=f"{urlbasic}",
+                              description=f"The Chapter {chapter_number} \n " + message_release + f"\n Link to latest chapter: {urlchapter}",
+                              color=discord.Color.from_rgb(r1, g, b))
+        embed.set_image(url=f"{url_thumbnail}")
+    except Exception as e:
+        channel_print = bot.get_channel(980509693329932338)
+        print(f'Error of MangaClash {Title}: {e}')
+        await channel_print.send(f'Error of MangaClash {Title}: {e}')
 
-    if until_release[1] is True and released is True:
-        message_release = f'The Chapter {int(next_chapter)} is being translated \n or is on break or has random releases'
-    else:
-        message_release = f'The Chapter {next_chapter} will be released in {until_release[0]}'
-    embed = discord.Embed(title=f"{Title}", url=f"{urlbasic}",
-                          description=f"The Chapter {chapter_number} \n " + message_release + f"\n Link to latest chapter: {urlchapter}",
-                          color=discord.Color.from_rgb(r1, g, b))
-    embed.set_image(url=f"{url_thumbnail}")
+
     return embed, chapter_number
 
 
@@ -1362,7 +1375,6 @@ def doReleased(id_guild, Title, chapter_num, urlbasic, urlchapter, r1, g, b, thu
                               description=f"{message_release} \n Link to the chapter: {urlchapter}",
                               color=discord.Color.from_rgb(r1, g, b))
         embed.set_image(url=f"{thumb_url}")
-
     return released, embed, subscription
 
 

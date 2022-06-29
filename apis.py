@@ -21,7 +21,7 @@ def getReaperScans(Title, urlbasic, urlchapter, r1, g, b, rHour, rMin, rDay, id_
 
     # Now I have the number as well
 
-    embed = doCheck(id_guild, Title, chapter_number, rHour, rMin, rDay, urlbasic, urlchapter, url_thumbnail, r1, g, b)
+    embed = call.doCheck(id_guild, Title, chapter_number, rHour, rMin, rDay, urlbasic, urlchapter, url_thumbnail, r1, g, b)
 
     return embed, chapter_number
 
@@ -43,7 +43,7 @@ def getReaperScansReleased(Title, urlbasic, urlchapter, r1, g, b, id_channel, id
 
     urlchapter += f'{chapter_number_text}/'
 
-    releaseR = doReleased(id_guild, Title, chapter_number, urlbasic, urlchapter, r1, g, b, url_thumbnail)
+    releaseR = call.doReleased(id_guild, Title, chapter_number, urlbasic, urlchapter, r1, g, b, url_thumbnail)
     released = releaseR[0]
     embed = releaseR[1]
     subscription = releaseR[2]
@@ -79,7 +79,7 @@ def getMangaClash(Title, urlbasic, urlchapter, r1, g, b, rHour, rMin, rDay, id_g
         date_text = chapter_second
 
         # Returns the time until release
-        until_release = getTime(rHour, rMin, rDay)
+        until_release = call.getTime(rHour, rMin, rDay)
 
         # Now I will add the number of chapter to the url of chapter
         if chapter_number == int(chapter_number):
@@ -123,9 +123,7 @@ def getMangaClash(Title, urlbasic, urlchapter, r1, g, b, rHour, rMin, rDay, id_g
                               color=discord.Color.from_rgb(r1, g, b))
         embed.set_image(url=f"{url_thumbnail}")
     except Exception as e:
-        channel_print = bot.get_channel(980509693329932338)
         print(f'Error of MangaClash {Title}: {e}')
-        await channel_print.send(f'Error of MangaClash {Title}: {e}')
 
     return embed, chapter_number
 
@@ -303,7 +301,7 @@ def getLuminousScansReleased(Title, urlbasic, urlchapter, r1, g, b, id_channel, 
     # I will get the picture from the website as well
     thumb_url = str(soup.find('div', class_='thumb')).split()[15].split('"')[1]
 
-    doFiles = doReleased(id_guild, Title, chapter_num, urlbasic, urlchapter, r1, g, b, thumb_url)
+    doFiles = call.doReleased(id_guild, Title, chapter_num, urlbasic, urlchapter, r1, g, b, thumb_url)
     released = doFiles[0]
     embed = doFiles[1]
     subscription = doFiles[2]
@@ -330,7 +328,7 @@ def getLuminousScans(Title, urlbasic, urlchapter, r1, g, b, rHour, rMin, rDay, i
     # I will get the picture from the website as well
     thumb_url = str(soup.find('div', class_='thumb')).split()[15].split('"')[1]
 
-    docheck = doCheck(id_guild, Title, chapter_num, rHour, rMin, rDay, urlbasic, urlchapter, thumb_url, r1, g, b)
+    docheck = call.doCheck(id_guild, Title, chapter_num, rHour, rMin, rDay, urlbasic, urlchapter, thumb_url, r1, g, b)
     embed = docheck
 
     return embed, chapter_num
@@ -351,7 +349,7 @@ def getMangaKakalot(Title, urlbasic, urlchapter, r1, g, b, rHour, rMin, rDay, id
     # Now I need to get thumbnail
     thumb_url = str(soup.find('span', class_='info-image')).split('"')[9]
 
-    embed = doCheck(id_guild, Title, chapter_num, rHour, rMin, rDay, urlbasic, urlchapter, thumb_url, r1, g, b)
+    embed = call.doCheck(id_guild, Title, chapter_num, rHour, rMin, rDay, urlbasic, urlchapter, thumb_url, r1, g, b)
 
     return embed, chapter_num
 
@@ -370,7 +368,7 @@ def getMangaKakalotReleased(Title, urlbasic, urlchapter, r1, g, b, id_channel, i
     urlchapter = urlchapter + f'{int(chapter_num)}'
 
     # Now I need to get the server_latest and server_release_ping
-    doFiles = doReleased(id_guild, Title, chapter_num, urlbasic, urlchapter, r1, g, b, thumb_url)
+    doFiles = call.doReleased(id_guild, Title, chapter_num, urlbasic, urlchapter, r1, g, b, thumb_url)
     released = doFiles[0]
     embed = doFiles[1]
     subscription = doFiles[2]

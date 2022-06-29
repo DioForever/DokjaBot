@@ -53,7 +53,7 @@ async def chapterreleasecheck(bot, announced):
                     # Now I need to check the source and according to that I need to send the embed
                     try:
                         if source == "ReaperScans":
-                            getReaperRelease = getReaperScansReleased(title, url_basic, url_chapter, int(r), int(g),
+                            getReaperRelease = api.getReaperScansReleased(title, url_basic, url_chapter, int(r), int(g),
                                                                       int(b), id_channel,
                                                                       id_guild)
                             if announced.keys().__contains__(f'{id_guild}-{title}'):
@@ -72,7 +72,8 @@ async def chapterreleasecheck(bot, announced):
                                                     for s in subs_dm:
                                                         n = s.replace("['", '').replace("']", '')
                                                         dm_subs.append(n)
-                                                        subscription_p.remove(n)
+                                                        if subscription_p.__contains__(n):
+                                                            subscription_p.remove(n)
                                                 else:
                                                     dm_other.append(line_dm)
 
@@ -135,7 +136,7 @@ async def chapterreleasecheck(bot, announced):
                                 await channel_print.send('------------------------------------')
 
                         elif source == "MangaClash":
-                            getMangaClashRelease = getMangaClashReleased(title, url_basic, url_chapter, int(r), int(g),
+                            getMangaClashRelease = api.getMangaClashReleased(title, url_basic, url_chapter, int(r), int(g),
                                                                          int(b), id_channel,
                                                                          id_guild)
                             if announced.keys().__contains__(f'{id_guild}-{title}'):
@@ -153,7 +154,8 @@ async def chapterreleasecheck(bot, announced):
                                                 for s in subs_dm:
                                                     n = s.replace("['", '').replace("']", '')
                                                     '''dm_subs.append(n)'''
-                                                    subscription_p.remove(n)
+                                                    if subscription_p.__contains__(n):
+                                                        subscription_p.remove(n)
                                             else:
                                                 dm_other.append(line_dm)
 
@@ -217,7 +219,7 @@ async def chapterreleasecheck(bot, announced):
                                 print('------------------------------------')
                                 await channel_print.send('------------------------------------')
                         elif source == "LuminousScans":
-                            getLuminousRelease = getLuminousScansReleased(title, url_basic, url_chapter, int(r), int(g),
+                            getLuminousRelease = api.getLuminousScansReleased(title, url_basic, url_chapter, int(r), int(g),
                                                                           int(b), id_channel,
                                                                           id_guild)
                             if announced.keys().__contains__(f'{id_guild}-{title}'):
@@ -236,7 +238,8 @@ async def chapterreleasecheck(bot, announced):
                                                 for s in subs_dm:
                                                     n = s.replace("['", '').replace("']", '')
                                                     dm_subs.append(n)
-                                                    subscription_p.remove(n)
+                                                    if subscription_p.__contains__(n):
+                                                        subscription_p.remove(n)
                                             else:
                                                 dm_other.append(line_dm)
 
@@ -300,7 +303,7 @@ async def chapterreleasecheck(bot, announced):
                                 print('------------------------------------')
                                 await channel_print.send('------------------------------------')
                         elif source == "MangaKakalot":
-                            getMangaKakalotRelease = getMangaKakalotReleased(title, url_basic, url_chapter, int(r),
+                            getMangaKakalotRelease = api.getMangaKakalotReleased(title, url_basic, url_chapter, int(r),
                                                                              int(g),
                                                                              int(b), id_channel,
                                                                              id_guild)
@@ -320,7 +323,8 @@ async def chapterreleasecheck(bot, announced):
                                                 for s in subs_dm:
                                                     n = s.replace("['", '').replace("']", '')
                                                     dm_subs.append(n)
-                                                    subscription_p.remove(n)
+                                                    if subscription_p.__contains__(n):
+                                                        subscription_p.remove(n)
                                             else:
                                                 dm_other.append(line_dm)
 
@@ -399,5 +403,6 @@ async def chapterreleasecheck(bot, announced):
         await channel_print.send(f'Couldnt refresh the releases {end}')
         print(f'Error: {e}')
         await channel_print.send(f'Error: {str(e)}')
+    return announced
 
 

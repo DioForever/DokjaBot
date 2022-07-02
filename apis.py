@@ -21,7 +21,8 @@ def getReaperScans(Title, urlbasic, urlchapter, r1, g, b, rHour, rMin, rDay, id_
 
     # Now I have the number as well
 
-    embed = call.doCheck(id_guild, Title, chapter_number, rHour, rMin, rDay, urlbasic, urlchapter, url_thumbnail, r1, g, b)
+    embed = call.doCheck(id_guild, Title, chapter_number, rHour, rMin, rDay, urlbasic, urlchapter, url_thumbnail, r1, g,
+                         b)
 
     return embed, chapter_number
 
@@ -49,6 +50,29 @@ def getReaperScansReleased(Title, urlbasic, urlchapter, r1, g, b, id_channel, id
     subscription = releaseR[2]
 
     return released, embed, subscription, chapter_number
+
+
+def searchReaperScans(Title):
+    title = str(Title).lower().replace(" ", "-").replace("’", "")
+    url = f"https://reaperscans.com/series/{title}/"
+    web = req.get(url)
+    soup = bs(web.content, features="html.parser")
+    print((soup.find("div", class_="post-title")))
+    urlbasic = ""
+    urlchapter = ""
+    if soup.find("div", class_="post-title") is not None:
+        # I checked if there is a 404 not found picture, so if there isnt, it was found
+        found = True
+        urlbasic = url
+        urlchapter = f"{urlbasic}chapter-"
+        print("Found")
+    else:
+        found = False
+        print("Not Found")
+    print(soup)
+    print(url)
+
+    return found, urlbasic, urlchapter, Title
 
 
 # Manga Clash

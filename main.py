@@ -95,7 +95,7 @@ async def m(ctx, *args):
     elif args[0] == "test":
         '''embed = getMangaClashReleased("The Beginning After The End","https://mangaclash.com/manga/the-beginning-after-the-end/","https://mangaclash.com/manga/the-beginning-after-the-end/chapter-", 0,0,0)[0]
         await ctx.send(embed = embed)'''
-        api.getMangaKakalotReleased("FFF Class Trashero", '', '', 1, 1, 1)
+        api.searchReaperScans("990K ex-Life Hunters")
     elif args[0] == "help":
         embed = discord.Embed(title=f"DokjaBot - Help Menu",
                               description=f'The list of commands for DokjaBot \n'

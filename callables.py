@@ -7,6 +7,7 @@ def doReleased(id_guild, Title, chapter_num, urlbasic, urlchapter, r1, g, b, thu
     subscription = []
     subscription_other = []
     content = []
+    # There it will open the file and find the users that are meant to be informed about new chapter
     with open('server_release_ping', 'r', errors='ignore') as f:
         for line in f:
             splited = line.split("-")
@@ -33,6 +34,7 @@ def doReleased(id_guild, Title, chapter_num, urlbasic, urlchapter, r1, g, b, thu
                 if line is not None:
                     line_ = line.split('-')
                     if line[0] != ' \n':
+                        # Ineed to check if its the server we want
                         if line_[0] == id_guild:
                             content_element = f'{line_[0]}-{(line_[1])}-{(line_[2])}'
                             content.append(content_element)
@@ -109,6 +111,7 @@ def doCheck(id_guild, Title, chapter_num, rHour, rMin, rDay, urlbasic, urlchapte
     subscription = []
     subscription_other = []
     content = []
+    # There it will open the file and find the users that are meant to be informed about new chapter
     with open('server_release_ping', 'r', errors='ignore') as f:
         for line in f:
             splited = line.split("-")

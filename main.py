@@ -1,15 +1,9 @@
-import json
-from datetime import datetime
 from discord.ext import tasks
-from discord.ext import commands
 import discord
-import requests as req
-from bs4 import BeautifulSoup as bs
 from discord.ext import commands
 import os
 import sys
 import release
-import callables as call
 import apis as api
 
 bot = commands.Bot(command_prefix="!")

@@ -1,13 +1,5 @@
-import json
 from datetime import datetime
-from discord.ext import tasks
-from discord.ext import commands
 import discord
-import requests as req
-from bs4 import BeautifulSoup as bs
-from discord.ext import commands
-import os
-import sys
 import apis as api
 
 

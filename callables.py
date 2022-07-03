@@ -43,7 +43,7 @@ def doReleased(id_guild, Title, chapter_num, urlbasic, urlchapter, r1, g, b, thu
                     if line[0] != ' \n':
                         line_ = line.split('-')
                         # split the line to [0] string of [guild ids] [1] title and [2] the latest chapter
-                        gi_sl = line_[0].replace("[", "").replace("]", "").replace(" ", "").split(",")
+                        gi_sl = line_[0].replace("[", "").replace("]", "").replace(" ", "").replace("'","").split(",")
                         # I made gi_sl a list of [guild ids]
                         # I need to check if its the server we want
                         found_gi_sl = False
@@ -52,12 +52,12 @@ def doReleased(id_guild, Title, chapter_num, urlbasic, urlchapter, r1, g, b, thu
                                 if id_guild == gi:
                                     found_gi_sl = True
                         if found_gi_sl:
-                            content_element = f'{line_[0]}-{(line_[1])}-{(line_[2])}'
+                            content_element = f'{gi_sl}-{(line_[1])}-{(line_[2])}'
                             content.append(content_element)
                             last_chapters.setdefault(line_[1], f'{line_[2]}')
                         else:
                             if str(line) != ' \n':
-                                content_element = f'{line_[0]}-{(line_[1])}-{(line_[2])}'
+                                content_element = f'{gi_sl}-{(line_[1])}-{(line_[2])}'
                                 content_servers.append(content_element)
     new = False
     released = False
@@ -80,9 +80,10 @@ def doReleased(id_guild, Title, chapter_num, urlbasic, urlchapter, r1, g, b, thu
     # Its more than 1 chapter
     if released:
         with open('server_latest', 'w', errors='ignore') as wf:
-            # Check if there are some that have to be updated
+            '''# Check if there are some that have to be updated
             for line in content:
                 for line_new in content_new:
+                    # ids_guilds-title-latest_chapter
                     id_g_new = line_new.split("-")[0]
                     id_g = line.split("-")[0]
                     if id_g_new == id_g:
@@ -92,7 +93,7 @@ def doReleased(id_guild, Title, chapter_num, urlbasic, urlchapter, r1, g, b, thu
                         title_ = line.split("-")[1]
                         if title_ == title_new:
                             # Its the same manga! so delete the old one
-                            content.remove(line)
+                            content.remove(line)'''
             released = True
             # Write it down
             for c in content_new:

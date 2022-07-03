@@ -33,15 +33,23 @@ async def chapterreleasecheck(bot, announced):
             if r_cl is not None:
                 for line in r_cl:
                     line = line.split("  ")
-                    id_guild = line[0]
+                    # split it so we get guild id, channel id, ect
+                    id_guild = line[0].replace("[","").replace("]","").split(",")
+                    # now I made it a list of server (guild ids) that want this manga to be announced
                     id_channel = line[1]
+                    # now I made it a list of server channels (channel ids) that want this manga to be announced
                     title = line[3]
+                    # Title is from the website its from
                     source = line[4].replace(" ", "")
+                    # Source is the name of the source the manga is from example: ReaperScans, MangaClash, AsuraScans
                     url_basic = line[5]
+                    # urlbasic is the url to the menu of the manga
                     url_chapter = line[6]
+                    # urlchapter is the url to one of the chapters but removed the end
                     r = line[7]
                     g = line[8]
                     b = line[9]
+                    # I saved the rgb to get the color of the embed
                     # Now I need to check the source and according to that I need to send the embed
                     try:
                         if source == "ReaperScans":

@@ -15,8 +15,13 @@ announced = {}
 
 with open('server_latest', 'r') as r_an:
     for line in r_an:
-        if line != ('' or ' '):
+        print(f"{line} line")
+        if line != ('' or ' ' or "['\n']"):
             split = line.split('-')
+            print(split)
+            print(split[0])
+            print(split[1])
+            print(split[2])
             announced.setdefault(f'{split[0]}-{split[1]}', float(split[2]))
 print(announced)
 

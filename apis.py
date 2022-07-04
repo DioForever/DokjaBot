@@ -3,10 +3,13 @@ import requests as req
 from bs4 import BeautifulSoup as bs
 import callables as call
 
+headers = {
+    'User-Agent': 'Mozilla/5.0'}
+
 
 # Reaper Scans
 def getReaperScans(Title, urlbasic, urlchapter, r1, g, b, rHour, rMin, rDay, id_guild):
-    web = req.get(url=urlbasic)
+    web = req.get(url=urlbasic, headers=headers)
     chapter_number = 0
     soup = bs(web.content, features="html.parser")
     chapter = soup.find("li", class_="wp-manga-chapter")
@@ -28,7 +31,7 @@ def getReaperScans(Title, urlbasic, urlchapter, r1, g, b, rHour, rMin, rDay, id_
 
 
 def getReaperScansReleased(Title, urlbasic, urlchapter, r1, g, b, id_channel, id_guild):
-    web = req.get(url=urlbasic)
+    web = req.get(url=urlbasic, headers=headers)
     chapter_number = float(0)
     soup = bs(web.content, features="html.parser")
     chapter = soup.find("li", class_="wp-manga-chapter")
@@ -55,9 +58,9 @@ def getReaperScansReleased(Title, urlbasic, urlchapter, r1, g, b, id_channel, id
 def searchReaperScans(Title):
     title = str(Title).lower().replace(" ", "-").replace("’", "")
     url = f"https://reaperscans.com/series/{title}/"
-    web = req.get(url)
+    web = req.get(url, headers=headers)
     soup = bs(web.content, features="html.parser")
-    print((soup.find("div", class_="post-title")))
+    #print((soup.find("div", class_="post-title")))
     urlbasic = ""
     urlchapter = ""
     if soup.find("div", class_="post-title") is not None:
@@ -69,8 +72,8 @@ def searchReaperScans(Title):
     else:
         found = False
         print("Not Found")
-    print(soup)
-    print(url)
+    #print(soup)
+    #print(url)
 
     return found, urlbasic, urlchapter, Title
 

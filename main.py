@@ -15,15 +15,16 @@ announced = {}
 
 with open('server_latest', 'r') as r_an:
     for line in r_an:
-        print(f"{line} line")
+        #print(f"{line} line")
         if line != ('' or ' ' or "['\n']"):
             split = line.split('-')
             print(split)
-            print(split[0])
-            print(split[1])
-            print(split[2])
-            announced.setdefault(f'{split[0]}-{split[1]}', float(split[2]))
-print(announced)
+            #print(split)
+            #print(split[0])
+            #print(split[1])
+            #print(split[2])
+            announced.setdefault(f'{split[1]}', float(split[2]))
+print(f"announced - {announced}")
 
 
 @tasks.loop(seconds=60)
@@ -236,8 +237,11 @@ async def m(ctx, *args):
                     for line_sl in r_sl:
                         if line_sl != ' \n' or line_sl != '':
                             # Make sure theer will be no empty lines
+                            # line_ will be [0] guild ids [1] Title and [2] Chapter number
                             line_ = line_sl.split("-")
-                            if str(line_[0]) == str(id_guild):
+                            gi_list = line_[0].replace("[", "").replace("]", "").replace('"','').replace("'", "").replace(" ", "").split(",")
+                            found_sl = False
+                            if line_[0] == id_guild:
                                 # it is the cmd from the server
                                 title_ = f'{line_[1]}'
                                 if str(title) != str(title_):
@@ -278,7 +282,7 @@ async def m(ctx, *args):
                         w_sl.write(item)
 
                 # Now I need to remove it from the announced
-                del announced[f'{id_guild}-{title}']
+                del announced[f'{title}']
                 await ctx.send(f'>>> The command: {cmd} with Title: {title} has been removed!')
             else:
                 await ctx.send(f'>>> The command: {args[2]} was **not** found!')

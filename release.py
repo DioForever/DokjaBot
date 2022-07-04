@@ -11,20 +11,7 @@ async def chapterreleasecheck(bot, announced):
     start = datetime.now().strftime('%H:%M:%S')
     print(f'Refreshing releases status: Starting {start}')
     await channel_print.send(f'Refreshing releases status: Starting {start}')
-    try:
-
-        # I need to get the chapters latest from the server.latest
-        chapters_released = {}
-        with open('server_latest', 'r', errors='ignore') as r_sl:
-            if r_sl is not None:
-                for line in r_sl:
-                    if line != "":
-                        if line is not None:
-                            line = line.split("-")
-                            if line[0] != ' \n':
-                                id_channel = line[0]
-                                name_number = f'{line[1]}-{line[2]}'
-                                chapters_released.setdefault(id_channel, name_number)
+    if True:
 
         # Now I need the channel_listed and check every one of them
         print(announced)
@@ -34,9 +21,9 @@ async def chapterreleasecheck(bot, announced):
                 for line in r_cl:
                     line = line.split("  ")
                     # split it so we get guild id, channel id, ect
-                    id_guild = line[0].replace("[", "").replace("]", "").split(",")
+                    id_guild = line[0].replace("[", "").replace("]", "").replace('"', '').replace("'", "").replace(" ","").split(",")
                     # now I made it a list of server (guild ids) that want this manga to be announced
-                    id_channel = line[1]
+                    id_channel = line[1].replace("[", "").replace("]", "").replace('"', '').replace("'", "").replace(" ", "").split(",")
                     # now I made it a list of server channels (channel ids) that want this manga to be announced
                     title = line[3]
                     # Title is from the website its from
@@ -51,7 +38,7 @@ async def chapterreleasecheck(bot, announced):
                     b = line[9]
                     # I saved the rgb to get the color of the embed
                     # Now I need to check the source and according to that I need to send the embed
-                    try:
+                    if True:
                         if source == "ReaperScans":
                             getReaperRelease = api.getReaperScansReleased(title, url_basic, url_chapter, int(r), int(g),
                                                                           int(b), id_channel,
@@ -197,17 +184,19 @@ async def chapterreleasecheck(bot, announced):
                                             await user.send(embed=embed_user)
                                     # --------------
                             else:
-                                channel = bot.get_channel(int(id_channel))
-                                embed = getMangaClashRelease[1]
-                                try:
-                                    await channel.send(embed=embed)
-                                except:
-                                    embed.set_image(url='')
-                                    await channel.send(embed=embed)
-                                await channel.send(
-                                    f'>>> Ping of The {title} {getMangaClashRelease[3]}: {getMangaClashRelease[2]}',
-                                    delete_after=300)
-                                announced.setdefault(f'{title}', float(getMangaClashRelease[3]))
+                                # For each channel in the list of channels
+                                for ch in id_channel:
+                                    channel = bot.get_channel(int(ch))
+                                    embed = getMangaClashRelease[1]
+                                    try:
+                                        await channel.send(embed=embed)
+                                    except:
+                                        embed.set_image(url='')
+                                        await channel.send(embed=embed)
+                                    await channel.send(
+                                        f'>>> Ping of The {title} {getMangaClashRelease[3]}: {getMangaClashRelease[2]}',
+                                        delete_after=300)
+                                    announced.setdefault(f'{title}', float(getMangaClashRelease[3]))
                                 print('------------------------------------')
                                 await channel_print.send('------------------------------------')
                                 print(f'{title} {getMangaClashRelease[3]}: {getMangaClashRelease[2]}')
@@ -384,18 +373,18 @@ async def chapterreleasecheck(bot, announced):
                                         '@', ''))
                                 print('------------------------------------')
                                 await channel_print.send('------------------------------------')
-                    except Exception as e:
+                                '''except Exception as e:
                         print(f'Error of {title}: {e}')
-                        await channel_print.send(f'Error of {title}: {e}')
+                        await channel_print.send(f'Error of {title}: {e}')'''
         print(announced)
         await channel_print.send(announced)
         end = datetime.now().strftime('%H:%M:%S')
         print(f'Refreshing releases status: Finished {end}')
         await channel_print.send(f'Refreshing releases status: Finished {end}')
-    except Exception as e:
+        '''except Exception as e:
         end = datetime.now().strftime('%H:%M:%S')
         print(f"Couldn't refresh the releases {end}")
         await channel_print.send(f"Couldn't refresh the releases {end}")
         print(f'Error: {e}')
-        await channel_print.send(f'Error: {str(e)}')
+        await channel_print.send(f'Error: {str(e)}')'''
     return announced

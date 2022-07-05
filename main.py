@@ -5,26 +5,25 @@ import os
 import sys
 import release
 import apis as api
+import callables as call
+from colorthief import ColorThief
+from PIL import Image
 
 bot = commands.Bot(command_prefix="!")
 
 # await bot.wait_until_ready()
 print("DokjaBot activated")
 
+img = Image.open("archmage.jpg")
+
 announced = {}
 
 with open('server_latest', 'r') as r_an:
     for line in r_an:
-        #print(f"{line} line")
-        if line != ('' or ' ' or "['\n']"):
+        if line != ('' or ' '):
             split = line.split('-')
-            print(split)
-            #print(split)
-            #print(split[0])
-            #print(split[1])
-            #print(split[2])
-            announced.setdefault(f'{split[1]}', float(split[2]))
-print(f"announced - {announced}")
+            announced.setdefault(f'{split[0]}-{split[1]}', float(split[2]))
+print(announced)
 
 
 @tasks.loop(seconds=60)
@@ -101,7 +100,7 @@ async def m(ctx, *args):
     elif args[0] == "test":
         '''embed = getMangaClashReleased("The Beginning After The End","https://mangaclash.com/manga/the-beginning-after-the-end/","https://mangaclash.com/manga/the-beginning-after-the-end/chapter-", 0,0,0)[0]
         await ctx.send(embed = embed)'''
-        api.searchReaperScans("990K ex-Life Hunters")
+
     elif args[0] == "help":
         embed = discord.Embed(title=f"DokjaBot - Help Menu",
                               description=f'The list of commands for DokjaBot \n'
@@ -135,7 +134,43 @@ async def m(ctx, *args):
                               color=discord.Color.from_rgb(246, 214, 4))
         await ctx.send(embed=embed)
     elif args[0] == "library":
-        if args[1] == "add":
+        if args[1] == "search":
+            if args[2] == "add":
+                if args[3] == ("ReaperScans" or "MangaClash" or "MangaKakalot" or "LuminousScans"):
+                    searched_title = ""
+                    # for every arg from the 3th to the last one
+                    for i in range(len(args) - 4):
+                        searched_title += f"{args[i + 4]} "
+                    search = False
+                    if args[3] == "ReaperScans":
+                        search = api.searchReaperScans(searched_title)
+                    elif args[3] == "MangaClash":
+                        search = api.searchReaperScans(searched_title)
+                    elif args[3] == "MangaKakalot":
+                        search = api.searchReaperScans(searched_title)
+                    elif args[3] == "LuminousScans":
+                        search = api.searchReaperScans(searched_title)
+                    if search[0] is False:
+                        # tell it wasnt found
+                        await ctx.send(f">>> The {searched_title} has not been found in {args[3]}")
+                    else:
+                        # found
+                        search_confirm = await ctx.send(f">>> {searched_title} - Was found\n"
+                                                        f"and has been added to the library ")
+                    '''print(searched_title)
+                    print("---")
+                    print(search[0])
+                    print("---")
+                    print(search[1])
+                    print("---")
+                    print(search[2])
+                    print("---")
+                    print(search[3])
+                    print("---")'''
+                else:
+                    await ctx.send(f">>> You didn't specify the source! \n"
+                                   f"Example: !m library search add ReaperScans Title")
+        elif args[1] == "add":
             #  0     1      2               3                       4                       5                                                           6                                               7  8  9  10  11 12  = 13
             # listen add after_fall The_World_After_the_Fall  ReaperScans  https://reaperscans.com/series/the-world-after-the-fall/  https://reaperscans.com/series/the-world-after-the-fall/chapter-  0  0  0  18  0  6
             if len(args) == 13:
@@ -237,11 +272,8 @@ async def m(ctx, *args):
                     for line_sl in r_sl:
                         if line_sl != ' \n' or line_sl != '':
                             # Make sure theer will be no empty lines
-                            # line_ will be [0] guild ids [1] Title and [2] Chapter number
                             line_ = line_sl.split("-")
-                            gi_list = line_[0].replace("[", "").replace("]", "").replace('"','').replace("'", "").replace(" ", "").split(",")
-                            found_sl = False
-                            if line_[0] == id_guild:
+                            if str(line_[0]) == str(id_guild):
                                 # it is the cmd from the server
                                 title_ = f'{line_[1]}'
                                 if str(title) != str(title_):
@@ -282,7 +314,7 @@ async def m(ctx, *args):
                         w_sl.write(item)
 
                 # Now I need to remove it from the announced
-                del announced[f'{title}']
+                del announced[f'{id_guild}-{title}']
                 await ctx.send(f'>>> The command: {cmd} with Title: {title} has been removed!')
             else:
                 await ctx.send(f'>>> The command: {args[2]} was **not** found!')
@@ -473,7 +505,7 @@ async def releaseCheck():
 
 
 # <@401845652541145089>
-periodical_restart.start()
-releaseCheck.start()
-rich_presence.start()
-bot.run('')
+# periodical_restart.start()
+# releaseCheck.start()
+# rich_presence.start()
+bot.run('ODg3Mzc4NzM3MTQ5MTQ1MTI4.GC013s.jSXWPGxKw0_HYiHFhep1OtoUjzB_eHDcOGNzFs')

@@ -2,6 +2,7 @@ import discord
 import requests as req
 from bs4 import BeautifulSoup as bs
 import callables as call
+from PIL import Image
 
 headers = {
     'User-Agent': 'Mozilla/5.0'}
@@ -60,9 +61,10 @@ def searchReaperScans(Title):
     url = f"https://reaperscans.com/series/{title}/"
     web = req.get(url, headers=headers)
     soup = bs(web.content, features="html.parser")
-    #print((soup.find("div", class_="post-title")))
+    title = ""
     urlbasic = ""
     urlchapter = ""
+    # I am looking for a div with class post-title
     if soup.find("div", class_="post-title") is not None:
         # I checked if there is a 404 not found picture, so if there isnt, it was found
         found = True
@@ -72,10 +74,28 @@ def searchReaperScans(Title):
     else:
         found = False
         print("Not Found")
-    #print(soup)
-    #print(url)
+    # print(soup)
+    print(url)
+    # I will find the title now,
+    try:
+        title = str(soup.find("div", class_="post-title")).split(">")[4].split("<")[0].replace("\n", "").replace("\t",
+                                                                                                                 "")
+    except:
+        title = "Title Not Found"
+    print(title)
+    # I will need to get RGB of the thumb
+    # so first I get the thumbnail
+    try:
+        url_thumb = str(soup.find("div", class_="summary_image")).split('"')[11]
+        print(url_thumb)
+        dominant_color = call.get_dominant_color(url_thumb)
+    except:
+        dominant_color = [0,0,0]
+    r = dominant_color[0]
+    g = dominant_color[1]
+    b = dominant_color[2]
 
-    return found, urlbasic, urlchapter, Title
+    return found, urlbasic, urlchapter, title, r, g, b
 
 
 # Manga Clash

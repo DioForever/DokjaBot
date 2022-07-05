@@ -1,5 +1,8 @@
 from datetime import datetime
 import discord
+from colorthief import ColorThief
+from PIL import Image
+import requests
 
 
 def doReleased(id_guild, Title, chapter_num, urlbasic, urlchapter, r1, g, b, thumb_url):
@@ -11,18 +14,11 @@ def doReleased(id_guild, Title, chapter_num, urlbasic, urlchapter, r1, g, b, thu
     with open('server_release_ping', 'r', errors='ignore') as f:
         for line in f:
             splited = line.split("-")
-            # Now I have [0] as [guild ids] string and [1] as title and [2] as [users ids] string
-            # I need to make the string of guild ids to list
-            gi_srp = splited[0].replace("[","").replace("]","").replace(" ","").split(",")
-            found_gi_srp = False
-            for gi in gi_srp:
-                if found_gi_srp is False:
-                    if id_guild == gi:
-                        found_gi_srp = True
-            if found_gi_srp:
+            if splited[0] == id_guild:
                 if splited[1] == Title:
                     # Now I just need to get the list of player
-                    users = splited[2].replace("[", "").replace("]", "").replace("'", '').replace("\\n", '').replace("\n", '').replace(" ", '').replace("  ", '').split(",")
+                    users = splited[2].replace("[", "").replace("]", "").replace("'", '').replace("\\n", '').replace(
+                        "\n", '').replace(" ", '').replace("  ", '').split(",")
                     subscription = users
                 else:
                     subscription_other.append(line)
@@ -40,26 +36,16 @@ def doReleased(id_guild, Title, chapter_num, urlbasic, urlchapter, r1, g, b, thu
         if r_sl is not None:
             for line in r_sl:
                 if line is not None:
+                    line_ = line.split('-')
                     if line[0] != ' \n':
-                        line_ = line.split('-')
-                        # split the line to [0] string of [guild ids] [1] title and [2] the latest chapter
-                        gi_sl = line_[0].replace("[", "").replace("]", "").replace(" ", "").replace("'","").split(",")
-                        # I made gi_sl a list of [guild ids]
-                        # I need to check if its the server we want
-                        found_gi_sl = False
-                        for gi in gi_sl:
-                            if found_gi_sl is False:
-                                if id_guild == gi:
-                                    found_gi_sl = True
-                        # Ther is an if
-                        # it checks if the line we are curr at is the one we want to edit
-                        if found_gi_sl:
-                            content_element = f'{gi_sl}-{(line_[1])}-{(line_[2])}'
+                        # Ineed to check if its the server we want
+                        if line_[0] == id_guild:
+                            content_element = f'{line_[0]}-{(line_[1])}-{(line_[2])}'
                             content.append(content_element)
                             last_chapters.setdefault(line_[1], f'{line_[2]}')
                         else:
                             if str(line) != ' \n':
-                                content_element = f'{gi_sl}-{(line_[1])}-{(line_[2])}'
+                                content_element = f'{line_[0]}-{(line_[1])}-{(line_[2])}'
                                 content_servers.append(content_element)
     new = False
     released = False
@@ -82,6 +68,19 @@ def doReleased(id_guild, Title, chapter_num, urlbasic, urlchapter, r1, g, b, thu
     # Its more than 1 chapter
     if released:
         with open('server_latest', 'w', errors='ignore') as wf:
+            # Check if there are some that have to be updated
+            for line in content:
+                for line_new in content_new:
+                    id_g_new = line_new.split("-")[0]
+                    id_g = line.split("-")[0]
+                    if id_g_new == id_g:
+                        # found the same server
+                        # Now I need to check for the Title
+                        title_new = line_new.split("-")[1]
+                        title_ = line.split("-")[1]
+                        if title_ == title_new:
+                            # Its the same manga! so delete the old one
+                            content.remove(line)
             released = True
             # Write it down
             for c in content_new:
@@ -123,7 +122,8 @@ def doCheck(id_guild, Title, chapter_num, rHour, rMin, rDay, urlbasic, urlchapte
             if splited[0] == id_guild:
                 if splited[1] == Title:
                     # Now I just need to get the list of player
-                    users = splited[2].replace("[", "").replace("]", "").replace("'", '').replace("\\n", '').replace("\n", '').replace(" ", '').replace("  ", '').split(",")
+                    users = splited[2].replace("[", "").replace("]", "").replace("'", '').replace("\\n", '').replace(
+                        "\n", '').replace(" ", '').replace("  ", '').split(",")
                     subscription = users
                 else:
                     subscription_other.append(line)
@@ -141,20 +141,16 @@ def doCheck(id_guild, Title, chapter_num, rHour, rMin, rDay, urlbasic, urlchapte
         if r_sl is not None:
             for line in r_sl:
                 if line is not None:
-                    # line_ will be 0 - guild ids 1 - Title and 2 - chapter number
                     line_ = line.split('-')
                     if line[0] != ' \n':
-                        gi_sl_list = line_[0].replace("[", "").replace("]", "").replace('"','').replace("'", "").replace(" ", "").split(",")
-                        found_gi_sl = False
-                        for gi in gi_sl_list:
-                            if found_gi_sl is False:
-                                if gi == id_guild:
-                                    found_gi_sl = True
-                        if found_gi_sl:
+                        if line_[0] == id_guild:
                             content_element = f'{line_[0]}-{(line_[1])}-{(line_[2])}'
                             content.append(content_element)
                             last_chapters.setdefault(line_[1], f'{line_[2]}')
-
+                        else:
+                            if str(line) != ' \n':
+                                content_element = f'{line_[0]}-{(line_[1])}-{(line_[2])}'
+                                content_servers.append(content_element)
     new = False
     released = False
     # Check if there is new episode
@@ -214,3 +210,26 @@ def getTime(rHour, rMinute, rDay):
     message_finall = f"{days_r} days  {hour_r} hours {min_r} minutes"
 
     return message_finall, negative
+
+
+def get_dominant_color(url_image, palette_size=16):
+    im = Image.open(requests.get(url_image, stream=True).raw)
+    img = im.copy()
+
+    img.convert('RGB')
+
+    width, height = img.size
+    r_total = 0
+    g_total = 0
+    b_total = 0
+
+    for x in range(0, width):
+        for y in range(0, height):
+            r, g, b = img.getpixel((x, y))
+            r_total += r
+            g_total += g
+            b_total += b
+    #print(r_total/(width*height), g_total/(width*height), b_total/(width*height))
+
+    #               R                      G                        B
+    return round(r_total/(width*height)), round(g_total/(width*height)), round(b_total/(width*height))

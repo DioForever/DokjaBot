@@ -155,7 +155,7 @@ async def m(ctx, *args):
                         await ctx.send(f">>> The {searched_title} has not been found in {args[3]}")
                     else:
                         # found
-                        search_confirm = await ctx.send(f">>> {searched_title} - Was found\n"
+                        await ctx.send(f">>> {searched_title} - Was found\n"
                                                         f"and has been added to the library ")
                     '''print(searched_title)
                     print("---")
@@ -508,4 +508,4 @@ async def releaseCheck():
 # periodical_restart.start()
 # releaseCheck.start()
 # rich_presence.start()
-bot.run('ODg3Mzc4NzM3MTQ5MTQ1MTI4.GC013s.jSXWPGxKw0_HYiHFhep1OtoUjzB_eHDcOGNzFs')
+bot.run('')

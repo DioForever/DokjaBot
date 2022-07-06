@@ -8,8 +8,34 @@ headers = {
     'User-Agent': 'Mozilla/5.0'}
 
 
+def getReleases(source, Title, urlbasic, r1, g, b, id_guild):
+    r = []
+    if source == "ReaperScans":
+        r = getReaperScansReleased(Title, urlbasic, r1, g, b, id_guild, source)
+    elif source == "MangaClash":
+        r = getMangaClashReleased(Title, urlbasic, r1, g, b, id_guild, source)
+    elif source == "LuminousScans":
+        r = getLuminousScansReleased(Title, urlbasic, r1, g, b, id_guild, source)
+    elif source == "MangaKakalot":
+        r = getMangaKakalotReleased(Title, urlbasic, r1, g, b, id_guild, source)
+
+    released = r[0]
+    if released is True:
+        embed = r[1]
+        subscription = r[2]
+        chapter_number = r[3]
+        return released, embed, subscription, chapter_number
+    else:
+        embed = ""
+        return released, embed
+    # print(released, embed, subscription, chapter_number)
+
+
+
+
 # Reaper Scans
-def getReaperScans(Title, urlbasic, urlchapter, r1, g, b, rHour, rMin, rDay, id_guild):
+def getReaperScans(Title, urlbasic, r1, g, b, rHour, rMin, rDay, id_guild):
+    urlchapter = urlbasic + "chapter-"
     web = req.get(url=urlbasic, headers=headers)
     chapter_number = 0
     soup = bs(web.content, features="html.parser")
@@ -31,7 +57,8 @@ def getReaperScans(Title, urlbasic, urlchapter, r1, g, b, rHour, rMin, rDay, id_
     return embed, chapter_number
 
 
-def getReaperScansReleased(Title, urlbasic, urlchapter, r1, g, b, id_channel, id_guild):
+def getReaperScansReleased(Title, urlbasic, r1, g, b, guild_ids, source):
+    urlchapter = urlbasic + "chapter-"
     web = req.get(url=urlbasic, headers=headers)
     chapter_number = float(0)
     soup = bs(web.content, features="html.parser")
@@ -48,19 +75,35 @@ def getReaperScansReleased(Title, urlbasic, urlchapter, r1, g, b, id_channel, id
 
     urlchapter += f'{chapter_number_text}/'
 
-    releaseR = call.doReleased(id_guild, Title, chapter_number, urlbasic, urlchapter, r1, g, b, url_thumbnail)
-    released = releaseR[0]
-    embed = releaseR[1]
-    subscription = releaseR[2]
-
-    return released, embed, subscription, chapter_number
+    releaseR = call.doReleased(guild_ids, Title, chapter_number, urlbasic, urlchapter, r1, g, b, url_thumbnail, source)
+    if releaseR[0] is True:
+        released = releaseR[0]
+        embed = releaseR[1]
+        subscription = releaseR[2]
+        return released, embed, subscription, chapter_number
+    else:
+        released = releaseR[0]
+        embed = ""
+        return released, embed
 
 
 def searchReaperScans(Title):
     title = str(Title).lower().replace(" ", "-").replace("’", "")
+    title = title.replace("---manhwa", "-manhwa")
     url = f"https://reaperscans.com/series/{title}/"
     web = req.get(url, headers=headers)
     soup = bs(web.content, features="html.parser")
+    mnhwornvl = True
+    type = str(soup.find("div", class_="post-title")).split(">")[2].replace("</span", "")
+    if (type.lower()).__contains__("novel"):
+        mnhwornvl = False
+    found = False
+    urlbasic = ""
+    r = 0
+    g = 0
+    b = 0
+    cmd = ""
+
     title = ""
     urlbasic = ""
     urlchapter = ""
@@ -70,32 +113,44 @@ def searchReaperScans(Title):
         found = True
         urlbasic = url
         urlchapter = f"{urlbasic}chapter-"
-        print("Found")
     else:
         found = False
-        print("Not Found")
-    # print(soup)
-    print(url)
-    # I will find the title now,
-    try:
-        title = str(soup.find("div", class_="post-title")).split(">")[4].split("<")[0].replace("\n", "").replace("\t",
-                                                                                                                 "")
-    except:
-        title = "Title Not Found"
-    print(title)
-    # I will need to get RGB of the thumb
-    # so first I get the thumbnail
-    try:
-        url_thumb = str(soup.find("div", class_="summary_image")).split('"')[11]
-        print(url_thumb)
-        dominant_color = call.get_dominant_color(url_thumb)
-    except:
-        dominant_color = [0,0,0]
-    r = dominant_color[0]
-    g = dominant_color[1]
-    b = dominant_color[2]
+    # Check if its a novel or not, True = Manhwa..., False = Novel...
+    if mnhwornvl is True:
+        # I will find the title now,
+        try:
+            title = str(soup.find("div", class_="post-title")).split(">")[4].split("<")[0].replace("\n", "").replace(
+                "\t",
+                "")
+        except:
+            title = "Title Not Found"
+        # I will need to get RGB of the thumb
+        # so first I get the thumbnail
+        try:
+            url_thumb = str(soup.find("div", class_="summary_image")).split('"')[11]
+            dominant_color = call.get_dominant_color(url_thumb)
+        except:
+            dominant_color = [0, 0, 0]
+        r = dominant_color[0]
+        g = dominant_color[1]
+        b = dominant_color[2]
 
-    return found, urlbasic, urlchapter, title, r, g, b
+        try:
+            # I will get each first two letters from the name and set it as cmd
+            cmd = ""
+            for ch in (title.split()):
+                if ch[0] != "–":
+                    cmd += ch[0].lower()
+                try:
+                    if ch[1] != "–":
+                        cmd += ch[1].lower()
+                except:
+                    cmd += ""
+        except:
+            cmd = ""
+
+
+    return found, urlbasic, title, r, g, b, cmd, mnhwornvl
 
 
 # Manga Clash
@@ -149,7 +204,7 @@ def getMangaClash(Title, urlbasic, urlchapter, r1, g, b, rHour, rMin, rDay, id_g
             if r_sl is not None:
                 for line in r_sl:
                     if line is not None:
-                        line_ = line.split('-')
+                        line_ = line.split('-+-')
                         if line[0] != ' \n':
                             if line_[0] == id_guild:
                                 last_chapters.setdefault(line_[1], f'{line_[2]}')
@@ -175,7 +230,7 @@ def getMangaClash(Title, urlbasic, urlchapter, r1, g, b, rHour, rMin, rDay, id_g
     return embed, chapter_number
 
 
-def getMangaClashReleased(Title, urlbasic, urlchapter, r1, g, b, id_channel, id_guild):
+def getMangaClashReleased(Title, urlbasic, urlchapter, r1, g, b, id_guild):
     '''
         Thumbnail:  Y
         CHAPTER_NUMBER: Y
@@ -189,7 +244,7 @@ def getMangaClashReleased(Title, urlbasic, urlchapter, r1, g, b, id_channel, id_
     content = []
     with open('server_release_ping', 'r', errors='ignore') as f:
         for line in f:
-            splited = line.split("-")
+            splited = line.split("-+-")
             if splited[0] == id_guild:
                 if splited[1] == Title:
                     # Now I just need to get the list of player
@@ -232,22 +287,22 @@ def getMangaClashReleased(Title, urlbasic, urlchapter, r1, g, b, id_channel, id_
     last_chapters = {}
     content_new = []
     content_servers = []
-    content_new_ = f'{id_guild}-{Title}-{chapter_number}'
+    content_new_ = f'{id_guild}-+-{Title}-+-{chapter_number}'
     content_new.append(content_new_)
     # Now get the time of release and if it already was released today or not
     with open('server_latest', 'r', errors='ignore') as r_sl:
         if r_sl is not None:
             for line in r_sl:
                 if line is not None:
-                    line_ = line.split('-')
+                    line_ = line.split('-+-')
                     if line[0] != ' \n':
                         if line_[0] == id_guild:
-                            content_element = f'{line_[0]}-{(line_[1])}-{(line_[2])}'
+                            content_element = f'{line_[0]}-+-{(line_[1])}-+-{(line_[2])}'
                             content.append(content_element)
                             last_chapters.setdefault(line_[1], f'{line_[2]}')
                         else:
                             if str(line) != ' \n':
-                                content_element = f'{line_[0]}-{(line_[1])}-{(line_[2])}'
+                                content_element = f'{line_[0]}-+-{(line_[1])}-+-{(line_[2])}'
                                 content_servers.append(content_element)
                 # Title Source  url  url_chapter r g b rHour rMinute rDay
     new = False
@@ -266,7 +321,7 @@ def getMangaClashReleased(Title, urlbasic, urlchapter, r1, g, b, id_channel, id_
 
     if new:
         with open('server_release_ping', 'w') as write:
-            subscription.append(f'{id_guild}-{Title}-[]')
+            subscription.append(f'{id_guild}-+-{Title}-+-[]')
             for subs in subscription:
                 write.write(f'{subs} \n')
             for subs in subscription_other:
@@ -277,13 +332,13 @@ def getMangaClashReleased(Title, urlbasic, urlchapter, r1, g, b, id_channel, id_
             # Check if there are some that have to be updated
             for line in content:
                 for line_new in content_new:
-                    id_g_new = line_new.split("-")[0]
-                    id_g = line.split("-")[0]
+                    id_g_new = line_new.split("-+-")[0]
+                    id_g = line.split("-+-")[0]
                     if id_g_new == id_g:
                         # found the same server
                         # Now I need to check for the Title
-                        title_new = line_new.split("-")[1]
-                        title_ = line.split("-")[1]
+                        title_new = line_new.split("-+-")[1]
+                        title_ = line.split("-+-")[1]
                         if title_ == title_new:
                             # Its the same manga! so delete the old one
                             content.remove(line)
@@ -329,7 +384,7 @@ def getAquaMangaReleased(Title, urlbasic, urlchapter, r1, g, b):
 
 # Luminous Scans
 
-def getLuminousScansReleased(Title, urlbasic, urlchapter, r1, g, b, id_channel, id_guild):
+def getLuminousScansReleased(Title, urlbasic, urlchapter, r1, g, b, id_guild):
     # We get the soup of the website
     # urlbasic = 'https://luminousscans.com/series/1653732347-fff-class-trash-hero/'
     web = req.get(url=urlbasic)
@@ -401,7 +456,7 @@ def getMangaKakalot(Title, urlbasic, urlchapter, r1, g, b, rHour, rMin, rDay, id
     return embed, chapter_num
 
 
-def getMangaKakalotReleased(Title, urlbasic, urlchapter, r1, g, b, id_channel, id_guild):
+def getMangaKakalotReleased(Title, urlbasic, urlchapter, r1, g, b, id_guild):
     urlbasic = 'https://readmanganato.com/manga-ki987365'
     web = req.get(url=urlbasic)
     soup = bs(web.content, features="html.parser")

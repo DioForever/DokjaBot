@@ -18,12 +18,12 @@ img = Image.open("archmage.jpg")
 
 announced = {}
 
-with open('server_latest', 'r') as r_an:
+'''with open('server_latest', 'r') as r_an:
     for line in r_an:
         if line != ('' or ' '):
             split = line.split('-')
             announced.setdefault(f'{split[0]}-{split[1]}', float(split[2]))
-print(announced)
+print(announced)'''
 
 
 @tasks.loop(seconds=60)
@@ -40,9 +40,13 @@ async def m(ctx, *args):
     cmds = []
     manhwas = []
     try:
+        id_channel = ctx.message.channel.id
         id_guild = ctx.message.guild.id
+        print(id_channel)
+        print(id_guild)
     except:
         id_guild = 0
+        id_channel = 0
     with open('channel_listed', 'r', errors='ignore') as r:
         for line in r:
             if line is not None:
@@ -142,31 +146,58 @@ async def m(ctx, *args):
                     for i in range(len(args) - 4):
                         searched_title += f"{args[i + 4]} "
                     search = False
+                    searched_title = searched_title[:len(searched_title)-1].replace("–","-")
                     if args[3] == "ReaperScans":
                         search = api.searchReaperScans(searched_title)
+                        source = "ReaperScans"
                     elif args[3] == "MangaClash":
                         search = api.searchReaperScans(searched_title)
+                        source = "MangaClash"
                     elif args[3] == "MangaKakalot":
                         search = api.searchReaperScans(searched_title)
+                        source = "MangaKakalot"
                     elif args[3] == "LuminousScans":
                         search = api.searchReaperScans(searched_title)
-                    if search[0] is False:
+                        source = "LuminousScans"
+                    if search[0] is True and search[7] is False:
+                        # tell it was found but was a novel
+                        embed = discord.Embed(title=f"Search of {searched_title}",
+                                              description=f"- Found \n "
+                                                          f"- A Novel \n"
+                                                          f"= Not added \n"
+                                                          f"+ Try adding: -Manhwa",
+                                              color=discord.Color.from_rgb(255, 255, 0))
+                        await ctx.send(embed=embed, delete_after=60)
+                    elif search[0] is False:
                         # tell it wasnt found
-                        await ctx.send(f">>> The {searched_title} has not been found in {args[3]}")
+                        embed = discord.Embed(title=f"Search of {searched_title}",
+                                              description=f"- Not Found \n ",
+                                              color=discord.Color.from_rgb(255, 0, 0))
+                        await ctx.send(embed=embed, delete_after=60)
                     else:
                         # found
-                        await ctx.send(f">>> {searched_title} - Was found\n"
-                                                        f"and has been added to the library ")
-                    '''print(searched_title)
-                    print("---")
-                    print(search[0])
-                    print("---")
-                    print(search[1])
-                    print("---")
-                    print(search[2])
-                    print("---")
-                    print(search[3])
-                    print("---")'''
+                        url = search[1]
+                        title = search[2]
+                        r = search[3]
+                        g = search[4]
+                        b = search[5]
+                        cmd = search[6]
+                        # if it returns as False it wasnt added already, but if its true, its already in libraryy
+                        am = call.add_manga(str(id_guild), str(id_channel), cmd, searched_title, source, url, r, g, b, 0, 0, 0)
+                        if am is False:
+                            embed = discord.Embed(title=f"Search of {searched_title}",
+                                                  description=f"- Found \n "
+                                                              f"- Added to library \n "
+                                                              f"- cmd: {cmd}",
+                                                  color=discord.Color.from_rgb(0, 255, 0))
+                            await ctx.send(embed=embed, delete_after=60)
+                        else:
+                            embed = discord.Embed(title=f"Search of {searched_title}",
+                                                  description=f"- Found \n "
+                                                              f"- Already in library \n "
+                                                              f"- cmd: {cmd}",
+                                                  color=discord.Color.from_rgb(255, 255, 0))
+                            await ctx.send(embed=embed, delete_after=60)
                 else:
                     await ctx.send(f">>> You didn't specify the source! \n"
                                    f"Example: !m library search add ReaperScans Title")
@@ -272,7 +303,7 @@ async def m(ctx, *args):
                     for line_sl in r_sl:
                         if line_sl != ' \n' or line_sl != '':
                             # Make sure theer will be no empty lines
-                            line_ = line_sl.split("-")
+                            line_ = line_sl.split("-+-")
                             if str(line_[0]) == str(id_guild):
                                 # it is the cmd from the server
                                 title_ = f'{line_[1]}'
@@ -284,7 +315,7 @@ async def m(ctx, *args):
                 with open('server_release_ping', 'r', errors='ignore') as r_srp:
                     for line_srp in r_srp:
                         if line_srp != ' \n' and line_srp != '':
-                            line_split = line_srp.split('-')
+                            line_split = line_srp.split('-+-')
                             if id_guild == int(line_split[0]):
                                 # Its the same server
                                 title_ = f'{line_split[1]}'
@@ -314,7 +345,7 @@ async def m(ctx, *args):
                         w_sl.write(item)
 
                 # Now I need to remove it from the announced
-                del announced[f'{id_guild}-{title}']
+                del announced[f'{id_guild}-+-{title}']
                 await ctx.send(f'>>> The command: {cmd} with Title: {title} has been removed!')
             else:
                 await ctx.send(f'>>> The command: {args[2]} was **not** found!')
@@ -326,7 +357,7 @@ async def m(ctx, *args):
             already_in = False
             with open('server_release_ping', 'r') as read:
                 for line in read:
-                    line_s = line.split('-')
+                    line_s = line.split('-+-')
                     if line_s[0] == str(id_guild):
                         # It is one of the servers pings
 
@@ -344,14 +375,7 @@ async def m(ctx, *args):
                             found = True
                             # Its the same title so now just get the users already in lsit and add the new one
                             # , but check if he isnt there already
-                            users = line_s[2].replace("[", "")
-                            users = users.replace("]", "")
-                            users = users.replace("'", '')
-                            users = users.replace("\\n", '')
-                            users = users.replace("\n", '')
-                            users = users.replace(" ", '')
-                            users = users.replace("  ", '')
-                            users = users.split(",")
+                            users = line_s[2].replace("[", "").replace("]", "").replace("'", '').replace("\\n", '').replace("\n", '').replace(" ", '').replace("  ", '').split(",")
                             if users.__contains__(ctx.author.mention):
                                 await ctx.send('>>> You have already subscribed to updates from this manhwa/manga')
                                 already_in = True
@@ -360,7 +384,7 @@ async def m(ctx, *args):
                                 for item in users:
                                     if item == '' or item == '\n' or item == ' ':
                                         users.remove(item)
-                                subscriptions.append(f'{id_guild}-{title}-{users}')
+                                subscriptions.append(f'{id_guild}-+-{title}-+-{users}')
                         else:
                             subscriptions_other.append(line)
                     else:
@@ -395,7 +419,7 @@ async def m(ctx, *args):
             with open('server_release_ping', 'r') as read:
                 for line in read:
                     if line != ('' or ' '):
-                        splited = line.split('-')
+                        splited = line.split('-+-')
                         if splited[0] == str(id_guild):
                             # Its the correct server
                             if title == splited[1]:
@@ -416,7 +440,7 @@ async def m(ctx, *args):
                                     # It does contain user
                                     contain = True
                                     users.remove(str(ctx.author.mention))
-                                    subscription_searched.append(f'{id_guild}-{title}-{users}')
+                                    subscription_searched.append(f'{id_guild}-+-{title}-+-{users}')
                             else:
                                 subscription_other.append(line)
                         else:
@@ -438,7 +462,7 @@ async def m(ctx, *args):
         dm_other = []
         with open('dm_ping', 'r') as r_dm:
             for line in r_dm:
-                split_dm = line.split('-')
+                split_dm = line.split('-+-')
                 if split_dm[0] == str(id_guild):
                     dm_list = split_dm[1].replace("['", '').replace("']", '').replace("'", '').replace(' ', '').split(
                         ',')
@@ -457,7 +481,7 @@ async def m(ctx, *args):
 
         # Now I will save it to the file
         with open('dm_ping', 'w') as w_dm:
-            w_dm.write(f'{id_guild}-{dm_ping}')
+            w_dm.write(f'{id_guild}-+-{dm_ping}')
             for p in dm_other:
                 w_dm.write(p)
     else:
@@ -501,11 +525,11 @@ async def periodical_restart():
 @tasks.loop(seconds=60)
 async def releaseCheck():
     release_check = await release.chapterreleasecheck(bot, announced)
-    setAnnounced(release_check)
+    #setAnnounced(release_check)
 
 
 # <@401845652541145089>
 # periodical_restart.start()
-# releaseCheck.start()
+releaseCheck.start()
 # rich_presence.start()
 bot.run('')

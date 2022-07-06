@@ -5,8 +5,95 @@ from PIL import Image
 import requests
 
 
-def doReleased(id_guild, Title, chapter_num, urlbasic, urlchapter, r1, g, b, thumb_url):
-    # get subscriptions
+def rewrite(file_name, manga_new, manga_other):
+    with open(file_name, "w") as w:
+        w.write(manga_new)
+        for manga in manga_other:
+            w.write(manga)
+
+
+def doReleased(guild_ids, Title, chapter_num, urlbasic, urlchapter, r1, g, b, thumb_url, source):
+    # I need to get subs
+    # print(f"doReleased {guild_ids, Title, chapter_num, urlbasic, urlchapter, r1, g, b, thumb_url, source}")
+    subs = []
+    embed = ""
+    # I will have guild_id-title as a key with list of subscribed users as a value
+    with open("server_release_ping", "r") as read_srp:
+        for line_srp in read_srp:
+            split = line_srp.split("-+-")
+            guild_id = split[0]
+            title = split[1]
+            # check if this is part of the subs we need
+            # and if the title is the same
+            if guild_ids.__contains__(guild_id) and Title == title:
+                sub_users = split[2].replace("[", "").replace("]", "").replace("'", '').replace("\\n", '').replace("\n",
+                                                                                                                   '').replace(
+                    " ", '').replace("  ", '').split(",")
+                subs = sub_users
+    #print(subs)
+    # ---------------
+
+    # I need to get the latest chapters
+    manga_latest = 0.0
+    other_latest = []
+    with open("server_latest", "r") as read_sl:
+        for line_sl in read_sl:
+            split_sl = line_sl.split("-+-")
+            Source = split_sl[0]
+            title = split_sl[1]
+            number = split_sl[2]
+            #   source == source
+            if Source == source:
+                #   title == Title
+                if title == Title:
+                    manga_latest = float(split_sl[2])
+                else:
+                    other_latest.append(f"{Source}-+-{title}-+-{number}")
+            else:
+                other_latest.append(line_sl)
+    # ---------------
+
+
+
+
+    if manga_latest == 0.0:
+        # its new one
+        # its a newer chapter guys so rewrite server_latest file
+        rewrite("server_latest", f"{source}-+-{Title}-+-{chapter_num} \n", other_latest)
+        released = False
+    else:
+        # it already exist
+        # need to check if its newer chapter
+        released = False
+        if float(chapter_num) > manga_latest:
+            print("-------------------------------")
+            print(f"Released {Title} - {chapter_num}")
+            print("-------------------------------")
+            # its a newer chapter guys so rewrite server_latest file
+            rewrite("server_latest", f"{source}-+-{Title}-+-{chapter_num} \n", other_latest)
+            # print(f"doReleased {guild_ids, Title, chapter_num, urlbasic, urlchapter, r1, g, b, thumb_url, source} - {source}-{Title}-{chapter_num} - {other_latest}")
+            released = True
+            message_release = f'The Chapter {chapter_num} was released'
+            embed = discord.Embed(title=f"{Title}", url=f"{urlbasic}",
+                                  description=f"{message_release} \n Link to the chapter: {urlchapter}",
+                                  color=discord.Color.from_rgb(r1, g, b))
+            #embed.set_image(url=f"{thumb_url}")
+
+    return released, embed, subs
+
+
+
+
+
+
+
+
+
+
+
+
+
+    '''# get subscriptions
     subscription = []
     subscription_other = []
     content = []
@@ -107,7 +194,7 @@ def doReleased(id_guild, Title, chapter_num, urlbasic, urlchapter, r1, g, b, thu
                               description=f"{message_release} \n Link to the chapter: {urlchapter}",
                               color=discord.Color.from_rgb(r1, g, b))
         embed.set_image(url=f"{thumb_url}")
-    return released, embed, subscription
+    return released, embed, subscription'''
 
 
 def doCheck(id_guild, Title, chapter_num, rHour, rMin, rDay, urlbasic, urlchapter, thumb_url, r1, g, b):
@@ -118,7 +205,7 @@ def doCheck(id_guild, Title, chapter_num, rHour, rMin, rDay, urlbasic, urlchapte
     # There it will open the file and find the users that are meant to be informed about new chapter
     with open('server_release_ping', 'r', errors='ignore') as f:
         for line in f:
-            splited = line.split("-")
+            splited = line.split("-+-")
             if splited[0] == id_guild:
                 if splited[1] == Title:
                     # Now I just need to get the list of player
@@ -141,15 +228,15 @@ def doCheck(id_guild, Title, chapter_num, rHour, rMin, rDay, urlbasic, urlchapte
         if r_sl is not None:
             for line in r_sl:
                 if line is not None:
-                    line_ = line.split('-')
+                    line_ = line.split('-+-')
                     if line[0] != ' \n':
                         if line_[0] == id_guild:
-                            content_element = f'{line_[0]}-{(line_[1])}-{(line_[2])}'
+                            content_element = f'{line_[0]}-+-{(line_[1])}-+-{(line_[2])}'
                             content.append(content_element)
                             last_chapters.setdefault(line_[1], f'{line_[2]}')
                         else:
                             if str(line) != ' \n':
-                                content_element = f'{line_[0]}-{(line_[1])}-{(line_[2])}'
+                                content_element = f'{line_[0]}-+-{(line_[1])}-+-{(line_[2])}'
                                 content_servers.append(content_element)
     new = False
     released = False
@@ -229,7 +316,65 @@ def get_dominant_color(url_image, palette_size=16):
             r_total += r
             g_total += g
             b_total += b
-    #print(r_total/(width*height), g_total/(width*height), b_total/(width*height))
+    # print(r_total/(width*height), g_total/(width*height), b_total/(width*height))
 
     #               R                      G                        B
-    return round(r_total/(width*height)), round(g_total/(width*height)), round(b_total/(width*height))
+    return round(r_total / (width * height)), round(g_total / (width * height)), round(b_total / (width * height))
+
+
+def add_manga(id_guild, id_channel, cmd, title, source, url, r, g, b, rHour, rMin, rDay):
+    # I will first need to read the channel_listed
+    exist_manga = ""
+    other_manga = []
+    contained = False
+    with open("channel_listed", "r") as read_cl:
+        for line_cl in read_cl:
+            if line_cl != "\n":
+                # in channel_listed I use two spaces as a separator, cuz I use spaces in titles
+                split_cl = line_cl.split("  ")
+                if url == split_cl[5] and title == split_cl[3]:
+                    print("exists")
+                    # it has the same url and title so it already exist, I just need to add it to the list of guild and channel ids if its not alerady there
+                    guild_ids = split_cl[0].replace("'", "").replace("[", "").replace("]", "").split(",")
+                    channel_ids = split_cl[1].replace("'", "").replace("[", "").replace("]", "").split(",")
+                    print(guild_ids, channel_ids)
+                    if guild_ids.__contains__(id_guild):
+                        # It already is added so just set contained True and return it and dont do anythin else
+                        contained = True
+                else:
+                    other_manga.append(line_cl)
+
+    if contained is False:
+        if exist_manga == "":
+            # Manga was not found, so it is a new one
+            guild_id_list = []
+            guild_id_list.append(id_guild)
+            channel_id_list = []
+            channel_id_list.append(id_channel)
+            exist_manga = f"{guild_id_list}  {channel_id_list}  {cmd}  {title}  {source}  {url}  {r}  {g}  {b}  {rHour}  {rMin}  {rDay}  \n"
+        else:
+            # Manga was found, so I will just edit it
+            print("exists")
+
+        # Its written down in channel listed
+        with open("channel_listed", "w") as write_cl:
+            write_cl.write(exist_manga)
+            for manga_register in other_manga:
+                write_cl.write(manga_register)
+
+        # server_release_ping
+        if True:
+            # This will be done either way, if it already exists or its new
+            # I will add it to server_release ping
+            srp_pings = []
+            with open("server_release_ping", "r") as read_srp:
+                for line_srp in read_srp:
+                    srp_pings.append(line_srp)
+            # I have the list of the sr pings so I will write them back with the new one added
+            empty = []
+            new_ping = f"{id_guild}-+-{title}-+-{empty} \n"
+            with open("server_release_ping", "w") as write_srp:
+                write_srp.write(new_ping)
+                for ping in srp_pings:
+                    write_srp.write(ping)
+    return contained

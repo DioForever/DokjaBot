@@ -24,13 +24,15 @@ def getReleases(source, Title, urlbasic, r1, g, b, id_guild):
         embed = r[1]
         subscription = r[2]
         chapter_number = r[3]
-        return released, embed, subscription, chapter_number
+        urlbasic = r[4]
+        urlchapter = r[5]
+        chapter_num = r[6]
+        message_release = r[7]
+        return released, embed, subscription, chapter_number, urlbasic, urlchapter, chapter_num, message_release
     else:
         embed = ""
         return released, embed
     # print(released, embed, subscription, chapter_number)
-
-
 
 
 # Reaper Scans
@@ -70,8 +72,10 @@ def getReaperScansReleased(Title, urlbasic, r1, g, b, guild_ids, source):
     chapter_text = str(chapter.find("p", class_="chapter-manhwa-title")).split()
     chapter_number = float(str(chapter_text[2]).split('<')[0])
     chapter_number_text = chapter_number
-    if str(chapter_number).split('.')[0] != '0':
+    if str(chapter_number).split('.')[1] != '0':
         chapter_number_text = str(chapter_number).split('.')[0] + '-' + str(chapter_number).split('.')[1]
+    else:
+        chapter_number_text = str(int(chapter_number_text))
 
     urlchapter += f'{chapter_number_text}/'
 
@@ -80,7 +84,11 @@ def getReaperScansReleased(Title, urlbasic, r1, g, b, guild_ids, source):
         released = releaseR[0]
         embed = releaseR[1]
         subscription = releaseR[2]
-        return released, embed, subscription, chapter_number
+        urlbasic = releaseR[3]
+        urlchapter = releaseR[4]
+        chapter_num = releaseR[5]
+        message_release = releaseR[6]
+        return released, embed, subscription, chapter_number, urlbasic, urlchapter, chapter_num, message_release
     else:
         released = releaseR[0]
         embed = ""
@@ -94,7 +102,8 @@ def searchReaperScans(Title):
     web = req.get(url, headers=headers)
     soup = bs(web.content, features="html.parser")
     mnhwornvl = True
-    type = str(soup.find("div", class_="post-title")).split(">")[2].replace("</span", "")
+    type = str(soup.find("div", class_="post-title")).split(">")
+    type = type[2].replace("</span", "")
     if (type.lower()).__contains__("novel"):
         mnhwornvl = False
     found = False
@@ -148,7 +157,6 @@ def searchReaperScans(Title):
                     cmd += ""
         except:
             cmd = ""
-
 
     return found, urlbasic, title, r, g, b, cmd, mnhwornvl
 

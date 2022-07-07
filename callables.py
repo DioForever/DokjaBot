@@ -12,6 +12,22 @@ def rewrite(file_name, manga_new, manga_other):
             w.write(manga)
 
 
+def sortAnnounce(guild_id, subscriptions):
+    dms = []
+    pings = list(subscriptions).copy()
+    list_users = []
+    with open("dm_ping", "r") as read_dms:
+        for line in read_dms:
+            if line.split("-")[0] == guild_id:
+                # its the servers dms we want
+                list_users = line.split("-")[1].replace("'", "").replace("[", "").replace("]", "").split(",")
+    for user in list_users:
+        if pings.__contains__(user):
+            pings.remove(user)
+            dms.append(user)
+    return dms, pings
+
+
 def doReleased(guild_ids, Title, chapter_num, urlbasic, urlchapter, r1, g, b, thumb_url, source):
     # I need to get subs
     # print(f"doReleased {guild_ids, Title, chapter_num, urlbasic, urlchapter, r1, g, b, thumb_url, source}")
@@ -30,12 +46,12 @@ def doReleased(guild_ids, Title, chapter_num, urlbasic, urlchapter, r1, g, b, th
                                                                                                                    '').replace(
                     " ", '').replace("  ", '').split(",")
                 subs = sub_users
-    #print(subs)
     # ---------------
 
     # I need to get the latest chapters
     manga_latest = 0.0
     other_latest = []
+    message_release = ""
     with open("server_latest", "r") as read_sl:
         for line_sl in read_sl:
             split_sl = line_sl.split("-+-")
@@ -52,9 +68,6 @@ def doReleased(guild_ids, Title, chapter_num, urlbasic, urlchapter, r1, g, b, th
             else:
                 other_latest.append(line_sl)
     # ---------------
-
-
-
 
     if manga_latest == 0.0:
         # its new one
@@ -77,21 +90,9 @@ def doReleased(guild_ids, Title, chapter_num, urlbasic, urlchapter, r1, g, b, th
             embed = discord.Embed(title=f"{Title}", url=f"{urlbasic}",
                                   description=f"{message_release} \n Link to the chapter: {urlchapter}",
                                   color=discord.Color.from_rgb(r1, g, b))
-            #embed.set_image(url=f"{thumb_url}")
+            # embed.set_image(url=f"{thumb_url}")
 
-    return released, embed, subs
-
-
-
-
-
-
-
-
-
-
-
-
+    return released, embed, subs, urlbasic, urlchapter, chapter_num, message_release
 
     '''# get subscriptions
     subscription = []

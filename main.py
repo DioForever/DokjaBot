@@ -42,8 +42,6 @@ async def m(ctx, *args):
     try:
         id_channel = ctx.message.channel.id
         id_guild = ctx.message.guild.id
-        print(id_channel)
-        print(id_guild)
     except:
         id_guild = 0
         id_channel = 0
@@ -93,10 +91,14 @@ async def m(ctx, *args):
                     await ctx.send("We don't support this source")
     elif args[0] == "list":
         release_list = "\n"
-        for line in manhwas:
-            line = line.split("  ")
-            if str(line[0]) == str(id_guild):
-                release_list += f"{line[3]}: !m {line[2]}\n"
+        with open("channel_listed","r") as read_cl:
+            for line_cl in read_cl:
+                line_cl = line_cl.split("  ")
+                guild_ids = line_cl[0].replace("[","").replace("]","").replace("'","").split(",")
+                print(guild_ids)
+                print(id_guild)
+                if guild_ids.__contains__(str(id_guild)):
+                    release_list += f"{line_cl[3]}: !m {line_cl[2]}\n"
         embed = discord.Embed(title=f"List of Manhwas/Mangas",
                               description=f"The list of commands for \n " + "Manhwas and Mangas in system" + f"\n {release_list}",
                               color=discord.Color.from_rgb(246, 214, 4))
@@ -202,75 +204,68 @@ async def m(ctx, *args):
                     await ctx.send(f">>> You didn't specify the source! \n"
                                    f"Example: !m library search add ReaperScans Title")
         elif args[1] == "add":
-            #  0     1      2               3                       4                       5                                                           6                                               7  8  9  10  11 12  = 13
-            # listen add after_fall The_World_After_the_Fall  ReaperScans  https://reaperscans.com/series/the-world-after-the-fall/  https://reaperscans.com/series/the-world-after-the-fall/chapter-  0  0  0  18  0  6
-            if len(args) == 13:
-                id_guild = ctx.message.guild.id
-                id_channel = ctx.message.channel.id
-                # await ctx.send(str(id_channel)+" "+str(id_guild))
-                basic_url_used = []
-                chapter_url_used = []
-                args_ = []
-                cmd = str(args[2])
-                args_.append(args[2])
-                title = str(args[3]).split("_")
-                title_ = ''
-                banned_character = False
-                for word in title:
-                    title_ += f'{word} '
-                    if word.__contains__('-' or '´'):
-                        banned_character = True
-
-                args_.append(title_)
-                args_.append(args[4])
-                args_.append(args[5])
-                args_.append(args[6])
-                args_.append(args[7])
-                args_.append(args[8])
-                args_.append(args[9])
-                args_.append(args[10])
-                args_.append(args[11])
-                args_.append(args[12])
-                channel_listed = []
-                cmds_ = []
-                with open('channel_listed', 'r', errors='ignore') as r:
-                    for line in r:
-                        if line is not None:
-                            channel_listed.append(line.replace('\n', ''))
-                            url_basic_line = line.split("  ")
-
-                            cmd_ = line.split(" ")
-                            cmd_ = cmd_[4]
-                            basic_url_used.append(url_basic_line[6])
-                            chapter_url_used.append(url_basic_line[7])
-                            cmds_.append(cmd_)
-                if not (cmds_.__contains__(cmd)):
-                    if args_[2] == ('ReaperScans' or 'MangaClash' or 'LuminousScans' or 'MangaKakalot'):
-                        if not (basic_url_used.__contains__(args_[3])):
-                            if banned_character is False:
-                                if not (chapter_url_used.__contains__(args_[4])):
-                                    # Now we need to check just to write it to the file
-                                    new_listed = f'{id_guild}  {id_channel}  {args_[0]}  {args_[1]}  {args_[2]}  {args_[3]}  {args_[4]}  {args_[5]}  {args_[6]}  {args_[7]}  {args_[8]}  {args_[9]}  {args_[10]}'
-                                    channel_listed.append(new_listed)
-                                    with open('channel_listed', 'w', errors='ignore') as wr:
-                                        for new in channel_listed:
-                                            wr.write(new + " \n")
-                                    await  ctx.send(
-                                        f'The command {cmd} with title {title_} has been added to server library!')
-                                else:
-                                    await  ctx.send(
-                                        "The chapter link you wanted to use is already in use, please don't duplicate")
-                            else:
-                                await  ctx.send('Dont use the **- character** in the name')
-                        else:
-                            await  ctx.send(
-                                "The chapter link you wanted to use is already in use, please don't duplicate")
-                    else:
-                        await  ctx.send(f"The source {args_[2]} is not available")
+            if args[2] == ("ReaperScans" or "MangaClash" or "MangaKakalot" or "LuminousScans"):
+                searched_title = ""
+                # for every arg from the 3th to the last one
+                for i in range(len(args) - 3):
+                    searched_title += f"{args[i + 3]} "
+                search = False
+                searched_title = searched_title[:len(searched_title) - 1].replace("–", "-")
+                if args[2] == "ReaperScans":
+                    search = api.searchReaperScans(searched_title)
+                    source = "ReaperScans"
+                elif args[2] == "MangaClash":
+                    search = api.searchReaperScans(searched_title)
+                    source = "MangaClash"
+                elif args[2] == "MangaKakalot":
+                    search = api.searchReaperScans(searched_title)
+                    source = "MangaKakalot"
+                elif args[2] == "LuminousScans":
+                    search = api.searchReaperScans(searched_title)
+                    source = "LuminousScans"
+                if search[0] is True and search[7] is False:
+                    # tell it was found but was a novel
+                    embed = discord.Embed(title=f"Search of {searched_title}",
+                                          description=f"- Found \n "
+                                                      f"- A Novel \n"
+                                                      f"= Not added \n"
+                                                      f"+ Try adding: -Manhwa",
+                                          color=discord.Color.from_rgb(255, 255, 0))
+                    await ctx.send(embed=embed, delete_after=60)
+                elif search[0] is False:
+                    # tell it wasnt found
+                    embed = discord.Embed(title=f"Search of {searched_title}",
+                                          description=f"- Not Found \n ",
+                                          color=discord.Color.from_rgb(255, 0, 0))
+                    await ctx.send(embed=embed, delete_after=60)
                 else:
-                    await  ctx.send('The command you wanted to use is already in use')
+                    # found
+                    url = search[1]
+                    title = search[2]
+                    r = search[3]
+                    g = search[4]
+                    b = search[5]
+                    cmd = search[6]
+                    # if it returns as False it wasnt added already, but if its true, its already in libraryy
+                    am = call.add_manga(str(id_guild), str(id_channel), cmd, searched_title, source, url, r, g, b, 0, 0,
+                                        0)
+                    if am is False:
+                        embed = discord.Embed(title=f"Search of {searched_title}",
+                                              description=f"- Found \n "
+                                                          f"- Added to library \n "
+                                                          f"- cmd: {cmd}",
+                                              color=discord.Color.from_rgb(0, 255, 0))
+                        await ctx.send(embed=embed, delete_after=60)
+                    else:
+                        embed = discord.Embed(title=f"Search of {searched_title}",
+                                              description=f"- Found \n "
+                                                          f"- Already in library \n "
+                                                          f"- cmd: {cmd}",
+                                              color=discord.Color.from_rgb(255, 255, 0))
+                        await ctx.send(embed=embed, delete_after=60)
             else:
-                await ctx.send('You missed something')
+                await ctx.send(f">>> You didn't specify the source! \n"
+                               f"Example: !m library search add ReaperScans Title")
         elif args[1] == "remove":
             #      0       1           2
             # !m library remove archmage_streamer

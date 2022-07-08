@@ -2,7 +2,6 @@ import discord
 import requests as req
 from bs4 import BeautifulSoup as bs
 import callables as call
-from PIL import Image
 
 headers = {
     'User-Agent': 'Mozilla/5.0'}

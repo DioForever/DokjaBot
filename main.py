@@ -55,10 +55,13 @@ async def m(ctx, *args):
         line = line.split("  ")
         cmds.append(line[2])
 
-    if cmds.__contains__(args[0]):
+    '''if cmds.__contains__(args[0]):
         # Now look into chapters and find it
-        # Now look into chapters and find it
-        for manhwa in manhwas:
+        with open("channel_listed", "r") as read_cl:
+            for line_cl in read_cl:
+                line_cl_split = line_cl.split("  ")'''
+
+    '''for manhwa in manhwas:
             manhwa = manhwa.split("  ")
             if manhwa[2] == args[0]:
                 # Now we found the manhwa we wanted
@@ -88,13 +91,13 @@ async def m(ctx, *args):
                                             int(manhwa[10]), int(manhwa[11]), int(manhwa[12]), str(id_guild))[0]
                     await ctx.send(embed=embed)
                 else:
-                    await ctx.send("We don't support this source")
-    elif args[0] == "list":
+                    await ctx.send("We don't support this source")'''
+    if args[0] == "list":
         release_list = "\n"
         with open("channel_listed","r") as read_cl:
             for line_cl in read_cl:
                 line_cl = line_cl.split("  ")
-                guild_ids = line_cl[0].replace("[","").replace("]","").replace("'","").split(",")
+                guild_ids = line_cl[0].replace("[","").replace(" ","").replace("]","").replace("'","").split(",")
                 print(guild_ids)
                 print(id_guild)
                 if guild_ids.__contains__(str(id_guild)):
@@ -110,22 +113,14 @@ async def m(ctx, *args):
     elif args[0] == "help":
         embed = discord.Embed(title=f"DokjaBot - Help Menu",
                               description=f'The list of commands for DokjaBot \n'
-                                          f'!m list - writes down every manga/manhwa in the library \n'
-                                          f'!m library add <command> <Title> <Source> <menu_url> <chapter_url> <r> <g> <b> <Hours> <Minutes> <Weekay> \n'
-                                          f'  -  command has to be one word \n'
-                                          f'  -  Title can have spaces, but you have to write _ between the words, \n'
-                                          f'     the character _ will be deleted later on by itself \n'
+                                          f'!m list - writes down every manga/manhwa in the server library \n'
+                                          f'!m library add <Source> <Title> \n'
                                           f'  - source, you can see all the sources possible by writing !m sources \n'
-                                          f'  - menu_url is url of a website where you can see all or latest chapters \n'
-                                          f'  - chapter_url is url of a website wheer you read the manga/manhwa without the \n'
-                                          f'    number and what comes after that \n'
-                                          f'  - rgb write rgb, but put spaces between \n'
-                                          f'  - time, remember that its in UTC, Coordinated Universal Time, put hours then minutes and \n'
-                                          f'    weekday, but write 0-6 not the weekday in words \n'
-                                          f'example: !m library add after_fall  The_World_After_the_Fall  ReaperScans  https://reaperscans.com/series/the-world-after-the-fall/  https://reaperscans.com/series/the-world-after-the-fall/chapter-  0 0 0 18 0 6\n'
+                                          f'  -  Title, has to be exactly the same as the name from'
+                                          f'     the source u specified\n'
+                                          f'example: !m library add ReaperScans The World After the Fall\n'
                                           f'!m library sub <title> and !m library unsub <title> \n'
-                                          f'  - you can write the title with the spaces '
-                                          f'  - if you dont know the title, find it in !m list \n',
+                                          f'  - if you dont know the title, find it in !m list',
                               color=discord.Color.from_rgb(246, 214, 4))
         await ctx.send(embed=embed)
     elif args[0] == "sources":
@@ -140,70 +135,7 @@ async def m(ctx, *args):
                               color=discord.Color.from_rgb(246, 214, 4))
         await ctx.send(embed=embed)
     elif args[0] == "library":
-        if args[1] == "search":
-            if args[2] == "add":
-                if args[3] == ("ReaperScans" or "MangaClash" or "MangaKakalot" or "LuminousScans"):
-                    searched_title = ""
-                    # for every arg from the 3th to the last one
-                    for i in range(len(args) - 4):
-                        searched_title += f"{args[i + 4]} "
-                    search = False
-                    searched_title = searched_title[:len(searched_title)-1].replace("–","-")
-                    if args[3] == "ReaperScans":
-                        search = api.searchReaperScans(searched_title)
-                        source = "ReaperScans"
-                    elif args[3] == "MangaClash":
-                        search = api.searchReaperScans(searched_title)
-                        source = "MangaClash"
-                    elif args[3] == "MangaKakalot":
-                        search = api.searchReaperScans(searched_title)
-                        source = "MangaKakalot"
-                    elif args[3] == "LuminousScans":
-                        search = api.searchReaperScans(searched_title)
-                        source = "LuminousScans"
-                    if search[0] is True and search[7] is False:
-                        # tell it was found but was a novel
-                        embed = discord.Embed(title=f"Search of {searched_title}",
-                                              description=f"- Found \n "
-                                                          f"- A Novel \n"
-                                                          f"= Not added \n"
-                                                          f"+ Try adding: -Manhwa",
-                                              color=discord.Color.from_rgb(255, 255, 0))
-                        await ctx.send(embed=embed, delete_after=60)
-                    elif search[0] is False:
-                        # tell it wasnt found
-                        embed = discord.Embed(title=f"Search of {searched_title}",
-                                              description=f"- Not Found \n ",
-                                              color=discord.Color.from_rgb(255, 0, 0))
-                        await ctx.send(embed=embed, delete_after=60)
-                    else:
-                        # found
-                        url = search[1]
-                        title = search[2]
-                        r = search[3]
-                        g = search[4]
-                        b = search[5]
-                        cmd = search[6]
-                        # if it returns as False it wasnt added already, but if its true, its already in libraryy
-                        am = call.add_manga(str(id_guild), str(id_channel), cmd, searched_title, source, url, r, g, b, 0, 0, 0)
-                        if am is False:
-                            embed = discord.Embed(title=f"Search of {searched_title}",
-                                                  description=f"- Found \n "
-                                                              f"- Added to library \n "
-                                                              f"- cmd: {cmd}",
-                                                  color=discord.Color.from_rgb(0, 255, 0))
-                            await ctx.send(embed=embed, delete_after=60)
-                        else:
-                            embed = discord.Embed(title=f"Search of {searched_title}",
-                                                  description=f"- Found \n "
-                                                              f"- Already in library \n "
-                                                              f"- cmd: {cmd}",
-                                                  color=discord.Color.from_rgb(255, 255, 0))
-                            await ctx.send(embed=embed, delete_after=60)
-                else:
-                    await ctx.send(f">>> You didn't specify the source! \n"
-                                   f"Example: !m library search add ReaperScans Title")
-        elif args[1] == "add":
+        if args[1] == "add":
             if args[2] == ("ReaperScans" or "MangaClash" or "MangaKakalot" or "LuminousScans"):
                 searched_title = ""
                 # for every arg from the 3th to the last one
@@ -247,8 +179,7 @@ async def m(ctx, *args):
                     b = search[5]
                     cmd = search[6]
                     # if it returns as False it wasnt added already, but if its true, its already in libraryy
-                    am = call.add_manga(str(id_guild), str(id_channel), cmd, searched_title, source, url, r, g, b, 0, 0,
-                                        0)
+                    am = call.add_manga(str(id_guild), str(id_channel), cmd, searched_title, source, url, r, g, b)
                     if am is False:
                         embed = discord.Embed(title=f"Search of {searched_title}",
                                               description=f"- Found \n "
@@ -268,45 +199,69 @@ async def m(ctx, *args):
                                f"Example: !m library search add ReaperScans Title")
         elif args[1] == "remove":
             #      0       1           2
-            # !m library remove archmage_streamer
+            # !m library remove Archmage Streamer
             content_cl = []
             content_sl = []
             content_rsl = []
             cmds = []
             found = False
-            title = ''
-            # I need to delete it from channel_listed
+            searched_title = ""
+            others = False
+            # for every arg from the 2th to the last one
+            for i in range(len(args) - 2):
+                if i != (len(args) -3):
+                    searched_title += f"{args[i + 2]} "
+                else:
+                    searched_title += f"{args[i + 2]}"
+            # I will copy every line
             with open('channel_listed', 'r', errors='ignore') as r_cl:
                 for line_cl in r_cl:
                     if line_cl != ' \n' and line_cl != '':
                         # Make sure theer will be no empty lines
                         line_ = line_cl.split("  ")
-                        if str(line_[0]) == str(id_guild):
+                        guild_ids = line_[0].replace("[","").replace(" ","").replace("]","").replace("'","").split(",")
+                        if guild_ids.__contains__(str(id_guild)):
                             # it is the cmd from the server
-                            cmd = f'{line_[2]}'
-                            if args[2] == cmd:
-                                # It is the line we want to delete
+                            title = f'{line_[3]}'
+                            if str(title) == str(searched_title):
+                                # It is the manga we want to remove from server library
                                 found = True
-                                title = line_[3]
+                                channel_ids = line_[0].replace("[","").replace("]","").replace(" ","").replace("'","").split(",")
+                                index = guild_ids.index(str(id_guild))
+                                guild_ids.remove(str(id_guild))
+                                channel_ids.remove(channel_ids[index])
+                                # Checkin if there is more servers using this book
+                                # if yes, I have to write it down back, but if not, its useless there
+                                print(guild_ids)
+                                if len(guild_ids) > 0:
+                                    others = True
+                                    content_cl.append(f"{guild_ids}  {channel_ids}  {line_[2]}  {line_[3]}  {line_[4]}  {line_[5]}  {line_[6]}  {line_[7]}  {line_[8]}")
                             else:
                                 content_cl.append(line_cl)
                         else:
                             content_cl.append(line_cl)
             if found is True:
                 # I need to delete it from server_latest
-                with open('server_latest', 'r', errors='ignore') as r_sl:
-                    for line_sl in r_sl:
-                        if line_sl != ' \n' or line_sl != '':
-                            # Make sure theer will be no empty lines
-                            line_ = line_sl.split("-+-")
-                            if str(line_[0]) == str(id_guild):
-                                # it is the cmd from the server
+                if others is False:
+                    with open('server_latest', 'r', errors='ignore') as r_sl:
+                        for line_sl in r_sl:
+                            if line_sl != ' \n' or line_sl != '':
+                                # Make sure theer will be no empty lines
+                                line_ = line_sl.split("-+-")
                                 title_ = f'{line_[1]}'
-                                if str(title) != str(title_):
+                                if title_ == str(searched_title):
+                                    # it is the cmd from the server
+                                    if str(title) != str(title_):
+                                        content_sl.append(line_sl)
+                                else:
                                     content_sl.append(line_sl)
-                            else:
-                                content_sl.append(line_sl)
-                # I need to delete it from server_release_ping
+                    # I need to delete it from server_release_ping
+                    #Now I need to rewrite server_latest
+                    with open('server_latest', 'w', errors='ignore') as w_sl:
+                        for item in content_sl:
+                            if not item.__contains__("\n"):
+                                item += ' \n'
+                            w_sl.write(item)
                 with open('server_release_ping', 'r', errors='ignore') as r_srp:
                     for line_srp in r_srp:
                         if line_srp != ' \n' and line_srp != '':
@@ -314,7 +269,7 @@ async def m(ctx, *args):
                             if id_guild == int(line_split[0]):
                                 # Its the same server
                                 title_ = f'{line_split[1]}'
-                                if str(title) != str(title_):
+                                if str(searched_title) != str(title_):
                                     content_rsl.append(line_srp)
                             else:
                                 content_rsl.append(line_srp)
@@ -332,18 +287,11 @@ async def m(ctx, *args):
                             c += ' \n'
                         w_cl.write(c)
 
-                # Now I need to rewrite server_latest
-                with open('server_latest', 'w', errors='ignore') as w_sl:
-                    for item in content_sl:
-                        if not item.__contains__("\n"):
-                            item += ' \n'
-                        w_sl.write(item)
 
-                # Now I need to remove it from the announced
-                del announced[f'{id_guild}-+-{title}']
-                await ctx.send(f'>>> The command: {cmd} with Title: {title} has been removed!')
+
+                await ctx.send(f'>>> The book in library with Title: {searched_title} has been removed!')
             else:
-                await ctx.send(f'>>> The command: {args[2]} was **not** found!')
+                await ctx.send(f'>>> The book in library with Title: {searched_title} was **not** found!')
         elif args[1] == "sub":
             poss_subs = []
             subscriptions = []
@@ -476,7 +424,7 @@ async def m(ctx, *args):
 
         # Now I will save it to the file
         with open('dm_ping', 'w') as w_dm:
-            w_dm.write(f'{id_guild}-+-{dm_ping}')
+            w_dm.write(f'{id_guild}-+-{dm_ping} \n')
             for p in dm_other:
                 w_dm.write(p)
     else:

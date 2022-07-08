@@ -323,21 +323,23 @@ def get_dominant_color(url_image, palette_size=16):
     return round(r_total / (width * height)), round(g_total / (width * height)), round(b_total / (width * height))
 
 
-def add_manga(id_guild, id_channel, cmd, title, source, url, r, g, b, rHour, rMin, rDay):
+def add_manga(id_guild, id_channel, cmd, title, source, url, r, g, b):
     # I will first need to read the channel_listed
     exist_manga = ""
     other_manga = []
     contained = False
+    exists = False
     with open("channel_listed", "r") as read_cl:
         for line_cl in read_cl:
             if line_cl != "\n":
                 # in channel_listed I use two spaces as a separator, cuz I use spaces in titles
                 split_cl = line_cl.split("  ")
                 if url == split_cl[5] and title == split_cl[3]:
-                    print("exists")
+                    exist_manga = line_cl
+                    exists = True
                     # it has the same url and title so it already exist, I just need to add it to the list of guild and channel ids if its not alerady there
-                    guild_ids = split_cl[0].replace("'", "").replace("[", "").replace("]", "").split(",")
-                    channel_ids = split_cl[1].replace("'", "").replace("[", "").replace("]", "").split(",")
+                    guild_ids = split_cl[0].replace("'", "").replace(" ","").replace("[", "").replace("]", "").split(",")
+                    channel_ids = split_cl[1].replace("'", "").replace(" ","").replace("[", "").replace("]", "").split(",")
                     print(guild_ids, channel_ids)
                     if guild_ids.__contains__(id_guild):
                         # It already is added so just set contained True and return it and dont do anythin else
@@ -345,37 +347,66 @@ def add_manga(id_guild, id_channel, cmd, title, source, url, r, g, b, rHour, rMi
                 else:
                     other_manga.append(line_cl)
 
+    # if its not contained it means ist not in server library
     if contained is False:
+        # if exist_manga is nothin its new for the global library as well, but if not, it already exists in there
         if exist_manga == "":
             # Manga was not found, so it is a new one
-            guild_id_list = []
-            guild_id_list.append(id_guild)
-            channel_id_list = []
-            channel_id_list.append(id_channel)
-            exist_manga = f"{guild_id_list}  {channel_id_list}  {cmd}  {title}  {source}  {url}  {r}  {g}  {b}  {rHour}  {rMin}  {rDay}  \n"
+            guild_id_list = [id_guild]
+            channel_id_list = [id_channel]
+            exist_manga = f"{guild_id_list}  {channel_id_list}  {cmd}  {title}  {source}  {url}  {r}  {g}  {b} \n"
+
+            # Its written down in channel listed
+            with open("channel_listed", "w") as write_cl:
+                write_cl.write(exist_manga)
+                for manga_register in other_manga:
+                    write_cl.write(manga_register)
+
+            # server_release_ping
+            if True:
+                # This will be done either way, if it already exists or its new
+                # I will add it to server_release ping
+                srp_pings = []
+                with open("server_release_ping", "r") as read_srp:
+                    for line_srp in read_srp:
+                        srp_pings.append(line_srp)
+                # I have the list of the sr pings so I will write them back with the new one added
+                empty = []
+                new_ping = f"{id_guild}-+-{title}-+-{empty} \n"
+                with open("server_release_ping", "w") as write_srp:
+                    write_srp.write(new_ping)
+                    for ping in srp_pings:
+                        write_srp.write(ping)
         else:
             # Manga was found, so I will just edit it
-            print("exists")
+            print("exists already but not in server library")
+            guild_ids = exist_manga.split("  ")[0].replace("[", "").replace(" ","").replace("]", "").replace("'", "").split(",")
+            channel_ids = exist_manga.split("  ")[1].replace("[", "").replace(" ","").replace("]", "").replace("'", "").split(",")
 
-        # Its written down in channel listed
-        with open("channel_listed", "w") as write_cl:
-            write_cl.write(exist_manga)
-            for manga_register in other_manga:
-                write_cl.write(manga_register)
+            guild_ids.append(id_guild)
+            channel_ids.append(id_channel)
+            exist_manga_split = exist_manga.split("  ")
+            exist_manga = f"{guild_ids}  {channel_ids}  {exist_manga_split[2]}  {exist_manga_split[3]}  {exist_manga_split[4]}  {exist_manga_split[5]}  {exist_manga_split[6]}  {exist_manga_split[7]}  {exist_manga_split[8]}"
+            # Now I need to write it down
+            with open("channel_listed", "w") as write_cl:
+                write_cl.write(exist_manga)
+                for manga_register in other_manga:
+                    write_cl.write(manga_register)
 
-        # server_release_ping
-        if True:
-            # This will be done either way, if it already exists or its new
-            # I will add it to server_release ping
-            srp_pings = []
-            with open("server_release_ping", "r") as read_srp:
-                for line_srp in read_srp:
-                    srp_pings.append(line_srp)
-            # I have the list of the sr pings so I will write them back with the new one added
-            empty = []
-            new_ping = f"{id_guild}-+-{title}-+-{empty} \n"
-            with open("server_release_ping", "w") as write_srp:
-                write_srp.write(new_ping)
-                for ping in srp_pings:
-                    write_srp.write(ping)
+            # server_release_ping
+            if True:
+                # This will be done either way, if it already exists or its new
+                # I will add it to server_release ping
+                srp_pings = []
+                with open("server_release_ping", "r") as read_srp:
+                    for line_srp in read_srp:
+                        srp_pings.append(line_srp)
+                # I have the list of the sr pings so I will write them back with the new one added
+                empty = []
+                new_ping = f"{id_guild}-+-{title}-+-{empty} \n"
+                with open("server_release_ping", "w") as write_srp:
+                    write_srp.write(new_ping)
+                    for ping in srp_pings:
+                        write_srp.write(ping)
+
     return contained

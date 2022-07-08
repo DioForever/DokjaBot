@@ -20,17 +20,17 @@ async def chapterreleasecheck(bot, announced):
     # Now that I have the list of mangas I have to check, well, I have to check it
     for manga in lines_cl:
         manga_splited = manga.split("  ")
-        guild_ids = manga_splited[0].replace("[","").replace("]","").replace("'","").split(",")
-        channel_ids = manga_splited[1].replace("[","").replace("]","").replace("'","").split(",")
+        guild_ids = manga_splited[0].replace("[","").replace("]","").replace(" ","").replace("'","").split(",")
+        channel_ids = manga_splited[1].replace("[","").replace("]","").replace(" ","").replace("'","").split(",")
         title = manga_splited[3]
         source = manga_splited[4]
         urlbasic = manga_splited[5]
         r = manga_splited[6]
         g = manga_splited[7]
         b = manga_splited[8]
-        rHour = manga_splited[9]
-        rMin = manga_splited[10]
-        rDay = manga_splited[11]
+        #rHour = manga_splited[9]
+        #rMin = manga_splited[10]
+        #rDay = manga_splited[11]
 
         release = api.getReleases(source, title, urlbasic, int(r), int(g), int(b), guild_ids)
         # return released, embed, subscription, chapter_number

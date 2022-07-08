@@ -136,7 +136,7 @@ async def m(ctx, *args):
         await ctx.send(embed=embed)
     elif args[0] == "library":
         if args[1] == "add":
-            if args[2] == ("ReaperScans" or "MangaClash" or "MangaKakalot" or "LuminousScans"):
+            if args[2] == "MangaClash" or args[2] =="ReaperScans" or args[2] =="MangaKakalot" or args[2] =="LuminousScans":
                 searched_title = ""
                 # for every arg from the 3th to the last one
                 for i in range(len(args) - 3):
@@ -147,7 +147,7 @@ async def m(ctx, *args):
                     search = api.searchReaperScans(searched_title)
                     source = "ReaperScans"
                 elif args[2] == "MangaClash":
-                    search = api.searchReaperScans(searched_title)
+                    search = api.searchMangaClash(searched_title)
                     source = "MangaClash"
                 elif args[2] == "MangaKakalot":
                     search = api.searchReaperScans(searched_title)

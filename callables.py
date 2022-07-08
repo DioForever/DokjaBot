@@ -90,7 +90,10 @@ def doReleased(guild_ids, Title, chapter_num, urlbasic, urlchapter, r1, g, b, th
             embed = discord.Embed(title=f"{Title}", url=f"{urlbasic}",
                                   description=f"{message_release} \n Link to the chapter: {urlchapter}",
                                   color=discord.Color.from_rgb(r1, g, b))
-            # embed.set_image(url=f"{thumb_url}")
+            try:
+                embed.set_image(url=f"{thumb_url}")
+            except:
+                embed = ""
 
     return released, embed, subs, urlbasic, urlchapter, chapter_num, message_release
 

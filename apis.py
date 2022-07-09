@@ -8,30 +8,33 @@ headers = {
 
 
 def getReleases(source, Title, urlbasic, r1, g, b, id_guild):
-    r = []
-    if source == "ReaperScans":
-        r = getReaperScansReleased(Title, urlbasic, r1, g, b, id_guild, source)
-    elif source == "MangaClash":
-        r = getMangaClashReleased(Title, urlbasic, r1, g, b, id_guild, source)
-    elif source == "LuminousScans":
-        r = getLuminousScansReleased(Title, urlbasic, r1, g, b, id_guild, source)
-    elif source == "MangaKakalot":
-        r = getMangaKakalotReleased(Title, urlbasic, r1, g, b, id_guild, source)
+    try:
+        r = []
+        if source == "ReaperScans":
+            r = getReaperScansReleased(Title, urlbasic, r1, g, b, id_guild, source)
+        elif source == "MangaClash":
+            r = getMangaClashReleased(Title, urlbasic, r1, g, b, id_guild, source)
+        elif source == "LuminousScans":
+            r = getLuminousScansReleased(Title, urlbasic, r1, g, b, id_guild, source)
+        elif source == "MangaKakalot":
+            r = getMangaKakalotReleased(Title, urlbasic, r1, g, b, id_guild, source)
 
-    released = r[0]
-    if released is True:
-        embed = r[1]
-        subscription = r[2]
-        chapter_number = r[3]
-        urlbasic = r[4]
-        urlchapter = r[5]
-        chapter_num = r[6]
-        message_release = r[7]
-        return released, embed, subscription, chapter_number, urlbasic, urlchapter, chapter_num, message_release
-    else:
-        embed = ""
-        return released, embed
-    # print(released, embed, subscription, chapter_number)
+        released = r[0]
+        if released is True:
+            embed = r[1]
+            subscription = r[2]
+            chapter_number = r[3]
+            urlbasic = r[4]
+            urlchapter = r[5]
+            chapter_num = r[6]
+            message_release = r[7]
+            return released, embed, subscription, chapter_number, urlbasic, urlchapter, chapter_num, message_release
+        else:
+            embed = ""
+            return released, embed
+        # print(released, embed, subscription, chapter_number)
+    except:
+        return False, ""
 
 
 # Reaper Scans
@@ -95,69 +98,74 @@ def getReaperScansReleased(Title, urlbasic, r1, g, b, guild_ids, source):
 
 
 def searchReaperScans(Title):
-    title = str(Title).lower().replace(" ", "-").replace("’", "")
-    title = title.replace("---manhwa", "-manhwa")
-    url = f"https://reaperscans.com/series/{title}/"
-    web = req.get(url, headers=headers)
-    soup = bs(web.content, features="html.parser")
-    mnhwornvl = True
-    type = str(soup.find("div", class_="post-title")).split(">")
-    type = type[2].replace("</span", "")
-    if (type.lower()).__contains__("novel"):
-        mnhwornvl = False
-    found = False
-    urlbasic = ""
-    r = 0
-    g = 0
-    b = 0
-    cmd = ""
-
-    title = ""
-    urlbasic = ""
-    urlchapter = ""
-    # I am looking for a div with class post-title
-    if soup.find("div", class_="post-title") is not None:
-        # I checked if there is a 404 not found picture, so if there isnt, it was found
-        found = True
-        urlbasic = url
-        urlchapter = f"{urlbasic}chapter-"
-    else:
+    try:
+        title = str(Title).lower().replace(" ", "-").replace("’", "")
+        title = title.replace("---manhwa", "-manhwa")
+        url = f"https://reaperscans.com/series/{title}/"
+        web = req.get(url, headers=headers)
+        soup = bs(web.content, features="html.parser")
+        mnhwornvl = True
+        type = str(soup.find("div", class_="post-title")).split(">")
+        type = type[2].replace("</span", "")
+        if (type.lower()).__contains__("novel"):
+            mnhwornvl = False
         found = False
-    # Check if its a novel or not, True = Manhwa..., False = Novel...
-    if mnhwornvl is True:
-        # I will find the title now,
-        try:
-            title = str(soup.find("div", class_="post-title")).split(">")[4].split("<")[0].replace("\n", "").replace(
-                "\t",
-                "")
-        except:
-            title = "Title Not Found"
-        # I will need to get RGB of the thumb
-        # so first I get the thumbnail
-        try:
-            url_thumb = str(soup.find("div", class_="summary_image")).split('"')[11]
-            dominant_color = call.get_dominant_color(url_thumb)
-        except:
-            dominant_color = [0, 0, 0]
-        r = dominant_color[0]
-        g = dominant_color[1]
-        b = dominant_color[2]
+        urlbasic = ""
+        r = 0
+        g = 0
+        b = 0
+        cmd = ""
 
-        try:
-            # I will get each first two letters from the name and set it as cmd
-            cmd = ""
-            for ch in (title.split()):
-                if ch[0] != "–":
-                    cmd += ch[0].lower()
-                try:
-                    if ch[1] != "–":
-                        cmd += ch[1].lower()
-                except:
-                    cmd += ""
-        except:
-            cmd = ""
+        title = ""
+        urlbasic = ""
+        urlchapter = ""
+        # I am looking for a div with class post-title
+        if soup.find("div", class_="post-title") is not None:
+            # I checked if there is a 404 not found picture, so if there isnt, it was found
+            found = True
+            urlbasic = url
+            urlchapter = f"{urlbasic}chapter-"
+        else:
+            found = False
+        # Check if its a novel or not, True = Manhwa..., False = Novel...
+        if mnhwornvl is True:
+            # I will find the title now,
+            try:
+                title = str(soup.find("div", class_="post-title")).split(">")[4].split("<")[0].replace("\n", "").replace(
+                    "\t",
+                    "")
+            except:
+                title = "Title Not Found"
+            # I will need to get RGB of the thumb
+            # so first I get the thumbnail
+            try:
+                url_thumb = str(soup.find("div", class_="summary_image")).split('"')[11]
+                dominant_color = call.get_dominant_color(url_thumb)
+            except:
+                dominant_color = [0, 0, 0]
+            r = dominant_color[0]
+            g = dominant_color[1]
+            b = dominant_color[2]
 
-    return found, urlbasic, title, r, g, b, cmd, mnhwornvl
+            try:
+                # I will get each first two letters from the name and set it as cmd
+                cmd = ""
+                for ch in (title.split()):
+                    if ch[0] != "–":
+                        cmd += ch[0].lower()
+                    try:
+                        if ch[1] != "–":
+                            cmd += ch[1].lower()
+                    except:
+                        cmd += ""
+            except:
+                cmd = ""
+        error = False
+        return found, urlbasic, title, r, g, b, cmd, mnhwornvl, error
+    except:
+        error = True
+        return False, 0,1,2,3,4,5,6,7, error
+
 
 
 # Manga Clash

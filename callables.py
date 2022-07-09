@@ -52,6 +52,7 @@ def doReleased(guild_ids, Title, chapter_num, urlbasic, urlchapter, r1, g, b, th
     manga_latest = 0.0
     other_latest = []
     message_release = ""
+    latest_chapter_same_title = 0
     with open("server_latest", "r") as read_sl:
         for line_sl in read_sl:
             split_sl = line_sl.split("-+-")
@@ -59,6 +60,8 @@ def doReleased(guild_ids, Title, chapter_num, urlbasic, urlchapter, r1, g, b, th
             title = split_sl[1]
             number = split_sl[2]
             #   source == source
+            if title == Title:
+                latest_chapter_same_title = float(number)
             if Source == source:
                 #   title == Title
                 if title == Title:
@@ -80,7 +83,7 @@ def doReleased(guild_ids, Title, chapter_num, urlbasic, urlchapter, r1, g, b, th
         released = False
         if float(chapter_num) > manga_latest:
             print("-------------------------------")
-            print(f"Released {Title} - {chapter_num}")
+            print(f"Released {source} - {Title} - {chapter_num}")
             print("-------------------------------")
             # its a newer chapter guys so rewrite server_latest file
             rewrite("server_latest", f"{source}-+-{Title}-+-{chapter_num} \n", other_latest)
@@ -94,111 +97,9 @@ def doReleased(guild_ids, Title, chapter_num, urlbasic, urlchapter, r1, g, b, th
                 embed.set_image(url=f"{thumb_url}")
             except:
                 embed = ""
-
+    if latest_chapter_same_title > chapter_num:
+        released = False
     return released, embed, subs, urlbasic, urlchapter, chapter_num, message_release
-
-    '''# get subscriptions
-    subscription = []
-    subscription_other = []
-    content = []
-    # There it will open the file and find the users that are meant to be informed about new chapter
-    with open('server_release_ping', 'r', errors='ignore') as f:
-        for line in f:
-            splited = line.split("-")
-            if splited[0] == id_guild:
-                if splited[1] == Title:
-                    # Now I just need to get the list of player
-                    users = splited[2].replace("[", "").replace("]", "").replace("'", '').replace("\\n", '').replace(
-                        "\n", '').replace(" ", '').replace("  ", '').split(",")
-                    subscription = users
-                else:
-                    subscription_other.append(line)
-            else:
-                subscription_other.append(line)
-
-    # get content
-    last_chapters = {}
-    content_new = []
-    content_servers = []
-    content_new_ = f'{id_guild}-{Title}-{chapter_num}'
-    content_new.append(content_new_)
-    # Now get the time of release and if it already was released today or not
-    with open('server_latest', 'r', errors='ignore') as r_sl:
-        if r_sl is not None:
-            for line in r_sl:
-                if line is not None:
-                    line_ = line.split('-')
-                    if line[0] != ' \n':
-                        # Ineed to check if its the server we want
-                        if line_[0] == id_guild:
-                            content_element = f'{line_[0]}-{(line_[1])}-{(line_[2])}'
-                            content.append(content_element)
-                            last_chapters.setdefault(line_[1], f'{line_[2]}')
-                        else:
-                            if str(line) != ' \n':
-                                content_element = f'{line_[0]}-{(line_[1])}-{(line_[2])}'
-                                content_servers.append(content_element)
-    new = False
-    released = False
-    # Check if there is new episode
-    if last_chapters.keys().__contains__(Title):
-        if float(last_chapters.get(Title)) < float(chapter_num):
-            released = True
-    else:
-        new = True
-        released = True
-
-    # Now I write the files if something new was released
-    if new:
-        with open('server_release_ping', 'w') as write:
-            subscription.append(f'{id_guild}-{Title}-[]')
-            for subs in subscription:
-                write.write(f'{subs} \n')
-            for subs in subscription_other:
-                write.write(subs)
-    # Its more than 1 chapter
-    if released:
-        with open('server_latest', 'w', errors='ignore') as wf:
-            # Check if there are some that have to be updated
-            for line in content:
-                for line_new in content_new:
-                    id_g_new = line_new.split("-")[0]
-                    id_g = line.split("-")[0]
-                    if id_g_new == id_g:
-                        # found the same server
-                        # Now I need to check for the Title
-                        title_new = line_new.split("-")[1]
-                        title_ = line.split("-")[1]
-                        if title_ == title_new:
-                            # Its the same manga! so delete the old one
-                            content.remove(line)
-            released = True
-            # Write it down
-            for c in content_new:
-                wf.write(c + " \n")
-            for c in content:
-                if not c.__contains__('\n'):
-                    wf.write(c + " \n")
-                else:
-                    wf.write(c)
-            for c in content_servers:
-                if not c.__contains__('\n'):
-                    wf.write(c + " \n")
-                else:
-                    wf.write(c)
-    if new is False:
-        message_release = f'The Chapter {chapter_num} was released'
-        embed = discord.Embed(title=f"{Title}", url=f"{urlbasic}",
-                              description=f"{message_release} \n Link to the chapter: {urlchapter}",
-                              color=discord.Color.from_rgb(r1, g, b))
-        embed.set_image(url=f"{thumb_url}")
-    else:
-        message_release = f'The {Title} has been added to library'
-        embed = discord.Embed(title=f"{Title}", url=f"{urlbasic}",
-                              description=f"{message_release} \n Link to the chapter: {urlchapter}",
-                              color=discord.Color.from_rgb(r1, g, b))
-        embed.set_image(url=f"{thumb_url}")
-    return released, embed, subscription'''
 
 
 def doCheck(id_guild, Title, chapter_num, rHour, rMin, rDay, urlbasic, urlchapter, thumb_url, r1, g, b):
@@ -331,17 +232,17 @@ def add_manga(id_guild, id_channel, cmd, title, source, url, r, g, b):
     exist_manga = ""
     other_manga = []
     contained = False
-    exists = False
+    same_title = False
     with open("channel_listed", "r") as read_cl:
         for line_cl in read_cl:
             if line_cl != "\n":
                 # in channel_listed I use two spaces as a separator, cuz I use spaces in titles
                 split_cl = line_cl.split("  ")
+                guild_ids = split_cl[0].replace("'", "").replace(" ", "").replace("[", "").replace("]", "").split(",")
                 if url == split_cl[5] and title == split_cl[3]:
                     exist_manga = line_cl
                     exists = True
                     # it has the same url and title so it already exist, I just need to add it to the list of guild and channel ids if its not alerady there
-                    guild_ids = split_cl[0].replace("'", "").replace(" ","").replace("[", "").replace("]", "").split(",")
                     channel_ids = split_cl[1].replace("'", "").replace(" ","").replace("[", "").replace("]", "").split(",")
                     print(guild_ids, channel_ids)
                     if guild_ids.__contains__(id_guild):
@@ -349,7 +250,8 @@ def add_manga(id_guild, id_channel, cmd, title, source, url, r, g, b):
                         contained = True
                 else:
                     other_manga.append(line_cl)
-
+                if split_cl[3] == title and guild_ids.__contains__(id_guild):
+                    same_title = True
     # if its not contained it means ist not in server library
     if contained is False:
         # if exist_manga is nothin its new for the global library as well, but if not, it already exists in there
@@ -366,7 +268,7 @@ def add_manga(id_guild, id_channel, cmd, title, source, url, r, g, b):
                     write_cl.write(manga_register)
 
             # server_release_ping
-            if True:
+            if same_title is False:
                 # This will be done either way, if it already exists or its new
                 # I will add it to server_release ping
                 srp_pings = []

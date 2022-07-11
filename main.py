@@ -16,14 +16,6 @@ print("DokjaBot activated")
 
 img = Image.open("archmage.jpg")
 
-announced = {}
-
-'''with open('server_latest', 'r') as r_an:
-    for line in r_an:
-        if line != ('' or ' '):
-            split = line.split('-')
-            announced.setdefault(f'{split[0]}-{split[1]}', float(split[2]))
-print(announced)'''
 
 
 @tasks.loop(seconds=60)
@@ -98,8 +90,6 @@ async def m(ctx, *args):
             for line_cl in read_cl:
                 line_cl = line_cl.split("  ")
                 guild_ids = line_cl[0].replace("[", "").replace(" ", "").replace("]", "").replace("'", "").split(",")
-                print(guild_ids)
-                print(id_guild)
                 if guild_ids.__contains__(str(id_guild)):
                     release_list += f"{line_cl[3]}: !m {line_cl[2]}\n"
         embed = discord.Embed(title=f"List of Manhwas/Mangas",
@@ -155,7 +145,7 @@ async def m(ctx, *args):
                 elif args[2] == "LuminousScans":
                     search = api.searchReaperScans(searched_title)
                     source = "LuminousScans"
-                error = search[9]
+                error = search[8]
                 if error is False:
                     if search[0] is True and search[7] is False:
                         # tell it was found but was a novel
@@ -208,6 +198,7 @@ async def m(ctx, *args):
         elif args[1] == "remove":
             #      0       1           2
             # !m library remove Archmage Streamer
+            id_guild = str(id_guild)
             content_cl = []
             content_sl = []
             content_rsl = []
@@ -222,7 +213,6 @@ async def m(ctx, *args):
                     searched_title += f"{args[i + 3]} "
                 else:
                     searched_title += f"{args[i + 3]}"
-            print(searched_title)
             # bool, I need to know if there is some other book with  the same title which means has same server_release_ping
             same_title = False
             # I will copy every line
@@ -237,24 +227,15 @@ async def m(ctx, *args):
                         if guild_ids.__contains__(str(id_guild)):
                             # it is the cmd from the server
                             title = f'{line_[3]}'
-                            print("guild contained")
-                            print(line_[4], source)
-                            print(title.replace(" ","-"), searched_title.replace(" ","-"))
-                            print(line_[4]==source)
-                            print(title==searched_title)
                             if str(title) == str(searched_title) and line_[4] == source:
                                 # It is the manga we want to remove from server library
                                 found = True
-                                print("True")
-                                channel_ids = line_[0].replace("[", "").replace("]", "").replace(" ", "").replace("'",
-                                                                                                                  "").split(
-                                    ",")
+                                channel_ids = line_[0].replace("[", "").replace("]", "").replace(" ", "").replace("'","").split( ",")
                                 index = guild_ids.index(str(id_guild))
                                 guild_ids.remove(str(id_guild))
                                 channel_ids.remove(channel_ids[index])
                                 # Checkin if there is more servers using this book
                                 # if yes, I have to write it down back, but if not, its useless there
-                                print(guild_ids)
                                 if len(guild_ids) > 0:
                                     others = True
                                     content_cl.append(
@@ -265,9 +246,7 @@ async def m(ctx, *args):
                             content_cl.append(line_cl)
                         if guild_ids.__contains__(id_guild) and title == searched_title:
                             same_title = True
-                            print("same title")
             if found is True:
-                print("Lets do it")
                 # I need to delete it from server_latest
                 if others is False:
                     with open('server_latest', 'r', errors='ignore') as r_sl:
@@ -276,9 +255,8 @@ async def m(ctx, *args):
                                 # Make sure theer will be no empty lines
                                 line_ = line_sl.split("-+-")
                                 title_ = f'{line_[1]}'
-                                if title_ == str(searched_title):
-                                    # it is the cmd from the server
-                                    if str(title) != str(title_):
+                                if line_[0] == str(source):
+                                    if title_ != str(searched_title):
                                         content_sl.append(line_sl)
                                 else:
                                     content_sl.append(line_sl)
@@ -294,7 +272,7 @@ async def m(ctx, *args):
                         for line_srp in r_srp:
                             if line_srp != ' \n' and line_srp != '':
                                 line_split = line_srp.split('-+-')
-                                if id_guild == int(line_split[0]):
+                                if str(id_guild) == str(line_split[0]):
                                     # Its the same server
                                     title_ = f'{line_split[1]}'
                                     if str(searched_title) != str(title_):

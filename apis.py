@@ -131,7 +131,8 @@ def searchReaperScans(Title):
         if mnhwornvl is True:
             # I will find the title now,
             try:
-                title = str(soup.find("div", class_="post-title")).split(">")[4].split("<")[0].replace("\n", "").replace(
+                title = str(soup.find("div", class_="post-title")).split(">")[4].split("<")[0].replace("\n",
+                                                                                                       "").replace(
                     "\t",
                     "")
             except:
@@ -163,9 +164,7 @@ def searchReaperScans(Title):
         error = False
         return found, urlbasic, title, r, g, b, cmd, mnhwornvl, error
     except:
-        error = True
-        return False, 0,1,2,3,4,5,6,7, error
-
+        return False, 0, 1, 2, 3, 4, 5, 6, True
 
 
 # Manga Clash
@@ -256,7 +255,7 @@ def getMangaClashReleased(Title, urlbasic, r1, g, b, guild_ids, source):
     # now we have chapter_number
 
     # urlchapter:
-    urlchapter = urlbasic + "chapter-"+str(int(chapter_number))+"/"
+    urlchapter = urlbasic + "chapter-" + str(int(chapter_number)) + "/"
 
     # now I need the chapter_thumbnail
     thumbnail_text = (menu_soup.find("div", class_="summary_image"))
@@ -280,64 +279,69 @@ def getMangaClashReleased(Title, urlbasic, r1, g, b, guild_ids, source):
 
 
 def searchMangaClash(Title):
-    title = str(Title).lower().replace(" ", "-").replace("’", "")
-    title = title.replace("---manhwa", "-manhwa")
-    url = f"https://mangaclash.com/manga/{title}/"
-    web = req.get(url, headers=headers)
-    soup = bs(web.content, features="html.parser")
-    found = False
-    urlbasic = ""
-    r = 0
-    g = 0
-    b = 0
-    cmd = ""
-    mnhwornvl = True
-    title = ""
-    urlbasic = ""
-    urlchapter = ""
-    # I am looking for a div with class post-title
-    if soup.find("div", class_="post-title") is not None:
-        # I checked if there is a 404 not found picture, so if there isnt, it was found
-        found = True
-        urlbasic = url
-        urlchapter = f"{urlbasic}chapter-"
-    else:
+    try:
+        title = str(Title).lower().replace(" ", "-").replace("’", "")
+        title = title.replace("---manhwa", "-manhwa")
+        url = f"https://mangaclash.com/manga/{title}/"
+        web = req.get(url, headers=headers)
+        soup = bs(web.content, features="html.parser")
         found = False
-    # Check if its a novel or not, True = Manhwa..., False = Novel...
-
-    # I will find the title now,
-    try:
-        title = str(soup.find("div", class_="post-title")).split(">")[4].split("<")[0].replace("\n", "").replace(
-            "\t",
-            "")
-    except:
-        title = "Title Not Found"
-    # I will need to get RGB of the thumb
-    # so first I get the thumbnail
-    try:
-        url_thumb = str(soup.find("div", class_="summary_image")).split('"')[11]
-        dominant_color = call.get_dominant_color(url_thumb)
-    except:
-        dominant_color = [0, 0, 0]
-    r = dominant_color[0]
-    g = dominant_color[1]
-    b = dominant_color[2]
-
-    try:
-        # I will get each first two letters from the name and set it as cmd
+        urlbasic = ""
+        r = 0
+        g = 0
+        b = 0
         cmd = ""
-        for ch in (Title.split()):
-            if ch[0] != "–":
-                cmd += ch[0].lower()
-            try:
-                if ch[1] != "–":
-                    cmd += ch[1].lower()
-            except:
-                cmd += ""
+        mnhwornvl = True
+        title = ""
+        urlbasic = ""
+        urlchapter = ""
+        # I am looking for a div with class post-title
+        if soup.find("div", class_="post-title") is not None:
+            # I checked if there is a 404 not found picture, so if there isnt, it was found
+            found = True
+            urlbasic = url
+            urlchapter = f"{urlbasic}chapter-"
+        else:
+            found = False
+        # Check if its a novel or not, True = Manhwa..., False = Novel...
+
+        # I will find the title now,
+        try:
+            title = str(soup.find("div", class_="post-title")).split(">")[4].split("<")[0].replace("\n", "").replace(
+                "\t",
+                "")
+        except:
+            title = "Title Not Found"
+        # I will need to get RGB of the thumb
+        # so first I get the thumbnail
+        try:
+            url_thumb = str(soup.find("div", class_="summary_image")).split('"')[11]
+            dominant_color = call.get_dominant_color(url_thumb)
+        except:
+            dominant_color = [0, 0, 0]
+        r = dominant_color[0]
+        g = dominant_color[1]
+        b = dominant_color[2]
+
+        try:
+            # I will get each first two letters from the name and set it as cmd
+            cmd = ""
+            for ch in (Title.split()):
+                if ch[0] != "–":
+                    cmd += ch[0].lower()
+                try:
+                    if ch[1] != "–":
+                        cmd += ch[1].lower()
+                except:
+                    cmd += ""
+        except:
+            cmd = ""
+        error = False
     except:
-        cmd = ""
+        error = True
+
     print(found, urlbasic, title, r, g, b, cmd, mnhwornvl)
-    return found, urlbasic, title, r, g, b, cmd, mnhwornvl
+    return found, urlbasic, title, r, g, b, cmd, mnhwornvl, error
 
 
 def getAquaManga(Title, urlbasic, urlchapter, r1, g, b, rHour, rMin, rDay):

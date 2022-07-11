@@ -244,7 +244,6 @@ def add_manga(id_guild, id_channel, cmd, title, source, url, r, g, b):
                     exists = True
                     # it has the same url and title so it already exist, I just need to add it to the list of guild and channel ids if its not alerady there
                     channel_ids = split_cl[1].replace("'", "").replace(" ","").replace("[", "").replace("]", "").split(",")
-                    print(guild_ids, channel_ids)
                     if guild_ids.__contains__(id_guild):
                         # It already is added so just set contained True and return it and dont do anythin else
                         contained = True

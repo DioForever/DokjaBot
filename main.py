@@ -6,7 +6,6 @@ import sys
 import release
 import apis as api
 import callables as call
-from colorthief import ColorThief
 from PIL import Image
 
 bot = commands.Bot(command_prefix="!")
@@ -15,6 +14,8 @@ bot = commands.Bot(command_prefix="!")
 print("DokjaBot activated")
 
 img = Image.open("archmage.jpg")
+
+announced = {}
 
 
 
@@ -176,7 +177,8 @@ async def m(ctx, *args):
                             embed = discord.Embed(title=f"Search of {searched_title}",
                                                   description=f"- Found \n "
                                                               f"- Added to library \n "
-                                                              f"- cmd: {cmd}",
+                                                              f"- cmd: {cmd}"
+                                                              f"- url: {url}",
                                                   color=discord.Color.from_rgb(0, 255, 0))
                             await ctx.send(embed=embed, delete_after=60)
                         else:

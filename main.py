@@ -144,7 +144,7 @@ async def m(ctx, *args):
                     search = api.searchReaperScans(searched_title)
                     source = "MangaKakalot"
                 elif args[2] == "LuminousScans":
-                    search = api.searchReaperScans(searched_title)
+                    search = api.searchLuminousScans(searched_title)
                     source = "LuminousScans"
                 error = search[8]
                 if error is False:
@@ -165,24 +165,26 @@ async def m(ctx, *args):
                         await ctx.send(embed=embed, delete_after=60)
                     else:
                         # found
+                        print(search)
                         url = search[1]
                         title = search[2]
+                        print(title.replace(" ","*"))
                         r = search[3]
                         g = search[4]
                         b = search[5]
                         cmd = search[6]
                         # if it returns as False it wasnt added already, but if its true, its already in libraryy
-                        am = call.add_manga(str(id_guild), str(id_channel), cmd, searched_title, source, url, r, g, b)
+                        am = call.add_manga(str(id_guild), str(id_channel), cmd, title, source, url, r, g, b)
                         if am is False:
-                            embed = discord.Embed(title=f"Search of {searched_title}",
+                            embed = discord.Embed(title=f"Search of {title}",
                                                   description=f"- Found \n "
                                                               f"- Added to library \n "
-                                                              f"- cmd: {cmd}"
+                                                              f"- cmd: {cmd} \n"
                                                               f"- url: {url}",
                                                   color=discord.Color.from_rgb(0, 255, 0))
                             await ctx.send(embed=embed, delete_after=60)
                         else:
-                            embed = discord.Embed(title=f"Search of {searched_title}",
+                            embed = discord.Embed(title=f"Search of {title}",
                                                   description=f"- Found \n "
                                                               f"- Already in library \n "
                                                               f"- cmd: {cmd}",
@@ -190,8 +192,11 @@ async def m(ctx, *args):
                             await ctx.send(embed=embed, delete_after=60)
                 else:
                     embed = discord.Embed(title=f"Search of {searched_title}",
-                                          description=f"- Error appeared \n "
-                                                      f"- Their Website is probably down \n ",
+                                          description=f"- Not Found \n "
+                                                      f"- If error appeared their  \n"
+                                                      f"- website is probably down \n"
+                                                      f"- try check their website or \n"
+                                                      f"- correct the searched title ",
                                           color=discord.Color.from_rgb(255, 0, 0))
                     await ctx.send(embed=embed, delete_after=60)
             else:

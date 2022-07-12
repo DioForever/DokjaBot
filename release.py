@@ -31,7 +31,7 @@ async def chapterreleasecheck(bot, announced):
         #rHour = manga_splited[9]
         #rMin = manga_splited[10]
         #rDay = manga_splited[11]
-
+        print(source, title, urlbasic, int(r), int(g), int(b), guild_ids)
         release = api.getReleases(source, title, urlbasic, int(r), int(g), int(b), guild_ids)
         # return released, embed, subscription, chapter_number
         if release[0] is True:

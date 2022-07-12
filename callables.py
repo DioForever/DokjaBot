@@ -239,7 +239,9 @@ def add_manga(id_guild, id_channel, cmd, title, source, url, r, g, b):
                 # in channel_listed I use two spaces as a separator, cuz I use spaces in titles
                 split_cl = line_cl.split("  ")
                 guild_ids = split_cl[0].replace("'", "").replace(" ", "").replace("[", "").replace("]", "").split(",")
-                if url == split_cl[5] and title == split_cl[3]:
+                Title = split_cl[3]
+                title = title[0:(len(title)-1)]
+                if url == split_cl[5] and title == Title:
                     exist_manga = line_cl
                     exists = True
                     # it has the same url and title so it already exist, I just need to add it to the list of guild and channel ids if its not alerady there
@@ -249,7 +251,8 @@ def add_manga(id_guild, id_channel, cmd, title, source, url, r, g, b):
                         contained = True
                 else:
                     other_manga.append(line_cl)
-                if split_cl[3] == title and guild_ids.__contains__(id_guild):
+
+                if Title == title and guild_ids.__contains__(id_guild):
                     same_title = True
     # if its not contained it means ist not in server library
     if contained is False:
@@ -283,7 +286,7 @@ def add_manga(id_guild, id_channel, cmd, title, source, url, r, g, b):
                         write_srp.write(ping)
         else:
             # Manga was found, so I will just edit it
-            print("exists already but not in server library")
+            #print("exists already but not in server library")
             guild_ids = exist_manga.split("  ")[0].replace("[", "").replace(" ","").replace("]", "").replace("'", "").split(",")
             channel_ids = exist_manga.split("  ")[1].replace("[", "").replace(" ","").replace("]", "").replace("'", "").split(",")
 

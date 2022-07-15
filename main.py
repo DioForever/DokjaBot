@@ -196,7 +196,8 @@ async def m(ctx, *args):
                                                       f"- If error appeared their  \n"
                                                       f"- website is probably down \n"
                                                       f"- try check their website or \n"
-                                                      f"- correct the searched title ",
+                                                      f"- correct the searched title"
+                                                      f"+ you can use a link as well ",
                                           color=discord.Color.from_rgb(255, 0, 0))
                     await ctx.send(embed=embed, delete_after=60)
             else:

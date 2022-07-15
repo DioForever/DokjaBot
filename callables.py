@@ -34,6 +34,7 @@ def doReleased(guild_ids, Title, chapter_num, urlbasic, urlchapter, r1, g, b, th
     subs = []
     embed = ""
     # I will have guild_id-title as a key with list of subscribed users as a value
+
     with open("server_release_ping", "r") as read_srp:
         for line_srp in read_srp:
             split = line_srp.split("-+-")
@@ -42,12 +43,15 @@ def doReleased(guild_ids, Title, chapter_num, urlbasic, urlchapter, r1, g, b, th
             # check if this is part of the subs we need
             # and if the title is the same
             if guild_ids.__contains__(guild_id) and Title == title:
-                sub_users = split[2].replace("[", "").replace("]", "").replace("'", '').replace("\\n", '').replace("\n",
-                                                                                                                   '').replace(
-                    " ", '').replace("  ", '').split(",")
+                try:
+                    sub_users = split[2].replace("[", "").replace("]", "").replace("'", '').replace("\\n", '').replace(
+                        "\n",
+                        '').replace(
+                        " ", '').replace("  ", '').split(",")
+                except Exception as e:
+                    sub_users = []
                 subs = sub_users
     # ---------------
-
     # I need to get the latest chapters
     manga_latest = 0.0
     other_latest = []
@@ -71,7 +75,6 @@ def doReleased(guild_ids, Title, chapter_num, urlbasic, urlchapter, r1, g, b, th
             else:
                 other_latest.append(line_sl)
     # ---------------
-
     if manga_latest == 0.0:
         # its new one
         # its a newer chapter guys so rewrite server_latest file
@@ -240,12 +243,13 @@ def add_manga(id_guild, id_channel, cmd, title, source, url, r, g, b):
                 split_cl = line_cl.split("  ")
                 guild_ids = split_cl[0].replace("'", "").replace(" ", "").replace("[", "").replace("]", "").split(",")
                 Title = split_cl[3]
-                title = title[0:(len(title)-1)]
+                #title = title[0:(len(title))]
                 if url == split_cl[5] and title == Title:
                     exist_manga = line_cl
                     exists = True
                     # it has the same url and title so it already exist, I just need to add it to the list of guild and channel ids if its not alerady there
-                    channel_ids = split_cl[1].replace("'", "").replace(" ","").replace("[", "").replace("]", "").split(",")
+                    channel_ids = split_cl[1].replace("'", "").replace(" ", "").replace("[", "").replace("]", "").split(
+                        ",")
                     if guild_ids.__contains__(id_guild):
                         # It already is added so just set contained True and return it and dont do anythin else
                         contained = True
@@ -286,9 +290,13 @@ def add_manga(id_guild, id_channel, cmd, title, source, url, r, g, b):
                         write_srp.write(ping)
         else:
             # Manga was found, so I will just edit it
-            #print("exists already but not in server library")
-            guild_ids = exist_manga.split("  ")[0].replace("[", "").replace(" ","").replace("]", "").replace("'", "").split(",")
-            channel_ids = exist_manga.split("  ")[1].replace("[", "").replace(" ","").replace("]", "").replace("'", "").split(",")
+            # print("exists already but not in server library")
+            guild_ids = exist_manga.split("  ")[0].replace("[", "").replace(" ", "").replace("]", "").replace("'",
+                                                                                                              "").split(
+                ",")
+            channel_ids = exist_manga.split("  ")[1].replace("[", "").replace(" ", "").replace("]", "").replace("'",
+                                                                                                                "").split(
+                ",")
 
             guild_ids.append(id_guild)
             channel_ids.append(id_channel)

@@ -9,19 +9,20 @@ headers = {
 
 def getReleases(source, Title, urlbasic, r1, g, b, id_guild):
     try:
+        #print(source.replace(" ","*"))
         r = []
         if source == "ReaperScans":
             r = getReaperScansReleased(Title, urlbasic, r1, g, b, id_guild, source)
-            print("Reaper")
-        elif source == " MangaClash":
+            #print("Reaper")
+        elif source == " MangaClash" or source == "MangaClash" or source == "  MangaClash":
             r = getMangaClashReleased(Title, urlbasic, r1, g, b, id_guild, source)
-            print("MangaClash")
+            #print("MangaClash")
         elif source == "LuminousScans":
             r = getLuminousScansReleased(Title, urlbasic, r1, g, b, id_guild, source)
-            print("LuminousScans")
+            #print("LuminousScans")
         elif source == "MangaKakalot":
             r = getMangaKakalotReleased(Title, urlbasic, r1, g, b, id_guild, source)
-            print("Kakalot")
+            #print("Kakalot")
 
         released = r[0]
         if released is True:
@@ -313,11 +314,16 @@ def searchMangaClash(Title):
         # I will find the title now,
         try:
             title = str(soup.find("div", class_="post-title"))
-            print(title)
-            title = title.split(">")[2].replace("\n","").replace("</h1","").replace("’","")
-            print(f"found {title}")
+            title = title.split(">")[2].replace("\n", "").replace("</h1", "").replace("’", "")
         except:
             title = "Title Not Found"
+        title = title[0:(len(title)-1)]
+        # I need to remove the spaces at the end of the title
+        enough = False
+        '''print(title.replace(" ","*"))
+        if title[(len(title))] == " ":
+            title = title[0:(len(title)-1)]
+        print(title.replace(" ","*"))'''
         # I will need to get RGB of the thumb
         # so first I get the thumbnail
         try:
@@ -346,7 +352,7 @@ def searchMangaClash(Title):
     except:
         error = True
 
-    print(found, urlbasic, title, r, g, b, cmd, mnhwornvl)
+    #print(found, urlbasic, title, r, g, b, cmd, mnhwornvl)
     return found, urlbasic, title, r, g, b, cmd, mnhwornvl, error
 
 
@@ -354,7 +360,7 @@ def getAquaManga(Title, urlbasic, urlchapter, r1, g, b, rHour, rMin, rDay):
     web = req.get(url=urlbasic)
     soup = bs(web.content, features="html.parser")
     chapter_text = (soup.find("li", class_="wp-manga-chapter"))
-    print(chapter_text)
+    #print(chapter_text)
 
 
 def getAquaMangaReleased(Title, urlbasic, urlchapter, r1, g, b):
@@ -363,10 +369,10 @@ def getAquaMangaReleased(Title, urlbasic, urlchapter, r1, g, b):
 
 # Luminous Scans
 
-def getLuminousScansReleased(Title, urlbasic, urlchapter, r1, g, b, id_guild):
+def getLuminousScansReleased(Title, urlbasic, r1, g, b, id_guild, source):
     # We get the soup of the website
     # urlbasic = 'https://luminousscans.com/series/1653732347-fff-class-trash-hero/'
-    web = req.get(url=urlbasic)
+    web = req.get(url=urlbasic, headers=headers)
     soup = bs(web.content, features="html.parser")
     content = web.content
     # Now we split it at the epcurlast class and split it again so we get the Chapter {number}
@@ -377,12 +383,16 @@ def getLuminousScansReleased(Title, urlbasic, urlchapter, r1, g, b, id_guild):
 
     #
     # Url chapter
-    urlchapter = urlchapter + f'{int(chapter_number)}/'
+    urlchapter = urlbasic + f'chapter-{int(chapter_number)}/'
 
     # I will get the picture from the website as well
-    thumb_url = str(soup.find('div', class_='thumb')).split()[15].split('"')[1]
+    try:
+        thumb_url = str(soup.find('div', class_='thumb')).split()[15].split('"')[1]
+    except:
+        thumb_url = ""
 
-    releaseR = call.doReleased(id_guild, Title, chapter_number, urlbasic, urlchapter, r1, g, b, thumb_url)
+    #(guild_ids, Title, chapter_num, urlbasic, urlchapter, r1, g, b, thumb_url, source)
+    releaseR = call.doReleased(id_guild, Title, chapter_number, urlbasic, urlchapter, r1, g, b, thumb_url, source)
     if releaseR[0] is True:
         released = releaseR[0]
         embed = releaseR[1]
@@ -391,6 +401,7 @@ def getLuminousScansReleased(Title, urlbasic, urlchapter, r1, g, b, id_guild):
         urlchapter = releaseR[4]
         chapter_num = releaseR[5]
         message_release = releaseR[6]
+        #print(released, embed, subscription, chapter_number, urlbasic, urlchapter, chapter_num, message_release)
         return released, embed, subscription, chapter_number, urlbasic, urlchapter, chapter_num, message_release
     else:
         released = releaseR[0]
@@ -402,7 +413,7 @@ def getLuminousScans(Title, urlbasic, urlchapter, r1, g, b, rHour, rMin, rDay, i
     # We get the soup of the website
     # urlbasic = 'https://luminousscans.com/series/1653732347-fff-class-trash-hero/'
     web = req.get(url=urlbasic)
-    soup = bs(web.content, features="html.parser")
+    soup = bs(web.content, features="html.parser", headers=headers)
     content = web.content
     # Now we split it at the epcurlast class and split it again so we get the Chapter {number}
     chapter_text = str(content).split('epcurlast')
@@ -416,7 +427,6 @@ def getLuminousScans(Title, urlbasic, urlchapter, r1, g, b, rHour, rMin, rDay, i
 
     # I will get the picture from the website as well
     thumb_url = str(soup.find('div', class_='thumb')).split()[15].split('"')[1]
-
     docheck = call.doCheck(id_guild, Title, chapter_num, rHour, rMin, rDay, urlbasic, urlchapter, thumb_url, r1, g, b)
     embed = docheck
 
@@ -425,14 +435,17 @@ def getLuminousScans(Title, urlbasic, urlchapter, r1, g, b, rHour, rMin, rDay, i
 
 def searchLuminousScans(Title):
     try:
-        title = str(Title).lower().replace(" ", "-").replace("’", "")
-        title = title.replace("---manhwa", "-manhwa")
-        url = f"https://luminousscans.com/series/{title}/"
-        web = req.get(url, headers=headers)
-        soup = bs(web.content, features="html.parser")
-        print(web.status_code)
-        print(url)
-        #print(soup)
+        # Checking if user provided url or a Title
+        if str(Title).__contains__("https://luminousscans.com/series/"):
+            url = Title
+            web = req.get(url, headers=headers)
+            soup = bs(web.content, features="html.parser")
+        else:
+            title = str(Title).lower().replace(" ", "-").replace("’", "")
+            title = title.replace("---manhwa", "-manhwa")
+            url = f"https://luminousscans.com/series/{title}/"
+            web = req.get(url, headers=headers)
+            soup = bs(web.content, features="html.parser")
 
         mnhwornvl = True
         try:
@@ -453,7 +466,7 @@ def searchLuminousScans(Title):
         urlbasic = ""
         urlchapter = ""
         # I am looking for a div with class post-title
-        print(soup.find("h1", class_="entry-title"))
+        #print(soup.find("h1", class_="entry-title"))
         if soup.find("h1", class_="entry-title") is not None:
             # I checked if there is a 404 not found picture, so if there isnt, it was found
             found = True
@@ -465,10 +478,10 @@ def searchLuminousScans(Title):
         if mnhwornvl is True:
             # I will find the title now,
             try:
-                title = str(soup.find("div", class_="post-title")).split(">")[4].split("<")[0].replace("\n",
-                                                                                                       "").replace(
-                    "\t",
-                    "")
+                title = str(soup.find("h1", class_="entry-title")).split(">")[1].split("<")[0].replace("\n",
+                                                                                                       "").replace("\t",
+                                                                                                                   "")
+                print(title)
             except:
                 title = "Title Not Found"
             # I will need to get RGB of the thumb
@@ -496,6 +509,7 @@ def searchLuminousScans(Title):
             except:
                 cmd = ""
         error = False
+        print(found, urlbasic, title, r, g, b, cmd, mnhwornvl, error)
         return found, urlbasic, title, r, g, b, cmd, mnhwornvl, error
     except:
         return False, 0, 1, 2, 3, 4, 5, 6, True
@@ -543,6 +557,7 @@ def getMangaKakalotReleased(Title, urlbasic, urlchapter, r1, g, b, id_guild):
     return released, embed, subscription, chapter_num
 
 
+# idk how their naming sense works tbh
 def searchMangaKakalot(Title):
     try:
         title = str(Title).lower().replace(" ", "-").replace("’", "")

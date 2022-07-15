@@ -320,10 +320,6 @@ def searchMangaClash(Title):
         title = title[0:(len(title)-1)]
         # I need to remove the spaces at the end of the title
         enough = False
-        '''print(title.replace(" ","*"))
-        if title[(len(title))] == " ":
-            title = title[0:(len(title)-1)]
-        print(title.replace(" ","*"))'''
         # I will need to get RGB of the thumb
         # so first I get the thumbnail
         try:
@@ -478,10 +474,7 @@ def searchLuminousScans(Title):
         if mnhwornvl is True:
             # I will find the title now,
             try:
-                title = str(soup.find("h1", class_="entry-title")).split(">")[1].split("<")[0].replace("\n",
-                                                                                                       "").replace("\t",
-                                                                                                                   "")
-                print(title)
+                title = str(soup.find("h1", class_="entry-title")).split(">")[1].split("<")[0].replace("\n","").replace("\t","")
             except:
                 title = "Title Not Found"
             # I will need to get RGB of the thumb
@@ -509,7 +502,6 @@ def searchLuminousScans(Title):
             except:
                 cmd = ""
         error = False
-        print(found, urlbasic, title, r, g, b, cmd, mnhwornvl, error)
         return found, urlbasic, title, r, g, b, cmd, mnhwornvl, error
     except:
         return False, 0, 1, 2, 3, 4, 5, 6, True

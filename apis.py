@@ -37,7 +37,6 @@ def getReleases(source, Title, urlbasic, r1, g, b, id_guild):
         else:
             embed = ""
             return released, embed
-        # print(released, embed, subscription, chapter_number)
     except:
         return False, ""
 
@@ -348,7 +347,7 @@ def searchMangaClash(Title):
     except:
         error = True
 
-    #print(found, urlbasic, title, r, g, b, cmd, mnhwornvl)
+
     return found, urlbasic, title, r, g, b, cmd, mnhwornvl, error
 
 

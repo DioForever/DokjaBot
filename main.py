@@ -11,7 +11,7 @@ from PIL import Image
 bot = commands.Bot(command_prefix="!")
 
 # await bot.wait_until_ready()
-print("DokjaBot activated")
+print("DokjaBot activated - Made by DioForever - dioforever.live")
 
 img = Image.open("archmage.jpg")
 
@@ -156,19 +156,17 @@ async def m(ctx, *args):
                                                           f"= Not added \n"
                                                           f"+ Try adding: -Manhwa",
                                               color=discord.Color.from_rgb(255, 255, 0))
-                        await ctx.send(embed=embed, delete_after=60)
+                        await ctx.send(embed=embed)
                     elif search[0] is False:
                         # tell it wasnt found
                         embed = discord.Embed(title=f"Search of {searched_title}",
                                               description=f"- Not Found \n ",
                                               color=discord.Color.from_rgb(255, 0, 0))
-                        await ctx.send(embed=embed, delete_after=60)
+                        await ctx.send(embed=embed)
                     else:
                         # found
-                        print(search)
                         url = search[1]
                         title = search[2]
-                        print(title.replace(" ","*"))
                         r = search[3]
                         g = search[4]
                         b = search[5]
@@ -182,27 +180,29 @@ async def m(ctx, *args):
                                                               f"- cmd: {cmd} \n"
                                                               f"- url: {url}",
                                                   color=discord.Color.from_rgb(0, 255, 0))
-                            await ctx.send(embed=embed, delete_after=60)
+                            await ctx.send(embed=embed)
                         else:
                             embed = discord.Embed(title=f"Search of {title}",
                                                   description=f"- Found \n "
                                                               f"- Already in library \n "
                                                               f"- cmd: {cmd}",
                                                   color=discord.Color.from_rgb(255, 255, 0))
-                            await ctx.send(embed=embed, delete_after=60)
+                            await ctx.send(embed=embed)
                 else:
                     embed = discord.Embed(title=f"Search of {searched_title}",
                                           description=f"- Not Found \n "
                                                       f"- If error appeared their  \n"
                                                       f"- website is probably down \n"
                                                       f"- try check their website or \n"
-                                                      f"- correct the searched title"
+                                                      f"- correct the searched title \n"
                                                       f"+ you can use a link as well ",
                                           color=discord.Color.from_rgb(255, 0, 0))
-                    await ctx.send(embed=embed, delete_after=60)
+                    await ctx.send(embed=embed)
             else:
                 await ctx.send(f">>> You didn't specify the source! \n"
                                f"Example: !m library search add ReaperScans Title")
+            # deltes the message sent by user
+            #await ctx.message.delete()
         elif args[1] == "remove":
             #      0       1           2
             # !m library remove Archmage Streamer

@@ -141,7 +141,7 @@ async def m(ctx, *args):
                     search = api.searchMangaClash(searched_title)
                     source = "MangaClash"
                 elif args[2] == "MangaKakalot":
-                    search = api.searchReaperScans(searched_title)
+                    search = api.searchMangaKakalot(searched_title)
                     source = "MangaKakalot"
                 elif args[2] == "LuminousScans":
                     search = api.searchLuminousScans(searched_title)

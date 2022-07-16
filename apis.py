@@ -33,7 +33,8 @@ def getReleases(source, Title, urlbasic, r1, g, b, id_guild):
             urlchapter = r[5]
             chapter_num = r[6]
             message_release = r[7]
-            return released, embed, subscription, chapter_number, urlbasic, urlchapter, chapter_num, message_release
+            sources_announced_already = r[8]
+            return released, embed, subscription, chapter_number, urlbasic, urlchapter, chapter_num, message_release, sources_announced_already
         else:
             embed = ""
             return released, embed
@@ -94,7 +95,8 @@ def getReaperScansReleased(Title, urlbasic, r1, g, b, guild_ids, source):
         urlchapter = releaseR[4]
         chapter_num = releaseR[5]
         message_release = releaseR[6]
-        return released, embed, subscription, chapter_number, urlbasic, urlchapter, chapter_num, message_release
+        sources_announced_already = releaseR[7]
+        return released, embed, subscription, chapter_number, urlbasic, urlchapter, chapter_num, message_release,sources_announced_already
     else:
         released = releaseR[0]
         embed = ""
@@ -139,6 +141,7 @@ def searchReaperScans(Title):
                                                                                                        "").replace(
                     "\t",
                     "")
+                title = title[0:(len(title)-20)]
             except:
                 title = "Title Not Found"
             # I will need to get RGB of the thumb
@@ -275,7 +278,8 @@ def getMangaClashReleased(Title, urlbasic, r1, g, b, guild_ids, source):
         urlchapter = releaseR[4]
         chapter_num = releaseR[5]
         message_release = releaseR[6]
-        return released, embed, subscription, chapter_number, urlbasic, urlchapter, chapter_num, message_release
+        sources_announced_already = releaseR[7]
+        return released, embed, subscription, chapter_number, urlbasic, urlchapter, chapter_num, message_release, sources_announced_already
     else:
         released = releaseR[0]
         embed = ""
@@ -284,12 +288,19 @@ def getMangaClashReleased(Title, urlbasic, r1, g, b, guild_ids, source):
 
 def searchMangaClash(Title):
     try:
-        title = str(Title).lower().replace(" ", "-").replace("’", "")
-        title = title.replace("---manhwa", "-manhwa")
-        url = f"https://mangaclash.com/manga/{title}/"
-        web = req.get(url, headers=headers)
-        url = web.url
-        soup = bs(web.content, features="html.parser")
+        # Checking if user provided url or a Title
+        if str(Title).__contains__("https://mangaclash.com/"):
+            url = Title
+            web = req.get(url, headers=headers)
+            soup = bs(web.content, features="html.parser")
+        else:
+            title = str(Title).lower().replace(" ", "-").replace("’", "")
+            title = title.replace("---manhwa", "-manhwa")
+            # https://mangaclash.com/manga-genre/manhwa/
+            url = f"https://mangaclash.com/manga/{title}/"
+            web = req.get(url, headers=headers)
+            url = web.url
+            soup = bs(web.content, features="html.parser")
         found = False
         urlbasic = ""
         r = 0
@@ -396,8 +407,8 @@ def getLuminousScansReleased(Title, urlbasic, r1, g, b, id_guild, source):
         urlchapter = releaseR[4]
         chapter_num = releaseR[5]
         message_release = releaseR[6]
-        #print(released, embed, subscription, chapter_number, urlbasic, urlchapter, chapter_num, message_release)
-        return released, embed, subscription, chapter_number, urlbasic, urlchapter, chapter_num, message_release
+        sources_announced_already = releaseR[7]
+        return released, embed, subscription, chapter_number, urlbasic, urlchapter, chapter_num, message_release,sources_announced_already
     else:
         released = releaseR[0]
         embed = ""
@@ -551,16 +562,20 @@ def getMangaKakalotReleased(Title, urlbasic, urlchapter, r1, g, b, id_guild):
 # idk how their naming sense works tbh
 def searchMangaKakalot(Title):
     try:
-        title = str(Title).lower().replace(" ", "-").replace("’", "")
-        title = title.replace("---manhwa", "-manhwa")
-        url = f"https://reaperscans.com/series/{title}/"
-        web = req.get(url, headers=headers)
-        soup = bs(web.content, features="html.parser")
-        mnhwornvl = True
-        type = str(soup.find("div", class_="post-title")).split(">")
-        type = type[2].replace("</span", "")
-        if (type.lower()).__contains__("novel"):
-            mnhwornvl = False
+        # Checking if user provided url or a Title
+        if str(Title).__contains__("https://ww3.mangakakalot.tv/"):
+            url = Title
+            web = req.get(url, headers=headers)
+            soup = bs(web.content, features="html.parser")
+            print(web.status_code)
+        else:
+            title = str(Title).lower().replace(" ", "-").replace("’", "")
+            title = title.replace("---manhwa", "-manhwa")
+            url = f"https://ww3.mangakakalot.tv/manga/{title}/"
+            web = req.get(url, headers=headers)
+            soup = bs(web.content, features="html.parser")
+            print(web.status_code)
+
         found = False
         urlbasic = ""
         r = 0
@@ -580,10 +595,10 @@ def searchMangaKakalot(Title):
         else:
             found = False
         # Check if its a novel or not, True = Manhwa..., False = Novel...
-        if mnhwornvl is True:
+        if True:
             # I will find the title now,
             try:
-                title = str(soup.find("div", class_="post-title")).split(">")[4].split("<")[0].replace("\n",
+                title = str(soup.find("ul", class_="manga-info-text")).split(">")[4].split("<")[0].replace("\n",
                                                                                                        "").replace(
                     "\t",
                     "")
@@ -614,7 +629,7 @@ def searchMangaKakalot(Title):
             except:
                 cmd = ""
         error = False
-        return found, urlbasic, title, r, g, b, cmd, mnhwornvl, error
+        return found, urlbasic, title, r, g, b, cmd, True, error
     except:
         return False, 0, 1, 2, 3, 4, 5, 6, True
 

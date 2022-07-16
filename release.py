@@ -43,6 +43,20 @@ async def chapterreleasecheck(bot, announced):
             urlchapter = release[5]
             chapter_num = release[6]
             message_release = release[7]
+            sources_announced_already = release[8]
+            # first I need to find out to which channels I already told it
+            # cuz I got manga with same title maybe advanced
+            with open("channel_listed", "r") as read_cl:
+                for line_cl in read_cl:
+                    split_line_cl = line_cl.split("  ")
+                    guild_ids_cl = manga_splited[0].replace("[", "").replace("]", "").replace(" ", "").replace("'","").split(",")
+                    channel_ids_cl = manga_splited[1].replace("[", "").replace("]", "").replace(" ", "").replace("'","").split(",")
+                    title_cl = manga_splited[3]
+                    source_cl = manga_splited[4]
+                    if title_cl == title and sources_announced_already.__contains__(str(source_cl)):
+                        for ch_id in channel_ids_cl:
+                            if channel_ids.__contains__(ch_id):
+                                channel_ids.remove(ch_id)
 
             count = 0
             for channel_id in channel_ids:

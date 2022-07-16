@@ -57,6 +57,7 @@ def doReleased(guild_ids, Title, chapter_num, urlbasic, urlchapter, r1, g, b, th
     other_latest = []
     message_release = ""
     latest_chapter_same_title = 0
+    sources_announced_already = []
     with open("server_latest", "r") as read_sl:
         for line_sl in read_sl:
             split_sl = line_sl.split("-+-")
@@ -64,8 +65,14 @@ def doReleased(guild_ids, Title, chapter_num, urlbasic, urlchapter, r1, g, b, th
             title = split_sl[1]
             number = split_sl[2]
             #   source == source
-            if title == Title:
-                latest_chapter_same_title = float(number)
+            '''if title == Title:
+                if float(number) > latest_chapter_same_title:
+                    latest_chapter_same_title = float(number)
+                    # I need to add it to the sources_announced_already
+                    if source != Source:
+                        # but only if its not the source we looking for
+                        sources_announced_already.append(Source)'''
+            print(f"announced already {sources_announced_already}")
             if Source == source:
                 #   title == Title
                 if title == Title:
@@ -96,13 +103,13 @@ def doReleased(guild_ids, Title, chapter_num, urlbasic, urlchapter, r1, g, b, th
             embed = discord.Embed(title=f"{Title}", url=f"{urlbasic}",
                                   description=f"{message_release} \n Link to the chapter: {urlchapter}",
                                   color=discord.Color.from_rgb(r1, g, b))
-            try:
+            '''try:
                 embed.set_image(url=f"{thumb_url}")
             except:
-                embed = ""
-    if latest_chapter_same_title > chapter_num:
-        released = False
-    return released, embed, subs, urlbasic, urlchapter, chapter_num, message_release
+                embed = ""'''
+    '''if latest_chapter_same_title > chapter_num:
+        released = False'''
+    return released, embed, subs, urlbasic, urlchapter, chapter_num, message_release, sources_announced_already
 
 
 def doCheck(id_guild, Title, chapter_num, rHour, rMin, rDay, urlbasic, urlchapter, thumb_url, r1, g, b):

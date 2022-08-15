@@ -47,44 +47,6 @@ async def m(ctx, *args):
     for line in manhwas:
         line = line.split("  ")
         cmds.append(line[2])
-
-    '''if cmds.__contains__(args[0]):
-        # Now look into chapters and find it
-        with open("channel_listed", "r") as read_cl:
-            for line_cl in read_cl:
-                line_cl_split = line_cl.split("  ")'''
-
-    '''for manhwa in manhwas:
-            manhwa = manhwa.split("  ")
-            if manhwa[2] == args[0]:
-                # Now we found the manhwa we wanted
-                source = manhwa[4].replace(" ", "")
-                if source == 'ReaperScans':
-                    embed = \
-                        api.getReaperScans(manhwa[3], manhwa[5], manhwa[6], int(manhwa[7]), int(manhwa[8]),
-                                           int(manhwa[9]),
-                                           int(manhwa[10]), int(manhwa[11]), int(manhwa[12]), str(id_guild))[0]
-                    await ctx.send(embed=embed)
-                elif source == 'MangaClash':
-                    embed = \
-                        api.getMangaClash(manhwa[3], manhwa[5], manhwa[6], int(manhwa[7]), int(manhwa[8]),
-                                          int(manhwa[9]),
-                                          int(manhwa[10]), int(manhwa[11]), int(manhwa[12]), str(id_guild))[0]
-                    await ctx.send(embed=embed)
-                elif source == 'LuminousScans':
-                    embed = \
-                        api.getLuminousScans(manhwa[3], manhwa[5], manhwa[6], int(manhwa[7]), int(manhwa[8]),
-                                             int(manhwa[9]),
-                                             int(manhwa[10]), int(manhwa[11]), int(manhwa[12]), str(id_guild))[0]
-                    await ctx.send(embed=embed)
-                elif source == 'MangaKakalot':
-                    embed = \
-                        api.getMangaKakalot(manhwa[3], manhwa[5], manhwa[6], int(manhwa[7]), int(manhwa[8]),
-                                            int(manhwa[9]),
-                                            int(manhwa[10]), int(manhwa[11]), int(manhwa[12]), str(id_guild))[0]
-                    await ctx.send(embed=embed)
-                else:
-                    await ctx.send("We don't support this source")'''
     if args[0] == "list":
         release_list = "\n"
         with open("channel_listed", "r") as read_cl:
@@ -305,7 +267,6 @@ async def m(ctx, *args):
             else:
                 await ctx.send(f'>>> The book in library with Title: {searched_title} was **not** found!')
         elif args[1] == "sub":
-            poss_subs = []
             subscriptions = []
             subscriptions_other = []
             found = False
@@ -421,12 +382,14 @@ async def m(ctx, *args):
             for line in r_dm:
                 split_dm = line.split('-+-')
                 if split_dm[0] == str(id_guild):
-                    dm_list = split_dm[1].replace("['", '').replace("']", '').replace("'", '').replace(' ', '').split(
+                    dm_list = split_dm[1].replace("['", '').replace("']", '').replace("\n", '').replace("'", '').replace(' ', '').split(
                         ',')
+                    print(dm_list)
                     for s in dm_list:
                         s.replace(' ', '')
                         if s != '[]':
                             dm_ping.append(s)
+                    print(dm_ping)
                 else:
                     dm_other.append(line)
         if dm_ping.__contains__(ctx.author.mention):

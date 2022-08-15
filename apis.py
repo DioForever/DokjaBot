@@ -113,6 +113,7 @@ def searchReaperScans(Title):
         mnhwornvl = True
         type = str(soup.find("div", class_="post-title")).split(">")
         type = type[2].replace("</span", "")
+        print((type.lower()).__contains__("novel"))
         if (type.lower()).__contains__("novel"):
             mnhwornvl = False
         found = False
@@ -141,7 +142,8 @@ def searchReaperScans(Title):
                                                                                                        "").replace(
                     "\t",
                     "")
-                title = title[0:(len(title)-20)]
+                #title = title[0:(len(title)-20)]
+                title = title.replace("                    ","")[0:(len(title)-1)]
             except:
                 title = "Title Not Found"
             # I will need to get RGB of the thumb
@@ -169,6 +171,7 @@ def searchReaperScans(Title):
             except:
                 cmd = ""
         error = False
+        print(found, urlbasic, title, r, g, b, cmd, mnhwornvl, error)
         return found, urlbasic, title, r, g, b, cmd, mnhwornvl, error
     except:
         return False, 0, 1, 2, 3, 4, 5, 6, True
@@ -538,7 +541,7 @@ def getMangaKakalot(Title, urlbasic, urlchapter, r1, g, b, rHour, rMin, rDay, id
 
 
 def getMangaKakalotReleased(Title, urlbasic, urlchapter, r1, g, b, id_guild):
-    urlbasic = 'https://readmanganato.com/manga-ki987365'
+    urlbasic = 'https://mangakakalot.com/manga/{'
     web = req.get(url=urlbasic)
     soup = bs(web.content, features="html.parser")
     chapter_num = float(
@@ -563,7 +566,7 @@ def getMangaKakalotReleased(Title, urlbasic, urlchapter, r1, g, b, id_guild):
 def searchMangaKakalot(Title):
     try:
         # Checking if user provided url or a Title
-        if str(Title).__contains__("https://ww3.mangakakalot.tv/"):
+        if str(Title).__contains__("mangakakalot."):
             url = Title
             web = req.get(url, headers=headers)
             soup = bs(web.content, features="html.parser")
@@ -571,34 +574,24 @@ def searchMangaKakalot(Title):
         else:
             title = str(Title).lower().replace(" ", "-").replace("’", "")
             title = title.replace("---manhwa", "-manhwa")
-            url = f"https://ww3.mangakakalot.tv/manga/{title}/"
+            url = f"https://mangakakalot.com/manga/{title}/"
             web = req.get(url, headers=headers)
             soup = bs(web.content, features="html.parser")
             print(web.status_code)
+        urlbasic = url
 
-        found = False
-        urlbasic = ""
-        r = 0
-        g = 0
-        b = 0
-        cmd = ""
-
-        title = ""
-        urlbasic = ""
-        urlchapter = ""
         # I am looking for a div with class post-title
-        if soup.find("div", class_="post-title") is not None:
+        if soup.find("ul", class_="manga-info-text") is not None:
             # I checked if there is a 404 not found picture, so if there isnt, it was found
             found = True
             urlbasic = url
-            urlchapter = f"{urlbasic}chapter-"
         else:
             found = False
         # Check if its a novel or not, True = Manhwa..., False = Novel...
         if True:
             # I will find the title now,
             try:
-                title = str(soup.find("ul", class_="manga-info-text")).split(">")[4].split("<")[0].replace("\n",
+                title = str(soup.find("ul", class_="manga-info-text")).split(">")[3].split("<")[0].replace("\n",
                                                                                                        "").replace(
                     "\t",
                     "")
@@ -629,6 +622,7 @@ def searchMangaKakalot(Title):
             except:
                 cmd = ""
         error = False
+        print(found, urlbasic, title, r, g, b, cmd, True, error)
         return found, urlbasic, title, r, g, b, cmd, True, error
     except:
         return False, 0, 1, 2, 3, 4, 5, 6, True

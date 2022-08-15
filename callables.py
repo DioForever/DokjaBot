@@ -72,7 +72,7 @@ def doReleased(guild_ids, Title, chapter_num, urlbasic, urlchapter, r1, g, b, th
                     if source != Source:
                         # but only if its not the source we looking for
                         sources_announced_already.append(Source)'''
-            print(f"announced already {sources_announced_already}")
+            #print(f"announced already {sources_announced_already}")
             if Source == source:
                 #   title == Title
                 if title == Title:
@@ -250,6 +250,7 @@ def add_manga(id_guild, id_channel, cmd, title, source, url, r, g, b):
                 split_cl = line_cl.split("  ")
                 guild_ids = split_cl[0].replace("'", "").replace(" ", "").replace("[", "").replace("]", "").split(",")
                 Title = split_cl[3]
+                Source = split_cl[4]
                 #title = title[0:(len(title))]
                 if url == split_cl[5] and title == Title:
                     exist_manga = line_cl
@@ -263,7 +264,7 @@ def add_manga(id_guild, id_channel, cmd, title, source, url, r, g, b):
                 else:
                     other_manga.append(line_cl)
 
-                if Title == title and guild_ids.__contains__(id_guild):
+                if Title == title and guild_ids.__contains__(id_guild) and source == Source:
                     same_title = True
     # if its not contained it means ist not in server library
     if contained is False:

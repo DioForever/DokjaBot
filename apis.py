@@ -234,8 +234,8 @@ def getMangaClash(Title, urlbasic, urlchapter, r1, g, b, rHour, rMin, rDay, id_g
                                 last_chapters.setdefault(line_[1], f'{line_[2]}')
 
         # Check if the last_chapters has the  current chapter number, if does it has not been released yet
-
-        if last_chapters[Title] == chapter_number:
+        last_chapter = last_chapters[Title]
+        if last_chapter == chapter_number:
             released = False
         else:
             released = True
@@ -243,9 +243,18 @@ def getMangaClash(Title, urlbasic, urlchapter, r1, g, b, rHour, rMin, rDay, id_g
         if until_release[1] is True and released is True:
             message_release = f'The Chapter {int(next_chapter)} is being translated \n or is on break or has random releases'
         else:
+            #Check if there was only one chapter released
+            chapters = []
+            chapters.append(chapter_number)
+            if (last_chapter - chapter_number) != 0:
+                for num in range(int(last_chapter), int(chapter_number)):
+                    chapters.append(num)
+                    print(num)
+            chapters = chapters.replace("[", "").replace(" ", "").replace("]", "")
+            print(chapters)
             message_release = f'The Chapter {next_chapter} will be released in {until_release[0]}'
         embed = discord.Embed(title=f"{Title}", url=f"{urlbasic}",
-                              description=f"The Chapter {chapter_number} \n " + message_release + f"\n Link to latest chapter: {urlchapter}",
+                              description=f"The Chapter {str(chapters)} \n " + message_release + f"\n Link to latest chapter: {urlchapter}",
                               color=discord.Color.from_rgb(r1, g, b))
         embed.set_image(url=f"{url_thumbnail}")
     except Exception as e:
@@ -272,7 +281,7 @@ def getMangaClashReleased(Title, urlbasic, r1, g, b, guild_ids, source):
     thumbnail_text = str(thumbnail_text.find("img")).split('"')[5]
     url_thumbnail = thumbnail_text
 
-    releaseR = call.doReleased(guild_ids, Title, chapter_number, urlbasic, urlchapter, r1, g, b, url_thumbnail, source)
+    releaseR = call.doReleased(guild_ids, Title, chapter_number, urlbasic, urlchapter, r1, g, b, url_thumbnail, source, )
     if releaseR[0] is True:
         released = releaseR[0]
         embed = releaseR[1]

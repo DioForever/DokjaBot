@@ -72,6 +72,7 @@ async def m(ctx, *args):
                                           f'  -  Title, has to be exactly the same as the name from'
                                           f'     the source u specified\n'
                                           f'example: !m library add ReaperScans The World After the Fall\n'
+                                          f'example: !m library add MangaKakalot https://mangakakalot.com/manga/yn929447\n'
                                           f'!m library sub <title> and !m library unsub <title> \n'
                                           f'  - if you dont know the title, find it in !m list',
                               color=discord.Color.from_rgb(246, 214, 4))
@@ -452,4 +453,4 @@ async def releaseCheck():
 # periodical_restart.start()
 releaseCheck.start()
 # rich_presence.start()
-bot.run('')
+bot.run('ODg3Mzc4NzM3MTQ5MTQ1MTI4.GbRxgl.KRmRZzZusUzQiyGqs61NawDngP8Bq-rzdcAdqw')

@@ -99,9 +99,16 @@ def doReleased(guild_ids, Title, chapter_num, urlbasic, urlchapter, r1, g, b, th
             rewrite("server_latest", f"{source}-+-{Title}-+-{chapter_num} \n", other_latest)
             # print(f"doReleased {guild_ids, Title, chapter_num, urlbasic, urlchapter, r1, g, b, thumb_url, source} - {source}-{Title}-{chapter_num} - {other_latest}")
             released = True
-            message_release = f'The Chapter {chapter_num} was released'
+            # Check if there was only one chapter released
+            chapters = []
+            if (manga_latest - chapter_num) != 0:
+                for num in range(int(manga_latest)+1, int(chapter_num)):
+                    chapters.append(num)
+            chapters.append(chapter_num)
+            chapters = str(chapters).replace("[", "").replace("]", "")
+            message_release = f'The Chapter {chapters} was released'
             embed = discord.Embed(title=f"{Title}", url=f"{urlbasic}",
-                                  description=f"{message_release} \n Link to the chapter: {urlchapter}",
+                                  description=f"{message_release} \n Link to the latest chapter: {urlchapter}",
                                   color=discord.Color.from_rgb(r1, g, b))
             '''try:
                 embed.set_image(url=f"{thumb_url}")

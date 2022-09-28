@@ -74,7 +74,6 @@ async def chapterreleasecheck(bot, announced):
                                                        f" Link to the chapter: {urlchapter} \n"
                                                        f" Server: {server}",
                                            color=discord.Color.from_rgb(int(r), int(g), int(b)))
-
                 for user_id in dm:
                     user_id = user_id.replace("<@","").replace(">","")
                     user = await bot.fetch_user(user_id)

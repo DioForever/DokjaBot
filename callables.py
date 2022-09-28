@@ -20,7 +20,7 @@ def sortAnnounce(guild_id, subscriptions):
         for line in read_dms:
             if line.split("-")[0] == guild_id:
                 # its the servers dms we want
-                list_users = line.split("-")[1].replace("'", "").replace("[", "").replace("]", "").split(",")
+                list_users = line.split("-+-")[1].replace("'", "").replace("[", "").replace("]", "").replace("\n","").replace(" ","").split(",")
     for user in list_users:
         if pings.__contains__(user):
             pings.remove(user)

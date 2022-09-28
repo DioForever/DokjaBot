@@ -453,4 +453,4 @@ async def releaseCheck():
 # periodical_restart.start()
 releaseCheck.start()
 # rich_presence.start()
-bot.run('ODg3Mzc4NzM3MTQ5MTQ1MTI4.GbRxgl.KRmRZzZusUzQiyGqs61NawDngP8Bq-rzdcAdqw')
+bot.run('')

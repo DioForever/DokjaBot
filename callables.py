@@ -1,8 +1,21 @@
+import time
 from datetime import datetime
 import discord
 from colorthief import ColorThief
+import matplotlib.pyplot as plt
 from PIL import Image
 import requests
+import sys
+import shutil
+
+if sys.version_info < (3, 0):
+    from urllib import urlopen
+else:
+    from urllib.request import urlopen
+
+import io
+
+from colorthief import ColorThief
 
 
 def rewrite(file_name, manga_new, manga_other):
@@ -34,6 +47,7 @@ def doReleased(guild_ids, Title, chapter_num, urlbasic, urlchapter, r1, g, b, th
     subs = []
     embed = ""
     # I will have guild_id-title as a key with list of subscribed users as a value
+
 
     with open("server_release_ping", "r") as read_srp:
         for line_srp in read_srp:
@@ -221,27 +235,27 @@ def getTime(rHour, rMinute, rDay):
     return message_finall, negative
 
 
-def get_dominant_color(url_image, palette_size=16):
-    im = Image.open(requests.get(url_image, stream=True).raw)
-    img = im.copy()
+def get_dominant_color(url_image):
+    try:
+        headers = {
+            'User-Agent': 'Mozilla/5.0'}
+        response = requests.get(url_image, stream=True, headers=headers)
+        with open('img.png', 'wb') as out_file:
+            shutil.copyfileobj(response.raw, out_file)
+        del response
 
-    img.convert('RGB')
+        ct = ColorThief("img.png")
+        dm_c = ct.get_palette(quality=1)
+        plt.imshow([dm_c])
+        #plt.show()
+        dm_c = [dm_c[4][0], dm_c[4][1], dm_c[4][1]]
+        print(dm_c)
+    except Exception as e:
+        dm_c = [0,0,0]
+        print(e)
 
-    width, height = img.size
-    r_total = 0
-    g_total = 0
-    b_total = 0
-
-    for x in range(0, width):
-        for y in range(0, height):
-            r, g, b = img.getpixel((x, y))
-            r_total += r
-            g_total += g
-            b_total += b
-    # print(r_total/(width*height), g_total/(width*height), b_total/(width*height))
-
-    #               R                      G                        B
-    return round(r_total / (width * height)), round(g_total / (width * height)), round(b_total / (width * height))
+    #           R          G           B
+    return dm_c[0], dm_c[1], dm_c[1]
 
 
 def add_manga(id_guild, id_channel, cmd, title, source, url, r, g, b):

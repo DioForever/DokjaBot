@@ -9,7 +9,6 @@ headers = {
 
 def getReleases(source, Title, urlbasic, r1, g, b, id_guild):
     try:
-        #print(source.replace(" ","*"))
         r = []
         if source == "ReaperScans":
             r = getReaperScansReleased(Title, urlbasic, r1, g, b, id_guild, source)
@@ -249,9 +248,7 @@ def getMangaClash(Title, urlbasic, urlchapter, r1, g, b, rHour, rMin, rDay, id_g
             if (last_chapter - chapter_number) != 0:
                 for num in range(int(last_chapter), int(chapter_number)):
                     chapters.append(num)
-                    print(num)
             chapters = chapters.replace("[", "").replace(" ", "").replace("]", "")
-            print(chapters)
             message_release = f'The Chapter {next_chapter} will be released in {until_release[0]}'
         embed = discord.Embed(title=f"{Title}", url=f"{urlbasic}",
                               description=f"The Chapter {str(chapters)} \n " + message_release + f"\n Link to latest chapter: {urlchapter}",
@@ -277,9 +274,13 @@ def getMangaClashReleased(Title, urlbasic, r1, g, b, guild_ids, source):
     urlchapter = urlbasic + "/chapter-" + str(int(chapter_number)) + "/"
 
     # now I need the chapter_thumbnail
-    thumbnail_text = (menu_soup.find("div", class_="summary_image"))
-    thumbnail_text = str(thumbnail_text.find("img")).split('"')[5]
-    url_thumbnail = thumbnail_text
+
+    text_thumbnail = (menu_soup.find("div", class_="summary_image"))
+    url_thumbnail = str(text_thumbnail.find("a")).split('"')
+    if  not (url_thumbnail[9].__contains__("http")):
+        url_thumbnail = url_thumbnail[7]
+    else:
+        url_thumbnail = url_thumbnail[9]
 
     releaseR = call.doReleased(guild_ids, Title, chapter_number, urlbasic, urlchapter, r1, g, b, url_thumbnail, source, )
     if releaseR[0] is True:
@@ -345,7 +346,13 @@ def searchMangaClash(Title):
         # I will need to get RGB of the thumb
         # so first I get the thumbnail
         try:
-            url_thumb = str(soup.find("div", class_="summary_image")).split('"')[11]
+            text_thumbnail = (soup.find("div", class_="summary_image"))
+            url_thumb = str(text_thumbnail.find("a")).split('"')
+            if not (url_thumb[9].__contains__("http")):
+                url_thumb = url_thumb[7]
+            else:
+                url_thumb = url_thumb[9]
+
             dominant_color = call.get_dominant_color(url_thumb)
         except:
             dominant_color = [0, 0, 0]
@@ -405,10 +412,10 @@ def getLuminousScansReleased(Title, urlbasic, r1, g, b, id_guild, source):
 
     # I will get the picture from the website as well
     try:
-        thumb_url = str(soup.find('div', class_='thumb')).split()[15].split('"')[1]
+        thumb_url = str(soup.find('div', class_='thumb')).split('"')[19]
     except:
         thumb_url = ""
-
+    #print(f"{thumb_url} - url")
     #(guild_ids, Title, chapter_num, urlbasic, urlchapter, r1, g, b, thumb_url, source)
     releaseR = call.doReleased(id_guild, Title, chapter_number, urlbasic, urlchapter, r1, g, b, thumb_url, source)
     if releaseR[0] is True:
@@ -502,7 +509,8 @@ def searchLuminousScans(Title):
             # I will need to get RGB of the thumb
             # so first I get the thumbnail
             try:
-                url_thumb = str(soup.find("div", class_="thumb")).split('"')[11]
+                url_thumb = str(soup.find('div', class_='thumb')).split('"')[19]
+                #print(url_thumb)
                 dominant_color = call.get_dominant_color(url_thumb)
             except:
                 dominant_color = [0, 0, 0]

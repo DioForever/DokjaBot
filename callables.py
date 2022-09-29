@@ -120,7 +120,7 @@ def doReleased(guild_ids, Title, chapter_num, urlbasic, urlchapter, r1, g, b, th
                     chapters.append(num)
             chapters.append(chapter_num)
             chapters = str(chapters).replace("[", "").replace("]", "")
-            message_release = f'The Chapter {chapters} was released'
+            message_release = f'The Chapter/s {chapters} was released'
             embed = nextcord.Embed(title=f"{Title}", url=f"{urlbasic}",
                                   description=f"{message_release} \n Link to the latest chapter: {urlchapter}",
                                   color=nextcord.Color.from_rgb(r1, g, b))
@@ -130,7 +130,7 @@ def doReleased(guild_ids, Title, chapter_num, urlbasic, urlchapter, r1, g, b, th
                 embed = ""'''
     '''if latest_chapter_same_title > chapter_num:
         released = False'''
-    return released, embed, subs, urlbasic, urlchapter, chapter_num, message_release, sources_announced_already
+    return released, embed, subs, urlbasic, urlchapter, chapter_num, message_release, sources_announced_already, chapters
 
 
 def doCheck(id_guild, Title, chapter_num, rHour, rMin, rDay, urlbasic, urlchapter, thumb_url, r1, g, b):

@@ -41,6 +41,7 @@ async def chapterreleasecheck(bot, announced):
             message_release = release[7]
             sources_announced_already = release[8]
             url_thumb = release[9]
+            chapters = release[10]
             # first I need to find out to which channels I already told it
             # cuz I got manga with same title maybe advanced
             with open("channel_listed", "r") as read_cl:
@@ -74,7 +75,7 @@ async def chapterreleasecheck(bot, announced):
                     await channel.send(ping)
                 server = bot.get_guild(int(guild_id))
                 embed_user = nextcord.Embed(title=f"{title}", url=f"{urlbasic}",
-                                           description=f"The Chapter {chapter_num} was released! \n"
+                                           description=f"The Chapter/s {chapters} was released! \n"
                                                        f" Link to the chapter: {urlchapter} \n"
                                                        f" Server: {server}",
                                            color=nextcord.Color.from_rgb(int(r), int(g), int(b)))

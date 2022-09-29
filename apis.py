@@ -34,7 +34,8 @@ def getReleases(source, Title, urlbasic, r1, g, b, id_guild):
             chapter_num = r[6]
             message_release = r[7]
             sources_announced_already = r[8]
-            return released, embed, subscription, chapter_number, urlbasic, urlchapter, chapter_num, message_release, sources_announced_already, url_thumb
+            chapters = r[10]
+            return released, embed, subscription, chapter_number, urlbasic, urlchapter, chapter_num, message_release, sources_announced_already, url_thumb, chapters
         else:
             embed = ""
             return released, embed
@@ -96,7 +97,8 @@ def getReaperScansReleased(Title, urlbasic, r1, g, b, guild_ids, source):
         chapter_num = releaseR[5]
         message_release = releaseR[6]
         sources_announced_already = releaseR[7]
-        return released, embed, subscription, chapter_number, urlbasic, urlchapter, chapter_num, message_release,sources_announced_already, url_thumbnail
+        chapters = releaseR[8]
+        return released, embed, subscription, chapter_number, urlbasic, urlchapter, chapter_num, message_release,sources_announced_already, url_thumbnail, chapters
     else:
         released = releaseR[0]
         embed = ""
@@ -292,7 +294,8 @@ def getMangaClashReleased(Title, urlbasic, r1, g, b, guild_ids, source):
         chapter_num = releaseR[5]
         message_release = releaseR[6]
         sources_announced_already = releaseR[7]
-        return released, embed, subscription, chapter_number, urlbasic, urlchapter, chapter_num, message_release, sources_announced_already, url_thumbnail
+        chapters = releaseR[8]
+        return released, embed, subscription, chapter_number, urlbasic, urlchapter, chapter_num, message_release, sources_announced_already, url_thumbnail, chapters
     else:
         released = releaseR[0]
         embed = ""
@@ -427,7 +430,8 @@ def getLuminousScansReleased(Title, urlbasic, r1, g, b, id_guild, source):
         chapter_num = releaseR[5]
         message_release = releaseR[6]
         sources_announced_already = releaseR[7]
-        return released, embed, subscription, chapter_number, urlbasic, urlchapter, chapter_num, message_release,sources_announced_already, thumb_url
+        chapters = releaseR[8]
+        return released, embed, subscription, chapter_number, urlbasic, urlchapter, chapter_num, message_release,sources_announced_already, thumb_url, chapters
     else:
         released = releaseR[0]
         embed = ""
@@ -561,22 +565,33 @@ def getMangaKakalotReleased(Title, urlbasic, urlchapter, r1, g, b, id_guild):
     urlbasic = 'https://mangakakalot.com/manga/{'
     web = req.get(url=urlbasic)
     soup = bs(web.content, features="html.parser")
-    chapter_num = float(
+    chapter_number = float(
         str(soup.find("a", class_='chapter-name text-nowrap')).split('"')[8].replace('>Chapter ', '').replace('</a>',
                                                                                                               ''))
     # Now I need to get thumbnail
     thumb_url = str(soup.find('span', class_='info-image')).split('"')[9]
 
     # Now I need to do the chapter url
-    urlchapter = urlchapter + f'{int(chapter_num)}'
+    urlchapter = urlchapter + f'{int(chapter_number)}'
 
     # Now I need to get the server_latest and server_release_ping
-    doFiles = call.doReleased(id_guild, Title, chapter_num, urlbasic, urlchapter, r1, g, b, thumb_url)
-    released = doFiles[0]
-    embed = doFiles[1]
-    subscription = doFiles[2]
+    releaseR = call.doReleased(id_guild, Title, chapter_number, urlbasic, urlchapter, r1, g, b, thumb_url)
 
-    return released, embed, subscription, chapter_num, thumb_url
+    if releaseR[0] is True:
+        released = releaseR[0]
+        embed = releaseR[1]
+        subscription = releaseR[2]
+        urlbasic = releaseR[3]
+        urlchapter = releaseR[4]
+        chapter_num = releaseR[5]
+        message_release = releaseR[6]
+        sources_announced_already = releaseR[7]
+        chapters = releaseR[8]
+        return released, embed, subscription, chapter_number, urlbasic, urlchapter, chapter_num, message_release, sources_announced_already, thumb_url, chapters
+    else:
+        released = releaseR[0]
+        embed = ""
+        return released, embed
 
 
 # idk how their naming sense works tbh

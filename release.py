@@ -1,5 +1,5 @@
 from datetime import datetime
-import discord
+import nextcord
 import apis as api
 import callables as call
 
@@ -40,6 +40,7 @@ async def chapterreleasecheck(bot, announced):
             chapter_num = release[6]
             message_release = release[7]
             sources_announced_already = release[8]
+            url_thumb = release[9]
             # first I need to find out to which channels I already told it
             # cuz I got manga with same title maybe advanced
             with open("channel_listed", "r") as read_cl:
@@ -57,27 +58,32 @@ async def chapterreleasecheck(bot, announced):
             count = 0
             for channel_id in channel_ids:
                 channel = bot.get_channel(int(channel_id))
-                await channel.send(embed=embed)
+                dominant_color = call.get_dominant_color(url_thumb)
+                file = nextcord.File("img.png", filename="img.png")
+                embed.set_image(url="attachment://img.png")
+                await channel.send(file=file, embed=embed)
                 guild_id = guild_ids[count]
                 ping_types = call.sortAnnounce(guild_id, subscription)
                 dm = ping_types[0]
                 ping = str(ping_types[1]).replace("[","").replace("]","").replace("'","")
                 if len(ping) > 0:
-                    embed_pings = discord.Embed(title=f"Ping",
+                    embed_pings = nextcord.Embed(title=f"Ping",
                                                description=f"Yo, just pinging ya, cuz u wana know about this \n",
-                                               color=discord.Color.from_rgb(255, 200, 0))
+                                               color=nextcord.Color.from_rgb(255, 200, 0))
                     await channel.send(embed=embed_pings)
                     await channel.send(ping)
                 server = bot.get_guild(int(guild_id))
-                embed_user = discord.Embed(title=f"{title}", url=f"{urlbasic}",
+                embed_user = nextcord.Embed(title=f"{title}", url=f"{urlbasic}",
                                            description=f"The Chapter {chapter_num} was released! \n"
                                                        f" Link to the chapter: {urlchapter} \n"
                                                        f" Server: {server}",
-                                           color=discord.Color.from_rgb(int(r), int(g), int(b)))
+                                           color=nextcord.Color.from_rgb(int(r), int(g), int(b)))
+                file = nextcord.File("img.png", filename="img.png")
+                embed_user.set_image(url="attachment://img.png")
                 for user_id in dm:
                     user_id = user_id.replace("<@","").replace(">","")
                     user = await bot.fetch_user(user_id)
-                    await user.send(embed=embed_user)
+                    await user.send(file=file, embed=embed_user)
 
                 count += 1
 

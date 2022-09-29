@@ -1,19 +1,21 @@
-from discord.ext import tasks
-import discord
-from discord.ext import commands
+from nextcord.ext import tasks
+import nextcord
+from nextcord.ext import commands
 import os
 import sys
 import release
 import apis as api
 import callables as call
-from PIL import Image
+from nextcord import Interaction
 
-bot = commands.Bot(command_prefix="!")
+intents = nextcord.Intents.default()
+intents.message_content = True
+client = nextcord.Client(intents=intents)
+bot = commands.Bot(command_prefix='!', intents=intents)
 
 # await bot.wait_until_ready()
 print("DokjaBot activated - Made by DioForever - dioforever.live")
 
-img = Image.open("archmage.jpg")
 
 announced = {}
 
@@ -24,8 +26,8 @@ async def rich_presence():
     await bot.wait_until_ready()
     guilds = bot.guilds
     number_of_servers = len(guilds)
-    await bot.change_presence(status=discord.Status.online,
-                              activity=discord.Game(f'Library of Culture on {number_of_servers} servers'), )
+    await bot.change_presence(status=nextcord.Status.online,
+                              activity=nextcord.Game(f'Library of Culture on {number_of_servers} servers'), )
 
 
 @bot.command()
@@ -55,16 +57,19 @@ async def m(ctx, *args):
                 guild_ids = line_cl[0].replace("[", "").replace(" ", "").replace("]", "").replace("'", "").split(",")
                 if guild_ids.__contains__(str(id_guild)):
                     release_list += f"{line_cl[3]}: !m {line_cl[2]}\n"
-        embed = discord.Embed(title=f"List of Manhwas/Mangas",
+        embed = nextcord.Embed(title=f"List of Manhwas/Mangas",
                               description=f"The list of commands for \n " + "Manhwas and Mangas in system" + f"\n {release_list}",
-                              color=discord.Color.from_rgb(246, 214, 4))
+                              color=nextcord.Color.from_rgb(246, 214, 4))
         await ctx.send(embed=embed)
     elif args[0] == "test":
         '''embed = getMangaClashReleased("The Beginning After The End","https://mangaclash.com/manga/the-beginning-after-the-end/","https://mangaclash.com/manga/the-beginning-after-the-end/chapter-", 0,0,0)[0]
         await ctx.send(embed = embed)'''
-
+        embed = nextcord.Embed(title="Title", description="Desc", color=0x00ff00)  # creates embed
+        file = nextcord.File("img.png", filename="img.png")
+        embed.set_image(url="attachment://img.png")
+        await ctx.send(file=file, embed=embed)
     elif args[0] == "help":
-        embed = discord.Embed(title=f"DokjaBot - Help Menu",
+        embed = nextcord.Embed(title=f"DokjaBot - Help Menu",
                               description=f'The list of commands for DokjaBot \n'
                                           f'!m list - writes down every manga/manhwa in the server library \n'
                                           f'!m library add <Source> <Title> \n'
@@ -75,10 +80,10 @@ async def m(ctx, *args):
                                           f'example: !m library add MangaKakalot https://mangakakalot.com/manga/yn929447\n'
                                           f'!m library sub <title> and !m library unsub <title> \n'
                                           f'  - if you dont know the title, find it in !m list',
-                              color=discord.Color.from_rgb(246, 214, 4))
+                              color=nextcord.Color.from_rgb(246, 214, 4))
         await ctx.send(embed=embed)
     elif args[0] == "sources":
-        embed = discord.Embed(title=f"DokjaBot - Sources",
+        embed = nextcord.Embed(title=f"DokjaBot - Sources",
                               description=f'When asked for source, write the code of source'
                                           f'The sources we support are \n'
                                           f'----Name----------Code----\n'
@@ -86,7 +91,7 @@ async def m(ctx, *args):
                                           f'MangaClash: MangaClash \n'
                                           f'Luminous Scans: LuminousScans \n'
                                           f'MangaKakalot: MangaKakalot',
-                              color=discord.Color.from_rgb(246, 214, 4))
+                              color=nextcord.Color.from_rgb(246, 214, 4))
         await ctx.send(embed=embed)
     elif args[0] == "library":
         if args[1] == "add":
@@ -113,18 +118,18 @@ async def m(ctx, *args):
                 if error is False:
                     if search[0] is True and search[7] is False:
                         # tell it was found but was a novel
-                        embed = discord.Embed(title=f"Search of {searched_title}",
+                        embed = nextcord.Embed(title=f"Search of {searched_title}",
                                               description=f"- Found \n "
                                                           f"- A Novel \n"
                                                           f"= Not added \n"
                                                           f"+ Try adding: -Manhwa",
-                                              color=discord.Color.from_rgb(255, 255, 0))
+                                              color=nextcord.Color.from_rgb(255, 255, 0))
                         await ctx.send(embed=embed)
                     elif search[0] is False:
                         # tell it wasnt found
-                        embed = discord.Embed(title=f"Search of {searched_title}",
+                        embed = nextcord.Embed(title=f"Search of {searched_title}",
                                               description=f"- Not Found \n ",
-                                              color=discord.Color.from_rgb(255, 0, 0))
+                                              color=nextcord.Color.from_rgb(255, 0, 0))
                         await ctx.send(embed=embed)
                     else:
                         # found
@@ -137,29 +142,29 @@ async def m(ctx, *args):
                         # if it returns as False it wasnt added already, but if its true, its already in libraryy
                         am = call.add_manga(str(id_guild), str(id_channel), cmd, title, source, url, r, g, b)
                         if am is False:
-                            embed = discord.Embed(title=f"Search of {title}",
+                            embed = nextcord.Embed(title=f"Search of {title}",
                                                   description=f"- Found \n "
                                                               f"- Added to library \n "
                                                               f"- cmd: {cmd} \n"
                                                               f"- url: {url}",
-                                                  color=discord.Color.from_rgb(0, 255, 0))
+                                                  color=nextcord.Color.from_rgb(0, 255, 0))
                             await ctx.send(embed=embed)
                         else:
-                            embed = discord.Embed(title=f"Search of {title}",
+                            embed = nextcord.Embed(title=f"Search of {title}",
                                                   description=f"- Found \n "
                                                               f"- Already in library \n "
                                                               f"- cmd: {cmd}",
-                                                  color=discord.Color.from_rgb(255, 255, 0))
+                                                  color=nextcord.Color.from_rgb(255, 255, 0))
                             await ctx.send(embed=embed)
                 else:
-                    embed = discord.Embed(title=f"Search of {searched_title}",
+                    embed = nextcord.Embed(title=f"Search of {searched_title}",
                                           description=f"- Not Found \n "
                                                       f"- If error appeared their  \n"
                                                       f"- website is probably down \n"
                                                       f"- try check their website or \n"
                                                       f"- correct the searched title \n"
                                                       f"+ you can use a link as well ",
-                                          color=discord.Color.from_rgb(255, 0, 0))
+                                          color=nextcord.Color.from_rgb(255, 0, 0))
                     await ctx.send(embed=embed)
             else:
                 await ctx.send(f">>> You didn't specify the source! \n"

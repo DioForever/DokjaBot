@@ -1,6 +1,6 @@
 import time
 from datetime import datetime
-import discord
+import nextcord
 from colorthief import ColorThief
 import matplotlib.pyplot as plt
 from PIL import Image
@@ -121,9 +121,9 @@ def doReleased(guild_ids, Title, chapter_num, urlbasic, urlchapter, r1, g, b, th
             chapters.append(chapter_num)
             chapters = str(chapters).replace("[", "").replace("]", "")
             message_release = f'The Chapter {chapters} was released'
-            embed = discord.Embed(title=f"{Title}", url=f"{urlbasic}",
+            embed = nextcord.Embed(title=f"{Title}", url=f"{urlbasic}",
                                   description=f"{message_release} \n Link to the latest chapter: {urlchapter}",
-                                  color=discord.Color.from_rgb(r1, g, b))
+                                  color=nextcord.Color.from_rgb(r1, g, b))
             '''try:
                 embed.set_image(url=f"{thumb_url}")
             except:
@@ -191,10 +191,10 @@ def doCheck(id_guild, Title, chapter_num, rHour, rMin, rDay, urlbasic, urlchapte
         message_release = f'The Chapter {chapter_num} is being translated \n or is on break or has random releases'
     else:
         message_release = f'The Chapter {(float(chapter_num) + 1)} will be released in {until_release[0]}'
-    embed = discord.Embed(title=f"{Title}", url=f"{urlbasic}",
+    embed = nextcord.Embed(title=f"{Title}", url=f"{urlbasic}",
                           description=f"The Chapter {chapter_num} \n " + message_release + f"\n Link to latest chapter: {urlchapter}",
-                          color=discord.Color.from_rgb(r1, g, b))
-    embed.set_image(url=f"{thumb_url}")
+                          color=nextcord.Color.from_rgb(r1, g, b))
+    embed.set_thumbnail(url=f"https://www.google.com/search?q=fff+trashero&client=opera-gx&hs=BBK&sxsrf=ALiCzsZUx2gNvJgySiMH_2UGwO94LdpjOA:1664465382897&source=lnms&tbm=isch&sa=X&ved=2ahUKEwiSwY3fqLr6AhXJnaQKHRptCj8Q_AUoAXoECAEQAw&biw=1495&bih=715&dpr=1.25#imgrc=5B_dVmqjAF9StM")
 
     return embed
 
@@ -249,7 +249,7 @@ def get_dominant_color(url_image):
         plt.imshow([dm_c])
         #plt.show()
         dm_c = [dm_c[4][0], dm_c[4][1], dm_c[4][1]]
-        print(dm_c)
+        #print(dm_c)
     except Exception as e:
         dm_c = [0,0,0]
         print(e)

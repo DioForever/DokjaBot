@@ -1,4 +1,4 @@
-import discord
+import nextcord
 import requests as req
 from bs4 import BeautifulSoup as bs
 import callables as call
@@ -30,10 +30,11 @@ def getReleases(source, Title, urlbasic, r1, g, b, id_guild):
             chapter_number = r[3]
             urlbasic = r[4]
             urlchapter = r[5]
+            url_thumb = r[9]
             chapter_num = r[6]
             message_release = r[7]
             sources_announced_already = r[8]
-            return released, embed, subscription, chapter_number, urlbasic, urlchapter, chapter_num, message_release, sources_announced_already
+            return released, embed, subscription, chapter_number, urlbasic, urlchapter, chapter_num, message_release, sources_announced_already, url_thumb
         else:
             embed = ""
             return released, embed
@@ -95,7 +96,7 @@ def getReaperScansReleased(Title, urlbasic, r1, g, b, guild_ids, source):
         chapter_num = releaseR[5]
         message_release = releaseR[6]
         sources_announced_already = releaseR[7]
-        return released, embed, subscription, chapter_number, urlbasic, urlchapter, chapter_num, message_release,sources_announced_already
+        return released, embed, subscription, chapter_number, urlbasic, urlchapter, chapter_num, message_release,sources_announced_already, url_thumbnail
     else:
         released = releaseR[0]
         embed = ""
@@ -250,10 +251,9 @@ def getMangaClash(Title, urlbasic, urlchapter, r1, g, b, rHour, rMin, rDay, id_g
                     chapters.append(num)
             chapters = chapters.replace("[", "").replace(" ", "").replace("]", "")
             message_release = f'The Chapter {next_chapter} will be released in {until_release[0]}'
-        embed = discord.Embed(title=f"{Title}", url=f"{urlbasic}",
+        embed = nextcord.Embed(title=f"{Title}", url=f"{urlbasic}",
                               description=f"The Chapter {str(chapters)} \n " + message_release + f"\n Link to latest chapter: {urlchapter}",
-                              color=discord.Color.from_rgb(r1, g, b))
-        embed.set_image(url=f"{url_thumbnail}")
+                              color=nextcord.Color.from_rgb(r1, g, b))
     except Exception as e:
         print(f'Error of MangaClash {Title}: {e}')
 
@@ -292,7 +292,7 @@ def getMangaClashReleased(Title, urlbasic, r1, g, b, guild_ids, source):
         chapter_num = releaseR[5]
         message_release = releaseR[6]
         sources_announced_already = releaseR[7]
-        return released, embed, subscription, chapter_number, urlbasic, urlchapter, chapter_num, message_release, sources_announced_already
+        return released, embed, subscription, chapter_number, urlbasic, urlchapter, chapter_num, message_release, sources_announced_already, url_thumbnail
     else:
         released = releaseR[0]
         embed = ""
@@ -378,7 +378,7 @@ def searchMangaClash(Title):
         error = True
 
 
-    return found, urlbasic, title, r, g, b, cmd, mnhwornvl, error
+    return found, urlbasic, title, r, g, b, cmd, mnhwornvl, error, url_thumb
 
 
 def getAquaManga(Title, urlbasic, urlchapter, r1, g, b, rHour, rMin, rDay):
@@ -427,7 +427,7 @@ def getLuminousScansReleased(Title, urlbasic, r1, g, b, id_guild, source):
         chapter_num = releaseR[5]
         message_release = releaseR[6]
         sources_announced_already = releaseR[7]
-        return released, embed, subscription, chapter_number, urlbasic, urlchapter, chapter_num, message_release,sources_announced_already
+        return released, embed, subscription, chapter_number, urlbasic, urlchapter, chapter_num, message_release,sources_announced_already, thumb_url
     else:
         released = releaseR[0]
         embed = ""
@@ -576,11 +576,12 @@ def getMangaKakalotReleased(Title, urlbasic, urlchapter, r1, g, b, id_guild):
     embed = doFiles[1]
     subscription = doFiles[2]
 
-    return released, embed, subscription, chapter_num
+    return released, embed, subscription, chapter_num, thumb_url
 
 
 # idk how their naming sense works tbh
 def searchMangaKakalot(Title):
+    global url_thumb
     try:
         # Checking if user provided url or a Title
         if str(Title).__contains__("mangakakalot."):
@@ -640,7 +641,7 @@ def searchMangaKakalot(Title):
                 cmd = ""
         error = False
         print(found, urlbasic, title, r, g, b, cmd, True, error)
-        return found, urlbasic, title, r, g, b, cmd, True, error
+        return found, urlbasic, title, r, g, b, cmd, True, error, url_thumb
     except:
         return False, 0, 1, 2, 3, 4, 5, 6, True
 

@@ -399,19 +399,19 @@ def getAquaMangaReleased(Title, urlbasic, urlchapter, r1, g, b):
 
 def getLuminousScansReleased(Title, urlbasic, r1, g, b, id_guild, source):
     # We get the soup of the website
+    print("Lum")
     # urlbasic = 'https://luminousscans.com/series/1653732347-fff-class-trash-hero/'
     web = req.get(url=urlbasic, headers=headers)
     soup = bs(web.content, features="html.parser")
     content = web.content
+    #print(content)
     # Now we split it at the epcurlast class and split it again so we get the Chapter {number}
-    chapter_text = str(content).split('epcurlast')
-    chapter_text = chapter_text[1].split('<')[0].replace('">', '')
-
-    chapter_number = float(chapter_text.split()[1])
+    chapter_text = str(content).split('chapterlist')[1]
+    chapter_number = float(chapter_text.split('data-num=')[1].split('"')[1])
 
     #
     # Url chapter
-    urlchapter = urlbasic + f'chapter-{int(chapter_number)}/'
+    urlchapter = chapter_text.split("href=")[1].split('"')[1]
 
     # I will get the picture from the website as well
     try:

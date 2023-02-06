@@ -399,7 +399,6 @@ def getAquaMangaReleased(Title, urlbasic, urlchapter, r1, g, b):
 
 def getLuminousScansReleased(Title, urlbasic, r1, g, b, id_guild, source):
     # We get the soup of the website
-    print("Lum")
     # urlbasic = 'https://luminousscans.com/series/1653732347-fff-class-trash-hero/'
     web = req.get(url=urlbasic, headers=headers)
     soup = bs(web.content, features="html.parser")

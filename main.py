@@ -1,4 +1,4 @@
-from nextcord.ext import tasks
+from nextcord.ext import tasks, application_checks
 from nextcord.ext import commands
 from nextcord import Interaction
 import nextcord
@@ -11,7 +11,7 @@ import apis as api
 import callables as call
 
 
-
+allowed_mentions = nextcord.AllowedMentions(roles = True)
 intents = nextcord.Intents.default()
 intents.message_content = True
 bot = commands.Bot(command_prefix='!', intents=intents)
@@ -41,6 +41,14 @@ print("DokjaBot activated - Made by DioForever - dioforever.live")
 
 announced = {}
 
+async def no_perms(interaction, error):
+    if isinstance(error, application_checks.ApplicationMissingPermissions):
+        embed = nextcord.Embed(title=f"Required Administrator perms!",
+                               color=nextcord.Color.from_rgb(255, 0, 0))
+        await interaction.response.send_message(embed=embed, delete_after = 5)
+    else:
+        raise error
+
 
 @tasks.loop(seconds=60)
 async def rich_presence():
@@ -51,10 +59,22 @@ async def rich_presence():
                               activity=nextcord.Game(f'Library of Culture on {number_of_servers} servers'), )
 
 @bot.slash_command(name="library_addrole", description="Adds role ping to specific manga/manhwa.", guild_ids=serverID)
-@commands.has_permissions(administrator=True)
+@application_checks.has_permissions(administrator=True)
 async def library_add(interaction: Interaction, role: str, title: str):
     print(role)
-    await interaction.response.send_message(role)
+    role = int(role.strip("<@&").strip(">"))
+    allowed_mentions = nextcord.AllowedMentions(roles = True)
+    try:
+        hrole = interaction.guild.get_role(role)
+        await interaction.response.send_message(hrole.mention, allowed_mentions=allowed_mentions)
+    except:
+        embed = nextcord.Embed(title=f"You didnt ping a role",
+                               color=nextcord.Color.from_rgb(255, 0, 0))
+        await interaction.response.send_message(embed=embed, delete_after = 5)
+
+@library_add.error
+async def no_perms_ladd(interaction: Interaction, error):
+    await no_perms(interaction,error)
 
 @bot.slash_command(name="library_add", description="Adds the manga to the server library", guild_ids=serverID)
 async def library_add(interaction: Interaction, source: str, title_or_url: str):

@@ -2,6 +2,7 @@ from datetime import datetime
 import nextcord
 import apis as api
 import callables as call
+import linking as link
 
 
 # @tasks.loop(seconds=60)
@@ -62,17 +63,21 @@ async def chapterreleasecheck(bot, announced):
                 dominant_color = call.get_dominant_color(url_thumb)
                 file = nextcord.File("img.png", filename="img.png")
                 embed.set_image(url="attachment://img.png")
-                await channel.send(file=file, embed=embed)
+                # Need to check if there isn't link
                 guild_id = guild_ids[count]
-                ping_types = call.sortAnnounce(guild_id, subscription)
-                dm = ping_types[0]
-                ping = str(ping_types[1]).replace("[","").replace("]","").replace("'","")
-                if len(ping) > 0:
-                    embed_pings = nextcord.Embed(title=f"Ping",
-                                               description=f"Yo, just pinging ya, cuz u wana know about this \n",
-                                               color=nextcord.Color.from_rgb(255, 200, 0))
-                    await channel.send(embed=embed_pings)
-                    await channel.send(ping)
+                print("checkin")
+                if link.link_check(guild_id, title, chapter_number) == False:
+                    await channel.send(file=file, embed=embed)
+                    ping_types = call.sortAnnounce(guild_id, subscription)
+                    dm = ping_types[0]
+                    ping = str(ping_types[1]).replace("[","").replace("]","").replace("'","")
+                    if len(ping) > 0:
+                        embed_pings = nextcord.Embed(title=f"Ping",
+                                                   description=f"Yo, just pinging ya, cuz u wana know about this \n",
+                                                   color=nextcord.Color.from_rgb(255, 200, 0))
+                        await channel.send(embed=embed_pings)
+                        await channel.send(ping)
+                # This is code for DM - we do this either way
                 server = bot.get_guild(int(guild_id))
                 embed_user = nextcord.Embed(title=f"{title}", url=f"{urlbasic}",
                                            description=f"The Chapter/s {chapters} was released! \n"

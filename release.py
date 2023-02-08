@@ -77,19 +77,19 @@ async def chapterreleasecheck(bot, announced):
                                                    color=nextcord.Color.from_rgb(255, 200, 0))
                         await channel.send(embed=embed_pings)
                         await channel.send(ping)
-                # This is code for DM - we do this either way
-                server = bot.get_guild(int(guild_id))
-                embed_user = nextcord.Embed(title=f"{title}", url=f"{urlbasic}",
-                                           description=f"The Chapter/s {chapters} was released! \n"
-                                                       f" Link to the chapter: {urlchapter} \n"
-                                                       f" Server: {server}",
-                                           color=nextcord.Color.from_rgb(int(r), int(g), int(b)))
-                file = nextcord.File("img.png", filename="img.png")
-                embed_user.set_image(url="attachment://img.png")
-                for user_id in dm:
-                    user_id = user_id.replace("<@","").replace(">","")
-                    user = await bot.fetch_user(user_id)
-                    await user.send(file=file, embed=embed_user)
+
+                    server = bot.get_guild(int(guild_id))
+                    embed_user = nextcord.Embed(title=f"{title}", url=f"{urlbasic}",
+                                               description=f"The Chapter/s {chapters} was released! \n"
+                                                           f" Link to the chapter: {urlchapter} \n"
+                                                           f" Server: {server}",
+                                               color=nextcord.Color.from_rgb(int(r), int(g), int(b)))
+                    file = nextcord.File("img.png", filename="img.png")
+                    embed_user.set_image(url="attachment://img.png")
+                    for user_id in dm:
+                        user_id = user_id.replace("<@","").replace(">","")
+                        user = await bot.fetch_user(user_id)
+                        await user.send(file=file, embed=embed_user)
 
                 count += 1
 

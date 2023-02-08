@@ -60,7 +60,7 @@ async def rich_presence():
 
 @bot.slash_command(name="library_addrole", description="Adds role ping to specific manga/manhwa.", guild_ids=serverID)
 @application_checks.has_permissions(administrator=True)
-async def library_add(interaction: Interaction, role: str, title: str):
+async def library_addrole(interaction: Interaction, role: str, title: str):
     print(role)
     role = int(role.strip("<@&").strip(">"))
     allowed_mentions = nextcord.AllowedMentions(roles = True)
@@ -72,94 +72,94 @@ async def library_add(interaction: Interaction, role: str, title: str):
                                color=nextcord.Color.from_rgb(255, 0, 0))
         await interaction.response.send_message(embed=embed, delete_after = 5)
 
-@library_add.error
+@library_addrole.error
 async def no_perms_ladd(interaction: Interaction, error):
     await no_perms(interaction,error)
 
 @bot.slash_command(name="library_add", description="Adds the manga to the server library", guild_ids=serverID)
+@application_checks.has_permissions(administrator=True)
 async def library_add(interaction: Interaction, source: str, title_or_url: str):
-    if Interaction.message.author.guild_permissions.administrator:
-        if source == "MangaClash" or source == "ReaperScans" or source == "MangaKakalot" or source == "LuminousScans":
-            try:
-                id_channel = interaction.channel_id
-                id_guild = interaction.guild_id
-            except:
-                id_guild = None
-                id_channel = None
-            search = False
+    if source == "MangaClash" or source == "ReaperScans" or source == "MangaKakalot" or source == "LuminousScans":
+        try:
+            id_channel = interaction.channel_id
+            id_guild = interaction.guild_id
+        except:
+            id_guild = None
+            id_channel = None
+        search = False
 
-            searched_title = title_or_url.replace("–", "-")
-            if source == "ReaperScans":
-                search = api.searchReaperScans(searched_title)
-                source = "ReaperScans"
-            elif source == "MangaClash":
-                search = api.searchMangaClash(searched_title)
-                source = "MangaClash"
-            elif source == "MangaKakalot":
-                search = api.searchMangaKakalot(searched_title)
-                source = "MangaKakalot"
-            elif source == "LuminousScans":
-                search = api.searchLuminousScans(searched_title)
-                source = "LuminousScans"
-            error = search[8]
-            if error is False:
-                if search[0] is True and search[7] is False:
-                    # tell it was found but was a novel
-                    embed = nextcord.Embed(title=f"Search of {searched_title}",
-                                           description=f"- Found \n "
-                                                       f"- A Novel \n"
-                                                       f"= Not added \n"
-                                                       f"+ Try adding: -Manhwa",
-                                           color=nextcord.Color.from_rgb(255, 255, 0))
-                    await interaction.response.send_message(embed=embed)
-                elif search[0] is False:
-                    # tell it wasnt found
-                    embed = nextcord.Embed(title=f"Search of {searched_title}",
-                                           description=f"- Not Found \n ",
-                                           color=nextcord.Color.from_rgb(255, 0, 0))
-                    await interaction.response.send_message(embed=embed)
-                else:
-                    # found
-                    url = search[1]
-                    title = search[2]
-                    r = search[3]
-                    g = search[4]
-                    b = search[5]
-                    cmd = search[6]
-                    # if it returns as False it wasnt added already, but if its true, its already in libraryy
-                    am = call.add_manga(str(id_guild), str(id_channel), cmd, title, source, url, r, g, b)
-                    if am is False:
-                        embed = nextcord.Embed(title=f"Search of {title}",
-                                               description=f"- Found \n "
-                                                           f"- Added to library \n "
-                                                           f"- cmd: {cmd} \n"
-                                                           f"- url: {url}",
-                                               color=nextcord.Color.from_rgb(0, 255, 0))
-                        await interaction.response.send_message(embed=embed)
-                    else:
-                        embed = nextcord.Embed(title=f"Search of {title}",
-                                               description=f"- Found \n "
-                                                           f"- Already in library \n "
-                                                           f"- cmd: {cmd}",
-                                               color=nextcord.Color.from_rgb(255, 255, 0))
-                        await interaction.response.send_message(embed=embed)
-            else:
+        searched_title = title_or_url.replace("–", "-")
+        if source == "ReaperScans":
+            search = api.searchReaperScans(searched_title)
+            source = "ReaperScans"
+        elif source == "MangaClash":
+            search = api.searchMangaClash(searched_title)
+            source = "MangaClash"
+        elif source == "MangaKakalot":
+            search = api.searchMangaKakalot(searched_title)
+            source = "MangaKakalot"
+        elif source == "LuminousScans":
+            search = api.searchLuminousScans(searched_title)
+            source = "LuminousScans"
+        error = search[8]
+        if error is False:
+            if search[0] is True and search[7] is False:
+                # tell it was found but was a novel
                 embed = nextcord.Embed(title=f"Search of {searched_title}",
-                                       description=f"- Not Found \n "
-                                                   f"- If error appeared their  \n"
-                                                   f"- website may be down \n"
-                                                   f"- try check their website or \n"
-                                                   f"- correct the searched title \n"
-                                                   f"+ you can use a link as well ",
+                                       description=f"- Found \n "
+                                                   f"- A Novel \n"
+                                                   f"= Not added \n"
+                                                   f"+ Try adding: -Manhwa",
+                                       color=nextcord.Color.from_rgb(255, 255, 0))
+                await interaction.response.send_message(embed=embed)
+            elif search[0] is False:
+                # tell it wasnt found
+                embed = nextcord.Embed(title=f"Search of {searched_title}",
+                                       description=f"- Not Found \n ",
                                        color=nextcord.Color.from_rgb(255, 0, 0))
                 await interaction.response.send_message(embed=embed)
+            else:
+                # found
+                url = search[1]
+                title = search[2]
+                r = search[3]
+                g = search[4]
+                b = search[5]
+                cmd = search[6]
+                # if it returns as False it wasnt added already, but if its true, its already in libraryy
+                am = call.add_manga(str(id_guild), str(id_channel), cmd, title, source, url, r, g, b)
+                if am is False:
+                    embed = nextcord.Embed(title=f"Search of {title}",
+                                           description=f"- Found \n "
+                                                       f"- Added to library \n "
+                                                       f"- cmd: {cmd} \n"
+                                                       f"- url: {url}",
+                                           color=nextcord.Color.from_rgb(0, 255, 0))
+                    await interaction.response.send_message(embed=embed)
+                else:
+                    embed = nextcord.Embed(title=f"Search of {title}",
+                                           description=f"- Found \n "
+                                                       f"- Already in library \n "
+                                                       f"- cmd: {cmd}",
+                                           color=nextcord.Color.from_rgb(255, 255, 0))
+                    await interaction.response.send_message(embed=embed)
         else:
-            await interaction.response.send_message(f">>> You didn't specify the source! \n"
-                           f"Example: !m library search add ReaperScans Title")
+            embed = nextcord.Embed(title=f"Search of {searched_title}",
+                                   description=f"- Not Found \n "
+                                               f"- If error appeared their  \n"
+                                               f"- website may be down \n"
+                                               f"- try check their website or \n"
+                                               f"- correct the searched title \n"
+                                               f"+ you can use a link as well ",
+                                   color=nextcord.Color.from_rgb(255, 0, 0))
+            await interaction.response.send_message(embed=embed)
     else:
-        await interaction.response.send_message(f">>> You dont have permission to this command!", delete_after=5)
+        await interaction.response.send_message(f">>> You didn't specify the source! \n"
+                       f"Example: !m library search add ReaperScans Title")
 
-        #await interaction.response.send_message(f"Added to library {title_or_url} from {source}")
+@library_add.error
+async def no_perms_ladd(interaction: Interaction, error):
+    await no_perms(interaction,error)
 
 @bot.slash_command(name="library_remove", description="Removes the manga from the server library", guild_ids=serverID)
 async def library_remove(interaction: Interaction, source: str, title: str):
@@ -169,106 +169,103 @@ async def library_remove(interaction: Interaction, source: str, title: str):
         id_guild = None
     #      0       1           2
     # !m library remove Archmage Streamer
-    if Interaction.message.author.guild_permissions.administrator:
-        id_guild = str(id_guild)
-        content_cl = []
-        content_sl = []
-        content_rsl = []
-        cmds = []
-        found = False
-        searched_title = ""
-        others = False
-        # bool, I need to know if there is some other book with  the same title which means has same server_release_ping
-        same_title = False
-        # I will copy every line
-        searched_title = title
-        with open('channel_listed', 'r', errors='ignore') as r_cl:
-            for line_cl in r_cl:
-                if line_cl != ' \n' and line_cl != '':
-                    # Make sure there will be no empty lines
-                    line_ = line_cl.split("  ")
-                    guild_ids = line_[0].replace("[", "").replace(" ", "").replace("]", "").replace("'", "").split(
-                        ",")
-                    print(guild_ids, id_guild)
+    id_guild = str(id_guild)
+    content_cl = []
+    content_sl = []
+    content_rsl = []
+    cmds = []
+    found = False
+    searched_title = ""
+    others = False
+    # bool, I need to know if there is some other book with  the same title which means has same server_release_ping
+    same_title = False
+    # I will copy every line
+    searched_title = title
+    with open('channel_listed', 'r', errors='ignore') as r_cl:
+        for line_cl in r_cl:
+            if line_cl != ' \n' and line_cl != '':
+                # Make sure there will be no empty lines
+                line_ = line_cl.split("  ")
+                guild_ids = line_[0].replace("[", "").replace(" ", "").replace("]", "").replace("'", "").split(
+                    ",")
+                print(guild_ids, id_guild)
+                # it is the cmd from the server
+                title = f'{line_[3]}'
+                print(title, searched_title)
+                print(line_[4], source)
+                if guild_ids.__contains__(str(id_guild)):
                     # it is the cmd from the server
-                    title = f'{line_[3]}'
-                    print(title, searched_title)
-                    print(line_[4], source)
-                    if guild_ids.__contains__(str(id_guild)):
-                        # it is the cmd from the server
-                        if str(title) == str(searched_title) and line_[4] == source:
-                            # It is the manga we want to remove from server library
-                            found = True
-                            channel_ids = line_[0].replace("[", "").replace("]", "").replace(" ", "").replace("'",
-                                                                                                              "").split(
-                                ",")
-                            index = guild_ids.index(str(id_guild))
-                            guild_ids.remove(str(id_guild))
-                            channel_ids.remove(channel_ids[index])
-                            # Checkin if there is more servers using this book
-                            # if yes, I have to write it down back, but if not, its useless there
-                            if len(guild_ids) > 0:
-                                others = True
-                                content_cl.append(
-                                    f"{guild_ids}  {channel_ids}  {line_[2]}  {line_[3]}  {line_[4]}  {line_[5]}  {line_[6]}  {line_[7]}  {line_[8]}")
-                        else:
-                            content_cl.append(line_cl)
+                    if str(title) == str(searched_title) and line_[4] == source:
+                        # It is the manga we want to remove from server library
+                        found = True
+                        channel_ids = line_[0].replace("[", "").replace("]", "").replace(" ", "").replace("'",
+                                                                                                          "").split(
+                            ",")
+                        index = guild_ids.index(str(id_guild))
+                        guild_ids.remove(str(id_guild))
+                        channel_ids.remove(channel_ids[index])
+                        # Checkin if there is more servers using this book
+                        # if yes, I have to write it down back, but if not, its useless there
+                        if len(guild_ids) > 0:
+                            others = True
+                            content_cl.append(
+                                f"{guild_ids}  {channel_ids}  {line_[2]}  {line_[3]}  {line_[4]}  {line_[5]}  {line_[6]}  {line_[7]}  {line_[8]}")
                     else:
                         content_cl.append(line_cl)
-                    if guild_ids.__contains__(id_guild) and title == searched_title:
-                        same_title = True
-        if found is True:
-            # I need to delete it from server_latest
-            if others is False:
-                with open('server_latest', 'r', errors='ignore') as r_sl:
-                    for line_sl in r_sl:
-                        if line_sl != ' \n' or line_sl != '':
-                            # Make sure theer will be no empty lines
-                            line_ = line_sl.split("-+-")
-                            title_ = f'{line_[1]}'
-                            if line_[0] == str(source):
-                                if title_ != str(searched_title):
-                                    content_sl.append(line_sl)
-                            else:
+                else:
+                    content_cl.append(line_cl)
+                if guild_ids.__contains__(id_guild) and title == searched_title:
+                    same_title = True
+    if found is True:
+        # I need to delete it from server_latest
+        if others is False:
+            with open('server_latest', 'r', errors='ignore') as r_sl:
+                for line_sl in r_sl:
+                    if line_sl != ' \n' or line_sl != '':
+                        # Make sure theer will be no empty lines
+                        line_ = line_sl.split("-+-")
+                        title_ = f'{line_[1]}'
+                        if line_[0] == str(source):
+                            if title_ != str(searched_title):
                                 content_sl.append(line_sl)
-                # I need to delete it from server_release_ping
-                # Now I need to rewrite server_latest
-                with open('server_latest', 'w', errors='ignore') as w_sl:
-                    for item in content_sl:
-                        if not item.__contains__("\n"):
-                            item += ' \n'
-                        w_sl.write(item)
-            if same_title is False:
-                with open('server_release_ping', 'r', errors='ignore') as r_srp:
-                    for line_srp in r_srp:
-                        if line_srp != ' \n' and line_srp != '':
-                            line_split = line_srp.split('-+-')
-                            if str(id_guild) == str(line_split[0]):
-                                # Its the same server
-                                title_ = f'{line_split[1]}'
-                                if str(searched_title) != str(title_):
-                                    content_rsl.append(line_srp)
-                            else:
+                        else:
+                            content_sl.append(line_sl)
+            # I need to delete it from server_release_ping
+            # Now I need to rewrite server_latest
+            with open('server_latest', 'w', errors='ignore') as w_sl:
+                for item in content_sl:
+                    if not item.__contains__("\n"):
+                        item += ' \n'
+                    w_sl.write(item)
+        if same_title is False:
+            with open('server_release_ping', 'r', errors='ignore') as r_srp:
+                for line_srp in r_srp:
+                    if line_srp != ' \n' and line_srp != '':
+                        line_split = line_srp.split('-+-')
+                        if str(id_guild) == str(line_split[0]):
+                            # Its the same server
+                            title_ = f'{line_split[1]}'
+                            if str(searched_title) != str(title_):
                                 content_rsl.append(line_srp)
-                # Now I just rewrite it to server_release_ping
-                with open('server_release_ping', 'w', errors='ignore') as w_srp:
-                    for lin in content_rsl:
-                        if not lin.__contains__("\n"):
-                            lin += ' \n'
-                        w_srp.write(lin)
+                        else:
+                            content_rsl.append(line_srp)
+            # Now I just rewrite it to server_release_ping
+            with open('server_release_ping', 'w', errors='ignore') as w_srp:
+                for lin in content_rsl:
+                    if not lin.__contains__("\n"):
+                        lin += ' \n'
+                    w_srp.write(lin)
 
-            # Now I need to rewrite the channel_listed
-            with open('channel_listed', 'w', errors='ignore') as w_cl:
-                for c in content_cl:
-                    if not c.__contains__("\n"):
-                        c += ' \n'
-                    w_cl.write(c)
+        # Now I need to rewrite the channel_listed
+        with open('channel_listed', 'w', errors='ignore') as w_cl:
+            for c in content_cl:
+                if not c.__contains__("\n"):
+                    c += ' \n'
+                w_cl.write(c)
 
-            await interaction.response.send_message(f'>>> The book in library with Title: {searched_title} has been removed!', delete_after=5)
-        else:
-            await interaction.response.send_message(f'>>> The book in library with Title: {searched_title} was **not** found!', delete_after=5)
+        await interaction.response.send_message(f'>>> The book in library with Title: {searched_title} has been removed!', delete_after=5)
     else:
-        await interaction.response.send_message(f">>> You dont have permission to this command!", delete_after=5)
+        await interaction.response.send_message(f'>>> The book in library with Title: {searched_title} was **not** found!', delete_after=5)
 
 @bot.slash_command(name="dm", description="Enables/Disables direct messages instead of pings from this server announcements.", guild_ids=serverID)
 async def dm_enable_disable(interaction: Interaction):

@@ -1,7 +1,7 @@
 def link_read(guild_id: str):
     #855860264942829589-*-{1: ['LuminousScans-+-FFF-Class Trash Hero', 'MangaClash-+-FFF-Class Trashero']}
     #Guild id with dictionary of links
-
+    linked = {}
     # lets find the server linked
     with open("linked_server","r") as read:
         for line in read:
@@ -10,7 +10,6 @@ def link_read(guild_id: str):
             if guild_id_file == guild_id:
                 # need to make a list from the str
                 linked_unsorted = str(links).split("'")
-                linked = {}
                 link_curr = []
                 link_num = 0
                 for i in range(1,len(linked_unsorted)):
@@ -31,6 +30,29 @@ def link_read(guild_id: str):
                         link_curr.append(linked_unsorted[i])
     return linked
 
+def link_write(type: int,guild_id: str, links: dict):
+    # type 0 = edit
+    # type 1 = add
+    if type == 0:
+        existing = []
+        with open("linked_server","r") as read:
+            for line in read:
+                if not line.__contains__(guild_id):
+                    existing.append(line)
+        with open("linked_server","w") as write:
+            write.write(str(links))
+            for l in line:
+                write.write(l)
+    elif type == 1:
+        existing = []
+        with open("linked_server","r") as read:
+            for line in read:
+                existing.append(line)
+        with open("linked_server","w") as write:
+            write.write(str(links))
+            for l in line:
+                write.write(l)
+    pass
 def link_check(guild_id: str, title: str, source: str, chapter: float):
     print(guild_id, title, source, chapter)
     # we call link_read to get the links of the server
@@ -38,6 +60,61 @@ def link_check(guild_id: str, title: str, source: str, chapter: float):
     print(links)
     # we gonna loop through and find if any of them has out curr source-+-title inside
     # if not the return False
+    full_name = f"{source}-+-{title}"
     for key in links.keys():
-        link_team = links[key]
+        link_team = list(links[key])
+        if link_team.__contains__(full_name):
+            print("contains")
+            search_list = link_team
+            search_list.remove(full_name)
+            for search_item in search_list:
+                source_search, title_search = str(search_item).split("-+-")
+                print(f"chapter { search_manga(source_search, title_search)} >? {chapter}")
+                if search_manga(source_search, title_search) >= chapter:
+                    print("returned true")
+                    return True
     return False
+
+def search_manga(source: str, title: str):
+    with open("server_latest","r") as read:
+        for line in read:
+            source_read, title_read, chapter_read = line.split("-+-")
+            print(f"check {source_read, source, source_read == source}")
+            print(f"check {title_read, title, title_read == title}")
+            if source_read == source and title_read == title:
+                return float(chapter_read)
+
+    return 0
+
+def create_link(guild_id: int, source:str, title: str, source_1: str, title_1: str):
+    existing = []
+    # if its empty, server hasnt used linking yet
+    links = link_read(str(guild_id))
+    if links != []:
+        # next we check if either one of those items hasnt already beed added to any link
+        duplicated = False
+        for key in links.keys():
+            link_team = links[key]
+            if link_team.__contains__(f"{source}-+-{title}"):
+                duplicated = True
+                break
+            if link_team.__contains__(f"{source_1}-+-{title_1}"):
+                duplicated = True
+                break
+        if not duplicated:
+            # if not empty, we get the len+1 and set it as a new key
+            links.setdefault(len(links) + 1, [f'{source}-+-{title}', f'{source_1}-+-{title_1}'])
+            link_write(0, str(guild_id), links)
+        else:
+            # return saying its a duplicate
+            pass
+
+    else:
+        links.setdefault(len(links)+1, [f'{source}-+-{title}', f'{source_1}-+-{title_1}'])
+        link_write(1, str(guild_id), links)
+
+def remove_link(guild_id: int, link_number: int):
+    pass
+
+def list_links(guild_id: int):
+    pass

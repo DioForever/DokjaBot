@@ -66,7 +66,7 @@ async def chapterreleasecheck(bot, announced):
                 # Need to check if there isn't link
                 guild_id = guild_ids[count]
                 print("checkin")
-                if link.link_check(guild_id, title, chapter_number) == False:
+                if not link.link_check(guild_id, title, source_cl, chapter_number):
                     await channel.send(file=file, embed=embed)
                     ping_types = call.sortAnnounce(guild_id, subscription)
                     dm = ping_types[0]

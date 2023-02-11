@@ -58,13 +58,10 @@ def doReleased(guild_ids, Title, chapter_num, urlbasic, urlchapter, r1, g, b, th
             # and if the title is the same
             if guild_ids.__contains__(guild_id) and Title == title:
                 try:
-                    print("**-*")
-                    print(split[2].replace("[", "").replace("]", "").replace("'", '').replace("\\n", '').replace(
-                        "\n",
-                        '').replace(
-                        " ", '').replace("  ", '').split(","))
-                    print(f"{title}, {guild_id}")
-                    print("**-*")
+                    #print(split[2].replace("[", "").replace("]", "").replace("'", '').replace("\\n", '').replace(
+                        #"\n",
+                        #'').replace(
+                        #" ", '').replace("  ", '').split(","))
 
                     sub_users = split[2].replace("[", "").replace("]", "").replace("'", '').replace("\\n", '').replace(
                         "\n",
@@ -263,7 +260,7 @@ def get_dominant_color(url_image):
         #print(dm_c)
     except Exception as e:
         dm_c = [0,0,0]
-        print(e)
+        #print(e)
 
     #           R          G           B
     return dm_c[0], dm_c[1], dm_c[1]

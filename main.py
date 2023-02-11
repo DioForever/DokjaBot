@@ -57,7 +57,6 @@ async def rich_presence():
 @bot.slash_command(name="library_addrole", description="Adds role ping to specific manga/manhwa.", guild_ids=serverID)
 @application_checks.has_permissions(administrator=True)
 async def library_addrole(interaction: Interaction, role: str, title: str):
-    print(role)
     role = int(role.strip("<@&").strip(">"))
     try:
         hrole = interaction.guild.get_role(role)
@@ -112,9 +111,58 @@ async def library_addrole(interaction: Interaction, role: str, title: str):
                                color=nextcord.Color.from_rgb(255, 0, 0))
         await interaction.response.send_message(embed=embed, delete_after = 5)
 
+
 @library_addrole.error
 async def library_addrole(interaction: Interaction, error):
     await no_perms(interaction,error)
+
+
+@bot.slash_command(name="library_remove_role", description="Removes role ping to specific manga/manhwa.", guild_ids=serverID)
+@application_checks.has_permissions(administrator=True)
+async def library_remove_role(interaction: Interaction, role: str, title: str):
+    role = int(role.strip("<@&").strip(">"))
+    try:
+        hrole = interaction.guild.get_role(role)
+        id_guild = interaction.guild_id
+        subscriptions = ""
+        subscriptions_other = []
+        found = False
+        removed = False
+        with open("server_release_ping","r") as read:
+            for line in read:
+                if line.__contains__(str(id_guild)) and line.__contains__(title):
+                    #855860264942829589-+-FFF-Class Trashero-+-['<@401845652541145089>', '<@&855860503090561055>']
+                    subscriptions = line.split("-+-")[2].strip("[").strip("]").strip("'").strip('"').strip(" ").strip("\n").strip("']").split("', '")
+                    if subscriptions.__contains__(str(hrole.mention)):
+                        subscriptions.remove(hrole.mention)
+                        removed = True
+                    found = True
+                else:
+                    subscriptions_other.append(line)
+        if subscriptions != "":
+            with open("server_release_ping", "w") as write:
+
+                write.write(f"{id_guild}-+-{title}-{subscriptions} \n")
+                for sub_line in subscriptions_other:
+                    write.write(sub_line)
+
+        if found:
+            if removed:
+                await interaction.response.send_message(f">>> Removed {hrole.mention} from pings of {title}!")
+            else:
+                await interaction.response.send_message(f">>> Couldn't find {hrole.mention} in pings of {title}!")
+        else:
+            await interaction.response.send_message(f">>> Couldn't find {title}!")
+
+
+    except:
+        embed = nextcord.Embed(title=f"You didnt ping a role",
+                               color=nextcord.Color.from_rgb(255, 0, 0))
+        await interaction.response.send_message(embed=embed, delete_after = 5)
+
+@library_remove_role.error
+async def library_remove_role(interaction: Interaction, error):
+    await no_perms(interaction, error)
 
 @bot.slash_command(name="library_add", description="Adds the manga to the server library", guild_ids=serverID)
 @application_checks.has_permissions(administrator=True)
@@ -229,11 +277,11 @@ async def library_remove(interaction: Interaction, source: str, title: str):
                 line_ = line_cl.split("  ")
                 guild_ids = line_[0].replace("[", "").replace(" ", "").replace("]", "").replace("'", "").split(
                     ",")
-                print(guild_ids, id_guild)
+                #print(guild_ids, id_guild)
                 # it is the cmd from the server
                 title = f'{line_[3]}'
-                print(title, searched_title)
-                print(line_[4], source)
+                #print(title, searched_title)
+                #print(line_[4], source)
                 if guild_ids.__contains__(str(id_guild)):
                     # it is the cmd from the server
                     if str(title) == str(searched_title) and line_[4] == source:
@@ -478,14 +526,14 @@ async def list(interaction: Interaction):
 async def help(interaction: Interaction):
     embed = nextcord.Embed(title=f"DokjaBot - Help Menu",
                            description=f'The list of commands for DokjaBot \n'
-                                       f'!m list - writes down every manga/manhwa in the server library \n'
-                                       f'!m library add <Source> <Title> \n'
+                                       f'/list - writes down every manga/manhwa in the server library \n'
+                                       f'/library_add <Source> <Title> \n'
                                        f'  - source, you can see all the sources possible by writing !m sources \n'
-                                       f'  -  Title, has to be exactly the same as the name from'
+                                       f'  -  Title or URL, has to be exactly the same as the original from'
                                        f'     the source u specified\n'
-                                       f'example: !m library add ReaperScans The World After the Fall\n'
-                                       f'example: !m library add MangaKakalot https://mangakakalot.com/manga/yn929447\n'
-                                       f'!m library sub <title> and !m library unsub <title> \n'
+                                       f'example: /library_add MangaKakalot https://mangakakalot.com/manga/yn929447\n'
+                                       f'/sub <title> and /unsub <title> which is for solo users\n'
+                                       f'/library_addrole <Role> <Title> which can be added by administrator\n'
                                        f'  - if you dont know the title, find it in !m list',
                            color=nextcord.Color.from_rgb(246, 214, 4))
     await interaction.response.send_message(embed=embed)
@@ -854,12 +902,10 @@ async def m(ctx, *args):
                                                                                                         '').replace(' ',
                                                                                                                     '').split(
                         ',')
-                    print(dm_list)
                     for s in dm_list:
                         s.replace(' ', '')
                         if s != '[]':
                             dm_ping.append(s)
-                    print(dm_ping)
                 else:
                     dm_other.append(line)
         if dm_ping.__contains__(ctx.author.mention):

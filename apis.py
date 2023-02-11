@@ -120,7 +120,7 @@ def searchReaperScans(Title):
         mnhwornvl = True
         type = str(soup.find("div", class_="post-title")).split(">")
         type = type[2].replace("</span", "")
-        print((type.lower()).__contains__("novel"))
+        #print((type.lower()).__contains__("novel"))
         if (type.lower()).__contains__("novel"):
             mnhwornvl = False
         found = False
@@ -178,7 +178,7 @@ def searchReaperScans(Title):
             except:
                 cmd = ""
         error = False
-        print(found, urlbasic, title, r, g, b, cmd, mnhwornvl, error)
+        #print(found, urlbasic, title, r, g, b, cmd, mnhwornvl, error)
         return found, urlbasic, title, r, g, b, cmd, mnhwornvl, error
     except:
         return False, 0, 1, 2, 3, 4, 5, 6, True
@@ -430,7 +430,7 @@ def getLuminousScansReleased(Title, urlbasic, r1, g, b, id_guild, source):
         released = releaseR[0]
         embed = releaseR[1]
         subscription = releaseR[2]
-        print(f"subscription is {subscription}")
+        #print(f"subscription is {subscription}")
         urlbasic = releaseR[3]
         urlchapter = releaseR[4]
         chapter_num = releaseR[5]
@@ -609,14 +609,14 @@ def searchMangaKakalot(Title):
             url = Title
             web = req.get(url, headers=headers)
             soup = bs(web.content, features="html.parser")
-            print(web.status_code)
+            #print(web.status_code)
         else:
             title = str(Title).lower().replace(" ", "-").replace("’", "")
             title = title.replace("---manhwa", "-manhwa")
             url = f"https://mangakakalot.com/manga/{title}/"
             web = req.get(url, headers=headers)
             soup = bs(web.content, features="html.parser")
-            print(web.status_code)
+            #print(web.status_code)
         urlbasic = url
 
         # I am looking for a div with class post-title
@@ -661,7 +661,7 @@ def searchMangaKakalot(Title):
             except:
                 cmd = ""
         error = False
-        print(found, urlbasic, title, r, g, b, cmd, True, error)
+        #print(found, urlbasic, title, r, g, b, cmd, True, error)
         return found, urlbasic, title, r, g, b, cmd, True, error, url_thumb
     except:
         return False, 0, 1, 2, 3, 4, 5, 6, True

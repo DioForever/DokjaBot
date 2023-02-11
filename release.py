@@ -64,20 +64,15 @@ async def chapterreleasecheck(bot, announced):
                 embed.set_image(url="attachment://img.png")
                 # Need to check if there isn't link
                 guild_id = guild_ids[count]
-                print("checkin")
-                print(f"??? {link.link_check(guild_id, title, source_cl, chapter_number)}")
                 if not link.link_check(guild_id, title, source_cl, chapter_number):
                     await channel.send(file=file, embed=embed)
-                    print(f"subs {subscription}")
                     ping_types = call.sortAnnounce(guild_id, subscription)
-                    print(f"ping types {ping_types}")
                     dm = ping_types[0]
                     ping = str(ping_types[1]).replace("[","").replace("]","").replace("'","")
                     # lets sort pings users and ping roles
                     ping_users = []
                     ping_roles = []
                     for p in ping_types[1]:
-                        print(f"p {p}")
                         if str(p).__contains__("&"):
                             # its a role
                             ping_roles.append(p)
@@ -85,9 +80,7 @@ async def chapterreleasecheck(bot, announced):
                             ping_users.append(p)
                     ping_roles = str(ping_roles).strip("[").strip("]").strip("'").strip(",")
                     ping_users = str(ping_users).strip("[").strip("]").strip("'").strip(",")
-                    print(f"len {len(ping)}")
                     if len(ping) > 0:
-                        print("SHOULD BE PINGED ?")
                         ping = f"{title} {chapter_num} has released! {(ping_roles)}"
                         ping_users = f"{title} {chapter_num} has released! {(ping_users)}"
                         allowed_mentions = nextcord.AllowedMentions(roles = True)

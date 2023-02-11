@@ -28,7 +28,7 @@ def link_read(guild_id: str):
                                 link_num = try_num
                     if (i+1) % 2 == 0:
                         link_curr.append(linked_unsorted[i])
-    return linked
+    return dict(linked)
 
 def link_write(type: int,guild_id: str, links: dict):
     # type 0 = edit
@@ -54,24 +54,19 @@ def link_write(type: int,guild_id: str, links: dict):
                 write.write(l)
     pass
 def link_check(guild_id: str, title: str, source: str, chapter: float):
-    print(guild_id, title, source, chapter)
     # we call link_read to get the links of the server
     links = link_read(guild_id)
-    print(links)
     # we gonna loop through and find if any of them has out curr source-+-title inside
     # if not the return False
     full_name = f"{source}-+-{title}"
     for key in links.keys():
         link_team = list(links[key])
         if link_team.__contains__(full_name):
-            print("contains")
             search_list = link_team
             search_list.remove(full_name)
             for search_item in search_list:
                 source_search, title_search = str(search_item).split("-+-")
-                print(f"chapter { search_manga(source_search, title_search)} >? {chapter}")
                 if search_manga(source_search, title_search) >= chapter:
-                    print("returned true")
                     return True
     return False
 
@@ -79,8 +74,6 @@ def search_manga(source: str, title: str):
     with open("server_latest","r") as read:
         for line in read:
             source_read, title_read, chapter_read = line.split("-+-")
-            print(f"check {source_read, source, source_read == source}")
-            print(f"check {title_read, title, title_read == title}")
             if source_read == source and title_read == title:
                 return float(chapter_read)
 
@@ -114,7 +107,17 @@ def create_link(guild_id: int, source:str, title: str, source_1: str, title_1: s
         link_write(1, str(guild_id), links)
 
 def remove_link(guild_id: int, link_number: int):
-    pass
+    try:
+        links = dict(link_read(str(guild_id)))
+        links.pop(link_number-1)
+        used_keys = links.keys()
+        # we need to move all the keys higher than the one we deleted one level down
+        # for example we delete 2 out of 1 2 3 4, we let 1 be and move 3,4 one level down and 3,4 becomes 2,3
+        for link_num in range(link_number+1, len(links)):
+            links[link_num-1] = links.pop(link_num)
+    except:
+        return False
+    return True
 
 def list_links(guild_id: int):
     pass

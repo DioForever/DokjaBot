@@ -1,9 +1,8 @@
 from datetime import datetime
-import nextcord
 import apis as api
 import callables as call
 import linking as link
-
+import nextcord
 
 # @tasks.loop(seconds=60)
 async def chapterreleasecheck(bot, announced):
@@ -66,21 +65,38 @@ async def chapterreleasecheck(bot, announced):
                 # Need to check if there isn't link
                 guild_id = guild_ids[count]
                 print("checkin")
+                print(f"??? {link.link_check(guild_id, title, source_cl, chapter_number)}")
                 if not link.link_check(guild_id, title, source_cl, chapter_number):
                     await channel.send(file=file, embed=embed)
+                    print(f"subs {subscription}")
                     ping_types = call.sortAnnounce(guild_id, subscription)
+                    print(f"ping types {ping_types}")
                     dm = ping_types[0]
                     ping = str(ping_types[1]).replace("[","").replace("]","").replace("'","")
+                    # lets sort pings users and ping roles
+                    ping_users = []
+                    ping_roles = []
+                    for p in ping_types[1]:
+                        print(f"p {p}")
+                        if str(p).__contains__("&"):
+                            # its a role
+                            ping_roles.append(p)
+                        else:
+                            ping_users.append(p)
+                    ping_roles = str(ping_roles).strip("[").strip("]").strip("'").strip(",")
+                    ping_users = str(ping_users).strip("[").strip("]").strip("'").strip(",")
+                    print(f"len {len(ping)}")
                     if len(ping) > 0:
-                        embed_pings = nextcord.Embed(title=f"Ping",
-                                                   description=f"Yo, just pinging ya, cuz u wana know about this \n",
-                                                   color=nextcord.Color.from_rgb(255, 200, 0))
-                        await channel.send(embed=embed_pings)
-                        await channel.send(ping)
+                        print("SHOULD BE PINGED ?")
+                        ping = f"{title} {chapter_num} has released! {(ping_roles)}"
+                        ping_users = f"{title} {chapter_num} has released! {(ping_users)}"
+                        allowed_mentions = nextcord.AllowedMentions(roles = True)
+                        await channel.send(ping, allowed_mentions = allowed_mentions)
+                        await channel.send(ping_users, allowed_mentions = allowed_mentions, delete_after=5)
 
                     server = bot.get_guild(int(guild_id))
                     embed_user = nextcord.Embed(title=f"{title}", url=f"{urlbasic}",
-                                               description=f"The Chapter/s {chapters} was released! \n"
+                                               description=f"The Chapter/s {chapters} was released!\n"
                                                            f" Link to the chapter: {urlchapter} \n"
                                                            f" Server: {server}",
                                                color=nextcord.Color.from_rgb(int(r), int(g), int(b)))

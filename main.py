@@ -31,10 +31,6 @@ async def setGuilds():
 #serverID = 855860264942829589
 
 
-@bot.slash_command(name="ping", description="Check bots ping!", guild_ids=serverID)
-async def pingtest(interaction: Interaction):
-    await interaction.response.send_message(f"My ping is Idk how many/ms")
-
 
 # await bot.wait_until_ready()
 print("DokjaBot activated - Made by DioForever - dioforever.live")
@@ -63,17 +59,61 @@ async def rich_presence():
 async def library_addrole(interaction: Interaction, role: str, title: str):
     print(role)
     role = int(role.strip("<@&").strip(">"))
-    allowed_mentions = nextcord.AllowedMentions(roles = True)
     try:
         hrole = interaction.guild.get_role(role)
-        await interaction.response.send_message(hrole.mention, allowed_mentions=allowed_mentions)
+        try:
+            id_guild = interaction.guild_id
+        except:
+            id_guild = None
+        subscriptions = []
+        subscriptions_other = []
+        found = False
+        already_in = False
+        with open('server_release_ping', 'r') as read:
+            for line in read:
+                line_s = line.split('-+-')
+                if line_s[0] == str(id_guild):
+                    # It is one of the servers pings
+
+                    if line_s[1] == title:
+                        found = True
+                        # Its the same title so now just get the users already in lsit and add the new one
+                        # , but check if he isnt there already
+                        users = line_s[2].replace("[", "").replace("]", "").replace("'", '').replace("\\n",
+                                                                                                     '').replace(
+                            "\n", '').replace(" ", '').replace("  ", '').split(",")
+                        if users.__contains__(hrole.mention):
+                            await interaction.response.send_message(
+                                f'>>> You have already added {hrole.mention} to {title}', delete_after=10)
+                            already_in = True
+                        else:
+                            users.append(f'{hrole.mention}')
+                            for item in users:
+                                if item == '' or item == '\n' or item == ' ':
+                                    users.remove(item)
+                            subscriptions.append(f'{id_guild}-+-{title}-+-{users}')
+                    else:
+                        subscriptions_other.append(line)
+                else:
+                    subscriptions_other.append(line)
+            if found and not already_in:
+                await interaction.response.send_message(f'>>> You added role {hrole.mention} to the {title}', delete_after=15)
+            if not already_in and found:
+                with open('server_release_ping', 'w') as w_srp:
+                    for subs in subscriptions:
+                        w_srp.write(f'{subs} \n')
+                    for subs in subscriptions_other:
+                        w_srp.write(subs)
+        if not found:
+            await interaction.response.send_message(
+                '>>> Coulnd´t find the desired manhwa/manga \nTry check the title again', delete_after=5)
     except:
         embed = nextcord.Embed(title=f"You didnt ping a role",
                                color=nextcord.Color.from_rgb(255, 0, 0))
         await interaction.response.send_message(embed=embed, delete_after = 5)
 
 @library_addrole.error
-async def no_perms_ladd(interaction: Interaction, error):
+async def library_addrole(interaction: Interaction, error):
     await no_perms(interaction,error)
 
 @bot.slash_command(name="library_add", description="Adds the manga to the server library", guild_ids=serverID)
@@ -162,6 +202,7 @@ async def no_perms_ladd(interaction: Interaction, error):
     await no_perms(interaction,error)
 
 @bot.slash_command(name="library_remove", description="Removes the manga from the server library", guild_ids=serverID)
+@application_checks.has_permissions(administrator=True)
 async def library_remove(interaction: Interaction, source: str, title: str):
     try:
         id_guild = interaction.guild_id
@@ -267,6 +308,9 @@ async def library_remove(interaction: Interaction, source: str, title: str):
     else:
         await interaction.response.send_message(f'>>> The book in library with Title: {searched_title} was **not** found!', delete_after=5)
 
+@library_remove.error
+async def library_remove(interaction: Interaction, error):
+    await no_perms(interaction,error)
 @bot.slash_command(name="dm", description="Enables/Disables direct messages instead of pings from this server announcements.", guild_ids=serverID)
 async def dm_enable_disable(interaction: Interaction):
     try:
@@ -416,6 +460,20 @@ async def sources(interaction: Interaction):
                            color=nextcord.Color.from_rgb(246, 214, 4))
     await interaction.response.send_message(embed=embed)
 
+@bot.slash_command(name="list", description="See all the manga/manhwa sources.", guild_ids=serverID)
+async def list(interaction: Interaction):
+    release_list = "\n"
+    with open("channel_listed", "r") as read_cl:
+        for line_cl in read_cl:
+            line_cl = line_cl.split("  ")
+            guild_ids = line_cl[0].replace("[", "").replace(" ", "").replace("]", "").replace("'", "").split(",")
+            if guild_ids.__contains__(str(interaction.guild.id)):
+                release_list += f"Title: {line_cl[3]} source: {line_cl[4]}\n"
+    embed = nextcord.Embed(title=f"List of Manhwas/Manga",
+                           description=f"The list of commands for \n " + "Manhwas and Manga in system" + f"\n {release_list}",
+                           color=nextcord.Color.from_rgb(246, 214, 4))
+    await interaction.response.send_message(embed=embed)
+
 @bot.slash_command(name="help", description="Need help?", guild_ids=serverID)
 async def help(interaction: Interaction):
     embed = nextcord.Embed(title=f"DokjaBot - Help Menu",
@@ -458,8 +516,8 @@ async def m(ctx, *args):
                 guild_ids = line_cl[0].replace("[", "").replace(" ", "").replace("]", "").replace("'", "").split(",")
                 if guild_ids.__contains__(str(id_guild)):
                     release_list += f"{line_cl[3]}: !m {line_cl[2]}\n"
-        embed = nextcord.Embed(title=f"List of Manhwas/Mangas",
-                               description=f"The list of commands for \n " + "Manhwas and Mangas in system" + f"\n {release_list}",
+        embed = nextcord.Embed(title=f"List of Manhwas/Manga",
+                               description=f"The list of commands for \n " + "Manhwas and Manga in system" + f"\n {release_list}",
                                color=nextcord.Color.from_rgb(246, 214, 4))
         await ctx.send(embed=embed)
     elif args[0] == "test":
@@ -856,7 +914,9 @@ async def periodical_restart(i=i):
 
 @tasks.loop(seconds=60)
 async def releaseCheck():
-    release_check = await release.chapterreleasecheck(bot, announced)
+    await release.chapterreleasecheck(bot, announced)
+
+#release_check = await release.chapterreleasecheck(bot, announced)
 #setAnnounced(release_check)
 
 

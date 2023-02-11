@@ -29,12 +29,17 @@ def getReleases(source, Title, urlbasic, r1, g, b, id_guild):
             subscription = r[2]
             chapter_number = r[3]
             urlbasic = r[4]
+            chapters = r[10]
             urlchapter = r[5]
+            #print(urlchapter)
+            #chapters_list = chapters.strip(" ").split(",")
+            #urlchapter = str(urlchapter).replace(str(int(chapter_number)),str(chapters_list[0]))
+            #print(chapters)
+            #print(urlchapter)
             url_thumb = r[9]
             chapter_num = r[6]
             message_release = r[7]
             sources_announced_already = r[8]
-            chapters = r[10]
             return released, embed, subscription, chapter_number, urlbasic, urlchapter, chapter_num, message_release, sources_announced_already, url_thumb, chapters
         else:
             embed = ""
@@ -414,7 +419,8 @@ def getLuminousScansReleased(Title, urlbasic, r1, g, b, id_guild, source):
 
     # I will get the picture from the website as well
     try:
-        thumb_url = str(soup.find('div', class_='thumb')).split('"')[19]
+        #print(str(soup.find('div', class_='thumb')))
+        thumb_url = str(soup.find('div', class_='thumb')).split('"')[21]
     except:
         thumb_url = ""
     #print(f"{thumb_url} - url")
@@ -424,6 +430,7 @@ def getLuminousScansReleased(Title, urlbasic, r1, g, b, id_guild, source):
         released = releaseR[0]
         embed = releaseR[1]
         subscription = releaseR[2]
+        print(f"subscription is {subscription}")
         urlbasic = releaseR[3]
         urlchapter = releaseR[4]
         chapter_num = releaseR[5]

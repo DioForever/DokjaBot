@@ -58,19 +58,28 @@ def doReleased(guild_ids, Title, chapter_num, urlbasic, urlchapter, r1, g, b, th
             # and if the title is the same
             if guild_ids.__contains__(guild_id) and Title == title:
                 try:
+                    print("**-*")
+                    print(split[2].replace("[", "").replace("]", "").replace("'", '').replace("\\n", '').replace(
+                        "\n",
+                        '').replace(
+                        " ", '').replace("  ", '').split(","))
+                    print(f"{title}, {guild_id}")
+                    print("**-*")
+
                     sub_users = split[2].replace("[", "").replace("]", "").replace("'", '').replace("\\n", '').replace(
                         "\n",
                         '').replace(
                         " ", '').replace("  ", '').split(",")
                 except Exception as e:
+                    print(f"Error while reading subs for {title}, server {guild_id}: {e}")
                     sub_users = []
                 subs = sub_users
+                break
     # ---------------
     # I need to get the latest chapters
     manga_latest = 0.0
     other_latest = []
     message_release = ""
-    latest_chapter_same_title = 0
     sources_announced_already = []
     with open("server_latest", "r") as read_sl:
         for line_sl in read_sl:
@@ -118,11 +127,13 @@ def doReleased(guild_ids, Title, chapter_num, urlbasic, urlchapter, r1, g, b, th
             if (manga_latest - chapter_num) != 0:
                 for num in range(int(manga_latest)+1, int(chapter_num)):
                     chapters.append(num)
+            if chapter_num == int(chapter_num):
+                urlchapter = str(urlchapter).replace(str(int(chapter_num)), str(chapters[0]))
             chapters.append(chapter_num)
             chapters = str(chapters).replace("[", "").replace("]", "")
             message_release = f'The Chapter/s {chapters} was released'
             embed = nextcord.Embed(title=f"{Title}", url=f"{urlbasic}",
-                                  description=f"{message_release} \n Link to the latest chapter: {urlchapter}",
+                                  description=f"{message_release} \n Link to the chapter: {urlchapter}",
                                   color=nextcord.Color.from_rgb(r1, g, b))
             '''try:
                 embed.set_image(url=f"{thumb_url}")

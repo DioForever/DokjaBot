@@ -5,6 +5,7 @@ from enum import Enum
 # MangaTable
 # - title
 # - link
+# - number
 # - r
 # - g
 # - b
@@ -23,9 +24,10 @@ from enum import Enum
 # - identifiers
 
 class MangaItem:
-    def __init__(self, title, link, r, g, b):
+    def __init__(self, title, link, number, r, g, b):
         self.title = title
         self.link = link
+        self.number = number
         self.r = r
         self.g = g
         self.b = b
@@ -47,7 +49,7 @@ class ShelfItem:
 
 def switchSpecs(tableName: str):
     if tableName == "mangaTable":
-        return "title, link, r, g, b", initiate_mt()
+        return "title, link, number, r, g, b", initiate_mt()
     elif tableName == "serverTable":
         return "titleMI, serverId, channelId, pings", initiate_st()
     elif tableName == "shelfTable":
@@ -71,7 +73,7 @@ def initiate_mt():
     connection = sqlite3.connect('mangaTable.db')
 
     initCmd = ''' CREATE TABLE IF NOT EXISTS
-    mangaTable(title TEXT, link TEXT, r INT, g INT, b INT) '''
+    mangaTable(title TEXT, link TEXT, number INT, r INT, g INT, b INT) '''
 
     connection.execute(initCmd)
     return connection
@@ -87,11 +89,13 @@ def initiate_sht():
     return connection
 
 
-def select(tableName: str, selection: str, conditions: str):
+def select(tableName: str, selection: str, conditions: str = ""):
     specs, connection = switchSpecs(tableName)
     if specs == "":
         return
-    cursor = connection.execute(f"SELECT {selection} from {tableName}")
+    cmd = f"SELECT {selection} from {tableName}"
+    if conditions != "": cmd += F" WHERE {conditions}"
+    cursor = connection.execute(cmd)
     for row in cursor:
         print(row)
 
@@ -137,6 +141,5 @@ def insert_update(tableName: str, values: list):
     connection.close()
     return True
 
-
-print(insert_new("mangaTable", ["FFF-Class Trashero", "https://trashero.com", 24, 126, 354]))
-# print(select(select("mangaTable", "*")))
+# print(insert_new("mangaTable", ["FFF-Class Trashero", "https://trashero.com", 145, 24, 126, 354]))
+# (select("mangaTable", "*", "r=24"))

@@ -1,4 +1,5 @@
 import sqlite3
+from enum import Enum
 
 
 # MangaTable
@@ -9,17 +10,48 @@ import sqlite3
 # - b
 #
 # ServerTable
-# - identifier = title+serverId
-# - titleMi
+# - identifier = title+serverId PRIMARY KEY
+# - titleMI
 # - serverId
 # - channelId
 # - pings
+# - link
+#
+# ShelfTable
+# - shelfTitle
+# - serverId
+# - identifiers
+
+class MangaItem:
+    def __init__(self, title, link, r, g, b):
+        self.title = title
+        self.link = link
+        self.r = r
+        self.g = g
+        self.b = b
+
+
+class ServerItem:
+    def __init__(self, identifier, titleMI, serverId, pings, link):
+        self.identifier = identifier
+        self.titleMI = titleMI
+        self.serverId = serverId
+        self.pings = pings
+        self.link = link
+
+
+class ShelfItem:
+    def __init__(self, Title):
+        self.name = Title
+
 
 def switchSpecs(tableName: str):
     if tableName == "mangaTable":
         return "title, link, r, g, b", initiate_mt()
     elif tableName == "serverTable":
         return "titleMI, serverId, channelId, pings", initiate_st()
+    elif tableName == "shelfTable":
+        return "shelfTitle, serverId, identifiers", initiate_sht()
     else:
         return "", ""
 
@@ -29,7 +61,7 @@ def initiate_st():
     cursor = connection.cursor()
 
     initCmd = ''' CREATE TABLE IF NOT EXISTS
-    serverTable(identifier TEXT PRIMARY KEY,titleMI TEXT, serverId TEXT, channelId TEXT, pings TEXT) '''
+    serverTable(identifier TEXT PRIMARY KEY,titleMI TEXT, serverId TEXT, channelId TEXT, pings TEXT, link TEXT) '''
 
     cursor.execute(initCmd)
     return connection
@@ -40,6 +72,16 @@ def initiate_mt():
 
     initCmd = ''' CREATE TABLE IF NOT EXISTS
     mangaTable(title TEXT, link TEXT, r INT, g INT, b INT) '''
+
+    connection.execute(initCmd)
+    return connection
+
+
+def initiate_sht():
+    connection = sqlite3.connect('shelfTable.db')
+
+    initCmd = ''' CREATE TABLE IF NOT EXISTS
+    shelfTable(shelfTitle TEXT, serverId TEXT, identifiers TEXT) '''
 
     connection.execute(initCmd)
     return connection
@@ -64,7 +106,7 @@ def insert_new(tableName: str, values: list):
             cmd += f"'{value}'"
         else:
             cmd += f"{value}"
-        if num != len(values)-1:
+        if num != len(values) - 1:
             cmd += ", "
         else:
             cmd += ")"
@@ -85,10 +127,9 @@ def insert_update(tableName: str, values: list):
             cmd += f"'{value}'"
         else:
             cmd += f"{value}"
-        if num != len(values)-1:
+        if num != len(values) - 1:
             cmd += ", "
         else:
-            cmd += ")"
             cmd += ")"
     print(cmd)
     connection.execute(cmd)

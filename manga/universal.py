@@ -1,38 +1,41 @@
-# import flamescans as fs
-# import luminousscans as ls
-# import reaperscans as rs
+import sys
+
+import bs4
+import nextcord
+import numpy as np
 from bs4 import BeautifulSoup
-from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
-import matplotlib.pyplot as plt
-import requests
-import shutil
 from selenium import webdriver
 from webdriver_manager.chrome import ChromeDriverManager
+import requests
+from PIL import Image
+from reaperscans import getBookInfo as getBookInfoRS
 
-from colorthief import ColorThief
+from database.functions import select
 
 
-def get_dominant_color(url_image):
+def gateway(url: str):
+    if url.__contains__("reaperscans.com"):
+        return getBookInfoRS(url)
+    else:
+        return None
+
+
+def get_dominant_color(url: str):
     try:
-        headers = {
-            'User-Agent': 'Mozilla/5.0'}
-        response = requests.get(url_image, stream=True, headers=headers)
-        with open('img.png', 'wb') as out_file:
-            shutil.copyfileobj(response.raw, out_file)
-        del response
+        response = requests.get(url, stream=True)
+        response.raise_for_status()
 
-        ct = ColorThief("img.png")
-        dm_c = ct.get_palette(quality=1)
-        plt.imshow([dm_c])
-        dm_c = [dm_c[4][0], dm_c[4][1], dm_c[4][1]]
+        image = Image.open(response.raw)
+        image = image.convert("RGB")
+        img_array = np.array(image)
+        average_color = np.mean(img_array, axis=(0, 1))
+        dominant_color = tuple(average_color.astype(int))
+        hex_color = "#{:02x}{:02x}{:02x}".format(*dominant_color)
+        return hex_color
 
-    except:
-        return [0, 0, 0]
-
-
-    #         R       G         B
-    return dm_c[0], dm_c[1], dm_c[1]
+    except Exception as e:
+        print("An error occurred:", e)
 
 
 def get_data(url: str):
@@ -48,3 +51,45 @@ def get_data(url: str):
     html = BeautifulSoup(html, 'html.parser')
     driver.quit()
     return html
+
+
+def getLastUpdate(title: str):
+    value = select("mangaTable", "../database/", "number", f"title = '{title}'")
+    return value
+
+
+def getNewChapters(title: str, episodesHtml):
+    # print(episodesHtml)
+    lastUpdate = (getLastUpdate(title))
+    if lastUpdate is None: lastUpdate = 0
+    # print(lastUpdate)
+
+    episodes, e = sortUpdates(episodesHtml, lastUpdate)
+    return episodes, e
+
+
+def sortUpdates(episodesHtml: bs4.BeautifulSoup, lastUpdate: int):
+    e: Exception = Exception(sys.exception())
+    episodes = {}
+
+    for chunk in episodesHtml:
+        try:
+            chunk = chunk.split('"')
+            num = int(chunk[1])
+            link = chunk[9]
+            if num > lastUpdate:
+                episodes.setdefault(link, num)
+                # print(num, link)
+            else:
+                return episodes, e
+        except Exception as e:
+            return episodes, e
+    return episodes, e
+
+
+def createEmbed(title: str, thumb: str, hexColor: str, number: float):
+    embed = nextcord.Embed(title=f"{title} - Chapter {number}",
+                           color=nextcord.Color.from_rgb(
+                               tuple(int(hexColor.strip("#")[i:i + 2], 16) for i in (0, 2, 4))))
+    embed.set_image(url=thumb)
+    return embed

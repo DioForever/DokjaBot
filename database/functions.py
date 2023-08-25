@@ -3,12 +3,10 @@ from enum import Enum
 
 
 # MangaTable
+# - link PRIMARY KEY
 # - title
-# - link
 # - number
-# - r
-# - g
-# - b
+# - hexColor
 #
 # ServerTable
 # - identifier = title+serverId PRIMARY KEY
@@ -17,29 +15,29 @@ from enum import Enum
 # - channelId
 # - pings
 # - link
+# - shelfName
 #
 # ShelfTable
-# - shelfTitle
+# - shelfTitle = serverId+serverId PRIMARY KEY
 # - serverId
 # - identifiers
 
 class MangaItem:
-    def __init__(self, title, link, number, r, g, b):
+    def __init__(self, title, link, number, hexColor):
         self.title = title
         self.link = link
         self.number = number
-        self.r = r
-        self.g = g
-        self.b = b
+        self.hexColor = hexColor
 
 
 class ServerItem:
-    def __init__(self, identifier, titleMI, serverId, pings, link):
+    def __init__(self, identifier, titleMI, serverId, pings, link, shelfName):
         self.identifier = identifier
         self.titleMI = titleMI
         self.serverId = serverId
         self.pings = pings
         self.link = link
+        self.shelfName = shelfName
 
 
 class ShelfItem:
@@ -47,50 +45,51 @@ class ShelfItem:
         self.name = Title
 
 
-def switchSpecs(tableName: str):
+def switchSpecs(tableName: str, tableLocation):
     if tableName == "mangaTable":
-        return "title, link, number, r, g, b", initiate_mt()
+        return "title, link, number, hexColor", initiate_mt(f"{tableLocation}mangaTable.db")
     elif tableName == "serverTable":
-        return "titleMI, serverId, channelId, pings", initiate_st()
+        return "identifier, titleMI, serverId, channelId, pings, link, shelfName", initiate_st(
+            f"{tableLocation}serverTable.db")
     elif tableName == "shelfTable":
-        return "shelfTitle, serverId, identifiers", initiate_sht()
+        return "shelfTitle, serverId, identifiers", initiate_sht(f"{tableLocation}shelfTable.db")
     else:
         return "", ""
 
 
-def initiate_st():
-    connection = sqlite3.connect('serverTable.db')
+def initiate_st(tableLocation: str):
+    connection = sqlite3.connect(tableLocation)
     cursor = connection.cursor()
 
-    initCmd = ''' CREATE TABLE IF NOT EXISTS
-    serverTable(identifier TEXT PRIMARY KEY,titleMI TEXT, serverId TEXT, channelId TEXT, pings TEXT, link TEXT) '''
+    initCmd = '''CREATE TABLE IF NOT EXISTS serverTable(identifier TEXT PRIMARY KEY,titleMI TEXT, serverId TEXT, 
+    channelId TEXT, pings TEXT, link TEXT, shelfName TEXT)'''
 
     cursor.execute(initCmd)
     return connection
 
 
-def initiate_mt():
-    connection = sqlite3.connect('mangaTable.db')
+def initiate_mt(tableLocation: str):
+    connection = sqlite3.connect(tableLocation)
 
     initCmd = ''' CREATE TABLE IF NOT EXISTS
-    mangaTable(title TEXT, link TEXT, number INT, r INT, g INT, b INT) '''
+    mangaTable(link TEXT PRIMARY KEY,title TEXT, number DECIMAL, hexColor TEXT) '''
 
     connection.execute(initCmd)
     return connection
 
 
-def initiate_sht():
-    connection = sqlite3.connect('shelfTable.db')
+def initiate_sht(tableLocation: str):
+    connection = sqlite3.connect(tableLocation)
 
     initCmd = ''' CREATE TABLE IF NOT EXISTS
-    shelfTable(shelfTitle TEXT, serverId TEXT, identifiers TEXT) '''
+    shelfTable(shelfTitle TEXT PRIMARY KEY, serverId TEXT, identifiers TEXT) '''
 
     connection.execute(initCmd)
     return connection
 
 
-def select(tableName: str, selection: str, conditions: str = ""):
-    specs, connection = switchSpecs(tableName)
+def select(tableName: str, tableLocation: str, selection: str, conditions: str = ""):
+    specs, connection = switchSpecs(tableName, tableLocation)
     if specs == "":
         return
     cmd = f"SELECT {selection} from {tableName}"
@@ -122,10 +121,10 @@ def insert_new(tableName: str, values: list):
 
 
 def insert_update(tableName: str, values: list):
-    specs, connection = switchSpecs(tableName)
+    specs, connection = switchSpecs(tableName, "")
     if specs == "":
         return False
-    cmd = f"REPLACE INTO {tableName} ({specs}) VALUES ("
+    cmd = f"INSERT OR REPLACE INTO {tableName} ({specs}) VALUES ("
     for num, value in enumerate(values):
         if isinstance(value, str):
             cmd += f"'{value}'"
@@ -135,11 +134,33 @@ def insert_update(tableName: str, values: list):
             cmd += ", "
         else:
             cmd += ")"
+
     print(cmd)
     connection.execute(cmd)
     connection.commit()
     connection.close()
     return True
 
-# print(insert_new("mangaTable", ["FFF-Class Trashero", "https://trashero.com", 145, 24, 126, 354]))
+
+def addMangaTable(values):
+    insert_new("mangaTable", values)
+    return True
+
+
+def addServerTable(values):
+    insert_new("serverTable", values)
+    return True
+
+# ServerTable
+# - identifier = title+serverId PRIMARY KEY
+# - titleMI
+# - serverId
+# - channelId
+# - pings
+# - link
+# - shelfName
+# print(insert_new("mangaTable", ["FFF-Class Trashero", "https://trashero.com", 145, #92908c]))
 # (select("mangaTable", "*", "r=24"))
+# insert_update("serverTable",
+#               ["FFF-Class Trasher-1654797725", "FFF-Class Trashero", 1654797725, 125647812, "@154625412",
+#                "https://trashero.com", "FFF-Class"])

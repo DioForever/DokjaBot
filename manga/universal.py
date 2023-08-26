@@ -9,16 +9,16 @@ from selenium import webdriver
 from webdriver_manager.chrome import ChromeDriverManager
 import requests
 from PIL import Image
-from reaperscans import getBookInfo as getBookInfoRS
+from manga.reaperscans import getBookInfoReaperScans
 
 from database.functions import select
 
 
 def gateway(url: str):
-    if url.__contains__("reaperscans.com"):
-        return getBookInfoRS(url)
+    if url.startswith("https://reaperscans.com"):
+        return getBookInfoReaperScans(url)
     else:
-        return None
+        return None, None, None
 
 
 def get_dominant_color(url: str):
@@ -87,9 +87,24 @@ def sortUpdates(episodesHtml: bs4.BeautifulSoup, lastUpdate: int):
     return episodes, e
 
 
-def createEmbed(title: str, thumb: str, hexColor: str, number: float):
+def createChapterEmbed(title: str, thumb: str, hexColor: str, number: float):
     embed = nextcord.Embed(title=f"{title} - Chapter {number}",
                            color=nextcord.Color.from_rgb(
                                tuple(int(hexColor.strip("#")[i:i + 2], 16) for i in (0, 2, 4))))
-    embed.set_image(url=thumb)
+    try:
+        embed.set_image(url=thumb)
+    except Exception as e:
+        return embed
+    return embed
+
+
+def createEmbed(title: str, description: str, thumb: str, hexColor: str):
+    embed = nextcord.Embed(title=title,
+                           description=description,
+                           color=nextcord.Color.from_rgb(
+                               tuple(int(hexColor.strip("#")[i:i + 2], 16) for i in (0, 2, 4))))
+    try:
+        embed.set_image(url=thumb)
+    except Exception as e:
+        return embed
     return embed

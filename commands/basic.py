@@ -1,3 +1,5 @@
+import sys
+
 from nextcord import Interaction
 from manga.universal import gateway
 from manga.universal import get_dominant_color
@@ -27,8 +29,10 @@ from database.functions import addServerTable
 # - identifiers
 
 
-def addManga(url: str, interaction: Interaction):
+def addManga(url: str, interaction: Interaction, pings, shelfName=""):
     episodes, title, thumb = gateway(url)
+    if episodes is None:
+        return False, "Unsupported source", ""
     hexColor = get_dominant_color(thumb)
     number: float = 0
     if len(list(episodes.keys)) > 0:
@@ -37,15 +41,17 @@ def addManga(url: str, interaction: Interaction):
 
     addMangaTable([url, title, number, hexColor])
 
-    serverId = 00000000
-    channelId = 0000000
+    serverId = interaction.guild_id
+    channelId = interaction.channel_id
     identifier = f"{title}{serverId}"
-    pings = ""
     link = url
-    shelfName = ""
 
     addServerTable([identifier, title, serverId, channelId, pings, link, shelfName])
-    return True
+    embed = createEmbed(f"Manga '{title}' added", f"Manga '{title}' has been successfully added to the library \n"
+                                                  f"shelfName: '{shelfName}'", "", "#e4b400")
+
+    e: Exception = Exception(sys.exception())
+    return True, e, embed
 
 
 def removeManga():

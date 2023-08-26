@@ -2,10 +2,10 @@ import sys
 
 import bs4
 
-import universal
+import manga.universal as universal
 
 
-def getBookInfo(url: str):
+def getBookInfoReaperScans(url: str):
     html: bs4.BeautifulSoup = universal.get_data(url)
     print(html)
     thumb, eThumb = get_thumb(html)
@@ -59,5 +59,4 @@ def get_title(html: bs4.BeautifulSoup):
     except Exception as e:
         return "", e
 
-
-getBookInfo("https://reaperscans.com/comics/5150-sss-class-suicide-hunter")
+# getBookInfo("https://reaperscans.com/comics/5150-sss-class-suicide-hunter")

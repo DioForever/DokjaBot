@@ -1,5 +1,4 @@
 import sqlite3
-from enum import Enum
 
 
 # MangaTable
@@ -45,14 +44,24 @@ class ShelfItem:
         self.name = Title
 
 
-def switchSpecs(tableName: str, tableLocation):
+def optimizeValues(values: list):
+    valuesOpt = []
+    for val in values:
+        if isinstance(val, str):
+            valuesOpt.append(val.replace("\n", ''))
+        else:
+            valuesOpt.append(val)
+    return valuesOpt
+
+
+def switchSpecs(tableName: str):
     if tableName == "mangaTable":
-        return "title, link, number, hexColor", initiate_mt(f"{tableLocation}mangaTable.db")
+        return "title, link, number, hexColor", initiate_mt(f"database/mangaTable.db")
     elif tableName == "serverTable":
         return "identifier, titleMI, serverId, channelId, pings, link, shelfName", initiate_st(
-            f"{tableLocation}serverTable.db")
+            f"database/serverTable.db")
     elif tableName == "shelfTable":
-        return "shelfTitle, serverId, identifiers", initiate_sht(f"{tableLocation}shelfTable.db")
+        return "shelfTitle, serverId, identifiers", initiate_sht(f"database/shelfTable.db")
     else:
         return "", ""
 
@@ -88,24 +97,30 @@ def initiate_sht(tableLocation: str):
     return connection
 
 
-def select(tableName: str, tableLocation: str, selection: str, conditions: str = ""):
-    specs, connection = switchSpecs(tableName, tableLocation)
+def select(tableName: str, selection: str, conditions: str = ""):
+    specs, connection = switchSpecs(tableName)
     if specs == "":
         return
     cmd = f"SELECT {selection} from {tableName}"
     if conditions != "": cmd += F" WHERE {conditions}"
+    print(cmd)
     cursor = connection.execute(cmd)
+    values = []
     for row in cursor:
         print(row)
+        values.append(row)
+    return values
 
 
 def insert_new(tableName: str, values: list):
+    values = optimizeValues(values)
     specs, connection = switchSpecs(tableName)
     if specs == "":
         return False
-    cmd = f"INSERT INTO {tableName} ({specs}) VALUES ("
+    cmd = f"INSERT OR IGNORE INTO {tableName} ({specs}) VALUES ("
     for num, value in enumerate(values):
         if isinstance(value, str):
+            value = value.replace("\n", "")
             cmd += f"'{value}'"
         else:
             cmd += f"{value}"
@@ -121,7 +136,8 @@ def insert_new(tableName: str, values: list):
 
 
 def insert_update(tableName: str, values: list):
-    specs, connection = switchSpecs(tableName, "")
+    values = optimizeValues(values)
+    specs, connection = switchSpecs(tableName)
     if specs == "":
         return False
     cmd = f"INSERT OR REPLACE INTO {tableName} ({specs}) VALUES ("
@@ -143,11 +159,18 @@ def insert_update(tableName: str, values: list):
 
 
 def addMangaTable(values):
+    values = optimizeValues(values)
     insert_new("mangaTable", values)
     return True
 
 
 def addServerTable(values):
+    values = optimizeValues(values)
+    identifier = "'" + values[0].replace("\n", "") + "'"
+    print(f"ss {identifier} ss")
+    selection = select("serverTable", f"identifier", f"identifier={identifier}")
+    if len(selection) != 0:
+        return False
     insert_new("serverTable", values)
     return True
 

@@ -30,13 +30,21 @@ from database.functions import addServerTable
 
 
 def addManga(url: str, interaction: Interaction, pings, shelfName=""):
+    episodes: dict
+    title: str
+    thumb: str
     episodes, title, thumb = gateway(url)
+    title = title.replace("\n", '')
     if episodes is None:
         return False, "Unsupported source", ""
     hexColor = get_dominant_color(thumb)
     number: float = 0
-    if len(list(episodes.keys)) > 0:
-        number = episodes[list(episodes.keys)[0]]
+    print("-*-*-*-")
+    print(episodes.keys)
+    print(episodes)
+    print("-*-*-*-")
+    if len(episodes) > 0:
+        number = episodes[next(iter(episodes))]
     print([url, title, number, hexColor])
 
     addMangaTable([url, title, number, hexColor])
@@ -46,12 +54,17 @@ def addManga(url: str, interaction: Interaction, pings, shelfName=""):
     identifier = f"{title}{serverId}"
     link = url
 
-    addServerTable([identifier, title, serverId, channelId, pings, link, shelfName])
-    embed = createEmbed(f"Manga '{title}' added", f"Manga '{title}' has been successfully added to the library \n"
-                                                  f"shelfName: '{shelfName}'", "", "#e4b400")
-
+    addedBool: bool = addServerTable([identifier, title, serverId, channelId, pings, link, shelfName])
     e: Exception = Exception(sys.exception())
-    return True, e, embed
+    print(f"already? {addedBool}")
+    if addedBool is False:
+        embedAlready = createEmbed(f"Attempt duplicate",
+                                   f"Manga '{title}' has been found already in the library", "", "#e4b400")
+        return True, e, embedAlready
+    embedNew = createEmbed(f"Attempt successful", f"Manga '{title}' has been successfully added to the library \n"
+                                                  f"shelfName: '{shelfName}'", "", "#00FF22")
+
+    return True, e, embedNew
 
 
 def removeManga():

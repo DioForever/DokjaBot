@@ -58,21 +58,31 @@ async def add_manga(interaction: nextcord.Interaction, url: str, ping: str, shel
 
     Parameters
     ----------
-#     interaction: Interaction
-#         The interaction object
-#     url: str
-#         Link to the specific manga.
-#     pings: str
-#         Ping of the roles you want to be pinged upon new release
-#     shelf_name: str
-#         Name of a 'Shelf' or a Group of mangas of the same name but different source so it doesnt ping same chapter twice.
+     interaction: Interaction
+         The interaction object
+     url: str
+         URL of specific manga.
+     ping: str
+         Ping of the roles you want to be pinged upon new release
+     shelf_name: str
+         Name of a 'Shelf' or a Group of Mangas with the same name but different source so it doesn't ping same chapter twice.
     """
     # await interaction.response.send_message(f"You said: {url, ping, shelf_name}")
+    embedAttempt = createEmbed("Attempting", "", "", "#e4b400")
+    message = await interaction.send(embed=embedAttempt)
     response: bool
+    e: Exception
     response, e, embed = basic.addManga(url, interaction, ping, shelf_name)
-    if response is True and e is None:
-        interaction.response.send(embed=embed, delete_after=15)
+    print(response, type(e), e)
+    if response is True:
+        await message.edit(embed=embed)
+        # await interaction.send(embed=embed, delete_after=15)
     else:
+        embedFailed = createEmbed(f"Manga attempt falied",
+                                  f"Manga with URL'{url}' has failed \n"
+                                  f"Error: {e}", "", "#FF0000")
+        await message.edit(embed=embedFailed)
+        # await interaction.send(embed=embedFailed, delete_after=15)
         print("FAIL", e)
 
 

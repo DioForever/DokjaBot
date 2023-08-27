@@ -23,10 +23,11 @@ def get_ep_list(html: bs4.BeautifulSoup, title: str):
     episodesHtmlBS: bs4.BeautifulSoup = html.body.find('ul', attrs={'role': 'list'})
     episodesHtmlLS: list[bs4.BeautifulSoup] = episodesHtmlBS.find_all('li')
     episodes = {}
-    latestNumber = universal.getLastUpdate(title)
-    if latestNumber is None:
+    latestList: list = universal.getLastUpdate(title)
+    if len(latestList) == 0:
         latestNumber: float = 0
-    latestNumber: float = float(latestNumber)
+    else:
+        latestNumber: float = float(latestList[0])
     for ep in episodesHtmlLS:
         number = float(
             f"{(ep.find('p', attrs={'class': 'truncate font-medium text-neutral-200'})).get_text()}".split(" ")[1])

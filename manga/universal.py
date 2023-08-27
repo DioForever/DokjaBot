@@ -7,7 +7,7 @@ from bs4 import BeautifulSoup
 from selenium.webdriver.chrome.options import Options
 from selenium import webdriver
 from webdriver_manager.chrome import ChromeDriverManager
-import requests
+import aiohttp
 from PIL import Image
 from manga.reaperscans import getBookInfoReaperScans
 
@@ -28,7 +28,7 @@ def get_dominant_color(url: str):
 
         image = Image.open(response.raw)
         image = image.convert("RGB")
-        img_array = np.array(image)
+        img_array: np.array = np.array(image)
         average_color = np.mean(img_array, axis=(0, 1))
         dominant_color = tuple(average_color.astype(int))
         hex_color = "#{:02x}{:02x}{:02x}".format(*dominant_color)
@@ -45,7 +45,9 @@ def get_data(url: str):
     chrome_options.add_argument('--disable-gpu')
 
     # driver = webdriver.Chrome(options=chrome_options)
-    driver = webdriver.Chrome(ChromeDriverManager().install())
+    chrome = ChromeDriverManager().install()
+    # print(chrome)
+    driver = webdriver.Chrome()
     driver.get(url)
     html = driver.page_source
     html = BeautifulSoup(html, 'html.parser')
@@ -54,7 +56,7 @@ def get_data(url: str):
 
 
 def getLastUpdate(title: str):
-    value = select("mangaTable", "../database/", "number", f"title = '{title}'")
+    value: list = select("mangaTable", "number", f"title = '{title}'")
     return value
 
 
@@ -99,10 +101,11 @@ def createChapterEmbed(title: str, thumb: str, hexColor: str, number: float):
 
 
 def createEmbed(title: str, description: str, thumb: str, hexColor: str):
+    colors = tuple(int(hexColor.strip("#")[i:i + 2], 16) for i in (0, 2, 4))
     embed = nextcord.Embed(title=title,
                            description=description,
                            color=nextcord.Color.from_rgb(
-                               tuple(int(hexColor.strip("#")[i:i + 2], 16) for i in (0, 2, 4))))
+                               colors[0], colors[1], colors[2]))
     try:
         embed.set_image(url=thumb)
     except Exception as e:

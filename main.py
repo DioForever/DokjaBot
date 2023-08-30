@@ -1,14 +1,15 @@
+import time
+
 from nextcord.ext import tasks, application_checks
 from nextcord.ext import commands
 from nextcord import Interaction
 import nextcord
-from commands import basic
 
-# from nextcord.ext import Interaction
-import os
-import sys
+from selenium import webdriver
+from selenium.webdriver.chrome.options import Options
 
-from manga.universal import createEmbed
+from commands.basic import taskManga, workManga, taskMemory, taskResponseMemory
+from manga.universal import createEmbed, get_data
 
 allowed_mentions = nextcord.AllowedMentions(roles=True)
 intents = nextcord.Intents.default()
@@ -52,8 +53,11 @@ async def rich_presence():
                               activity=nextcord.Game(f'Library of Culture on {number_of_servers} servers'), )
 
 
+# async def add_manga(interaction: nextcord.Interaction, url: str, ping: str, shelf_name: str):
+
+
 @bot.slash_command(guild_ids=serverID)
-async def add_manga(interaction: nextcord.Interaction, url: str, ping: str, shelf_name: str):
+async def manga_add(interaction: nextcord.Interaction, url: str, ping: str, shelf_name: str):
     """Repeats your message that you send as an argument
 
     Parameters
@@ -67,23 +71,52 @@ async def add_manga(interaction: nextcord.Interaction, url: str, ping: str, shel
      shelf_name: str
          Name of a 'Shelf' or a Group of Mangas with the same name but different source so it doesn't ping same chapter twice.
     """
-    # await interaction.response.send_message(f"You said: {url, ping, shelf_name}")
     embedAttempt = createEmbed("Attempting", "", "", "#e4b400")
     message = await interaction.send(embed=embedAttempt)
-    response: bool
-    e: Exception
-    response, e, embed = basic.addManga(url, interaction, ping, shelf_name)
-    print(response, type(e), e)
-    if response is True:
-        await message.edit(embed=embed)
-        # await interaction.send(embed=embed, delete_after=15)
-    else:
-        embedFailed = createEmbed(f"Manga attempt falied",
-                                  f"Manga with URL'{url}' has failed \n"
-                                  f"Error: {e}", "", "#FF0000")
-        await message.edit(embed=embedFailed)
-        # await interaction.send(embed=embedFailed, delete_after=15)
-        print("FAIL", e)
+    # html = get_data(url)
+    # print(html)
+    task = taskManga(interaction, message, url, ping, shelf_name)
+    taskMemory.append(task)
+    print(taskMemory)
+
+
+@tasks.loop(seconds=1)
+async def taskMemoryWorker():
+    taskMemoryCopy = taskMemory.copy()
+    for work in taskMemoryCopy:
+        if isinstance(work, taskManga):
+            workManga(work.interaction, work.message, work.url, work.ping, work.shelf_name)
+            taskMemory.remove(work)
+
+
+@tasks.loop(seconds=1)
+async def taskResponseWorker():
+    taskResponseMemoryCopy = taskResponseMemory.copy()
+    for work in taskResponseMemoryCopy:
+        print(f"Work {work} done")
+        if work.edit is True:
+            await work.message.edit(embed=work.embed)
+        else:
+            await work.interaction.send(embed=work.embed)
+        taskResponseMemory.remove(work)
+
+
+# embedAttempt = createEmbed("Attempting", "", "", "#e4b400")
+# message = await interaction.send(embed=embedAttempt)
+# response: bool
+# e: Exception
+# response, e, embed = basic.addManga(url, interaction, ping, shelf_name)
+# print(response, type(e), e)
+# if response is True:
+#     await message.edit(embed=embed)
+#     # await interaction.send(embed=embed, delete_after=15)
+# else:
+#     embedFailed = createEmbed(f"Manga attempt falied",
+#                               f"Manga with URL'{url}' has failed \n"
+#                               f"Error: {e}", "", "#FF0000")
+#     await message.edit(embed=embedFailed)
+#     # await interaction.send(embed=embedFailed, delete_after=15)
+#     print("FAIL", e)
 
 
 # @bot.slash_command(guild_ids=serverID)
@@ -126,6 +159,7 @@ async def add_manga(interaction: nextcord.Interaction, url: str, ping: str, shel
 
 # <@401845652541145089>
 setGuilds.start()
-# releaseCheck.start()
+taskMemoryWorker.start()
+taskResponseWorker.start()
 # rich_presence.start()
 bot.run(open("botToken", "r").read())

@@ -10,6 +10,8 @@ def getBookInfoReaperScans(url: str):
     print(html)
     thumb, eThumb = get_thumb(html)
     title, eTitle = get_title(html)
+    print(html)
+    print(thumb, title)
     episodes, eEpisodes = get_ep_list(html, title)
     print(episodes)
     if (eThumb or eTitle or eEpisodes) is None:

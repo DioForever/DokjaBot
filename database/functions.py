@@ -98,6 +98,7 @@ def initiate_sht(tableLocation: str):
 
 
 def select(tableName: str, selection: str, conditions: str = ""):
+    conditions = conditions.replace("\n", "")
     specs, connection = switchSpecs(tableName)
     if specs == "":
         return

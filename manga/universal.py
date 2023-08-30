@@ -3,11 +3,11 @@ import sys
 import bs4
 import nextcord
 import numpy as np
+import requests
 from bs4 import BeautifulSoup
 from selenium.webdriver.chrome.options import Options
 from selenium import webdriver
 from webdriver_manager.chrome import ChromeDriverManager
-import aiohttp
 from PIL import Image
 from manga.reaperscans import getBookInfoReaperScans
 
@@ -39,20 +39,17 @@ def get_dominant_color(url: str):
 
 
 def get_data(url: str):
-    chrome_options = Options()
-    chrome_options.add_argument('--headless')
-    chrome_options.add_experimental_option('excludeSwitches', ['enable-logging'])
-    chrome_options.add_argument('--disable-gpu')
-
-    # driver = webdriver.Chrome(options=chrome_options)
     chrome = ChromeDriverManager().install()
-    # print(chrome)
     driver = webdriver.Chrome()
     driver.get(url)
     html = driver.page_source
     html = BeautifulSoup(html, 'html.parser')
     driver.quit()
     return html
+
+
+# htm = get_data("https://reaperscans.com/comics/9882-revenge-of-the-sword-clans-hound")
+# print(htm)
 
 
 def getLastUpdate(title: str):
@@ -62,7 +59,7 @@ def getLastUpdate(title: str):
 
 def getNewChapters(title: str, episodesHtml):
     # print(episodesHtml)
-    lastUpdate = (getLastUpdate(title))
+    lastUpdate = getLastUpdate(title)
     if lastUpdate is None: lastUpdate = 0
     # print(lastUpdate)
 
@@ -76,7 +73,7 @@ def sortUpdates(episodesHtml: bs4.BeautifulSoup, lastUpdate: int):
 
     for chunk in episodesHtml:
         try:
-            chunk = chunk.split('"')
+            chunk = str(chunk).split('"')
             num = int(chunk[1])
             link = chunk[9]
             if num > lastUpdate:
@@ -90,9 +87,9 @@ def sortUpdates(episodesHtml: bs4.BeautifulSoup, lastUpdate: int):
 
 
 def createChapterEmbed(title: str, thumb: str, hexColor: str, number: float):
+    colors = tuple(int(hexColor.strip("#")[i:i + 2], 16) for i in (0, 2, 4))
     embed = nextcord.Embed(title=f"{title} - Chapter {number}",
-                           color=nextcord.Color.from_rgb(
-                               tuple(int(hexColor.strip("#")[i:i + 2], 16) for i in (0, 2, 4))))
+                           color=nextcord.Color.from_rgb(colors[0], colors[1], colors[2]))
     try:
         embed.set_image(url=thumb)
     except Exception as e:

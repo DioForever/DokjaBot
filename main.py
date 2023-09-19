@@ -26,8 +26,6 @@ async def setGuilds():
     print(f"server ids {serverID}")
 
 
-
-
 #serverID = 855860264942829589
 
 

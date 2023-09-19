@@ -28,12 +28,8 @@ async def setGuilds():
     print(f"server ids {serverID}")
 
 
-<<<<<<< HEAD
 #serverID = 855860264942829589
 
-=======
-# serverID = 855860264942829589
->>>>>>> 74d6130e50b30b0224ab5735e3f6dddb6f16dfeb
 
 
 # await bot.wait_until_ready()
